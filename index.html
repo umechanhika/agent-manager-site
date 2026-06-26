@@ -10,28 +10,33 @@
 
   <style>
     /* ============================================================
-       DESIGN TOKENS
-       Palette: pixel-art night room — deep navy-purple bg,
-       warm amber lantern accent, pixel grass green secondary.
-       Border-radius: 2px (sharp, pixel-art feel).
-       Borders: 2px (heavier, more tactile than generic 1px).
+       DESIGN TOKENS — day-scene palette
+       Reference: the pixel art cat room's daytime colors.
+       BG: soft sage daylight. Accent: sky blue (the daytime sky).
+       Secondary: pixel grass green. Sun: warm amber for highlights.
+       Sharp corners (2px radius) match pixel art's hard edges.
+
+       Font size rationale:
+         Body / description text: 15-16px — comfortable reading distance,
+         reduces eye strain, improves scannability on a landing page.
+         14px was too small; LP copy needs to be read at a glance.
     ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:     #130F1E;
-      --surf:   #1E1830;
-      --surf2:  #28223C;
-      --border: #3A3054;
-      --text:   #F0E8CC;
-      --muted:  #9090B0;
-      --dim:    #4A4068;
-      --amber:  #F5A623;
-      --amber2: #C07810;
-      --green:  #5ECC41;
-      --blue:   #6AABFF;
+      --bg:     #EFF7E8;
+      --surf:   #FFFFFF;
+      --surf2:  #F3F9EE;
+      --border: #B2CFA2;
+      --text:   #152010;
+      --muted:  #4C7840;
+      --dim:    #8CAA7C;
+      --sky:    #1A6FB8;
+      --sky-lt: #4498DC;
+      --grass:  #2AA836;
+      --sun:    #E89010;
       --r:      2px;
-      --mono:   ui-monospace, 'SF Mono', Menlo, monospace;
+      --mono:   ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
       --sans:   -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
                 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
     }
@@ -46,28 +51,12 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── subtle star-field texture ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background-image:
-        radial-gradient(1px 1px at 20%  15%, rgba(255,255,255,.35) 0%, transparent 100%),
-        radial-gradient(1px 1px at 60%  8%,  rgba(255,255,255,.25) 0%, transparent 100%),
-        radial-gradient(1px 1px at 80%  25%, rgba(255,255,255,.30) 0%, transparent 100%),
-        radial-gradient(1px 1px at 40%  5%,  rgba(255,255,255,.20) 0%, transparent 100%),
-        radial-gradient(1px 1px at 10%  40%, rgba(255,255,255,.18) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90%  60%, rgba(255,255,255,.22) 0%, transparent 100%),
-        radial-gradient(1px 1px at 55%  35%, rgba(255,255,255,.15) 0%, transparent 100%),
-        radial-gradient(1px 1px at 75%  50%, rgba(255,255,255,.20) 0%, transparent 100%);
-    }
-    body > * { position: relative; z-index: 1; }
-
     /* ============================================================
        HEADER
     ============================================================ */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(19,15,30,.94);
+      background: rgba(239,247,232,.95);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 2px solid var(--border);
@@ -78,13 +67,12 @@
       font-family: var(--mono); font-size: 14px; font-weight: 700;
       color: var(--text); text-decoration: none; letter-spacing: .04em;
     }
-    .logo span { color: var(--amber); }
-    .hdr-right { display: flex; align-items: center; gap: 14px; }
+    .logo span { color: var(--sky); }
 
+    .hdr-right { display: flex; align-items: center; gap: 14px; }
     .lang-toggle {
       display: flex; gap: 2px;
-      background: var(--surf);
-      border: 2px solid var(--border);
+      background: var(--surf2); border: 2px solid var(--border);
       border-radius: var(--r); padding: 3px;
     }
     .lang-btn {
@@ -94,53 +82,40 @@
       background: transparent; color: var(--muted);
       cursor: pointer; transition: all .1s;
     }
-    .lang-btn.active { background: var(--surf2); color: var(--text); }
-
+    .lang-btn.active { background: var(--sky); color: #fff; }
     .hdr-cta {
       font-family: var(--mono); font-size: 12px; font-weight: 700;
       letter-spacing: .06em; text-transform: uppercase;
-      color: var(--bg); background: var(--amber);
+      color: #fff; background: var(--sky);
       padding: 7px 16px; border-radius: var(--r);
-      text-decoration: none; transition: opacity .12s;
-      white-space: nowrap;
+      text-decoration: none; transition: opacity .12s; white-space: nowrap;
     }
-    .hdr-cta:hover { opacity: .84; }
+    .hdr-cta:hover { opacity: .85; }
     @media (max-width: 540px) { .hdr-cta { display: none; } }
 
     /* ============================================================
-       HERO — 2-column
+       HERO — 2-col: text left, app window right
     ============================================================ */
     .hero-grid {
       max-width: 1040px; margin: 0 auto;
-      padding: 80px 32px 48px;
-      display: grid;
-      grid-template-columns: 1fr 296px;
-      gap: 64px; align-items: center;
+      padding: 76px 32px 48px;
+      display: grid; grid-template-columns: 1fr 296px;
+      gap: 60px; align-items: center;
     }
     @media (max-width: 760px) {
-      .hero-grid {
-        grid-template-columns: 1fr;
-        gap: 44px; padding: 52px 24px 40px;
-      }
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; padding: 48px 24px 36px; }
       .hero-window { order: -1; }
     }
 
-    /* Decorative badge (pixel dots — replaces fake CLI command) */
+    /* Badge (pixel dots) */
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 10px;
-      margin-bottom: 28px;
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px;
     }
-    .px-dots {
-      display: flex; gap: 4px;
-    }
-    .px-dot {
-      width: 8px; height: 8px;
-      image-rendering: pixelated;
-    }
+    .px-dots { display: flex; gap: 4px; }
+    .px-dot { width: 8px; height: 8px; image-rendering: pixelated; }
     .badge-label {
       font-family: var(--mono); font-size: 11px; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase;
-      color: var(--muted);
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
     }
 
     h1 {
@@ -148,8 +123,7 @@
       font-weight: 800; letter-spacing: -.03em; line-height: 1.12;
       margin-bottom: 20px;
     }
-    h1 em { font-style: normal; color: var(--amber); }
-
+    h1 em { font-style: normal; color: var(--sky); }
     .hero-sub {
       font-size: clamp(15px, 1.8vw, 17px);
       color: var(--muted); line-height: 1.72;
@@ -165,33 +139,25 @@
       text-decoration: none; cursor: pointer; border: none;
       transition: opacity .12s, transform .08s; white-space: nowrap;
     }
-    .btn:hover { opacity: .84; transform: translateY(-1px); }
-    .btn-amber { background: var(--amber); color: var(--bg); }
+    .btn:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-sky   { background: var(--sky); color: #fff; }
     .btn-ghost {
-      background: transparent; color: var(--muted);
-      border: 2px solid var(--border);
+      background: transparent; color: var(--muted); border: 2px solid var(--border);
     }
-    .btn-ghost:hover { color: var(--text); border-color: var(--dim); }
+    .btn-ghost:hover { border-color: var(--sky); color: var(--text); }
     .cta-note {
-      font-family: var(--mono); font-size: 11px;
-      color: var(--dim); letter-spacing: .03em;
+      font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .03em;
     }
 
-    /* App window */
+    /* App window (in hero) */
     .app-window {
-      border: 2px solid var(--border);
-      border-radius: 6px; overflow: hidden;
-      box-shadow:
-        0 0 0 1px rgba(245,166,35,.08),
-        0 40px 80px rgba(0,0,0,.8),
-        0 0 60px rgba(245,166,35,.06);
+      border: 2px solid #C0D4B8; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(20,40,20,.14), 0 4px 16px rgba(20,40,20,.08);
     }
     .win-bar {
-      background: var(--surf2);
-      padding: 9px 14px;
-      display: flex; align-items: center; gap: 8px;
-      border-bottom: 2px solid var(--border);
-      user-select: none;
+      background: #E8EEE4;
+      padding: 9px 14px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 2px solid #C0D4B8; user-select: none;
     }
     .traffic { display: flex; gap: 5px; }
     .tl { width: 11px; height: 11px; border-radius: 50%; }
@@ -202,10 +168,33 @@
       flex: 1; text-align: center;
       font-family: var(--mono); font-size: 11px; font-weight: 600;
       letter-spacing: .08em; text-transform: uppercase;
-      color: var(--muted); margin-right: 44px;
+      color: #7A9A70; margin-right: 44px;
     }
     .win-body { background: #0C0A14; min-height: 200px; }
     .win-body img { display: block; width: 100%; height: auto; }
+
+    /* ============================================================
+       SCREENSHOT TOGGLE — day/night switch
+    ============================================================ */
+    .screenshots {
+      max-width: 340px; margin: 0 auto; padding: 0 24px 72px;
+    }
+    .ss-toggle {
+      display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;
+    }
+    .ss-btn {
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      letter-spacing: .06em; padding: 5px 18px; border-radius: var(--r);
+      border: 2px solid var(--border);
+      background: transparent; color: var(--muted); cursor: pointer; transition: all .12s;
+    }
+    .ss-btn.active { background: var(--sky); color: #fff; border-color: var(--sky); }
+    .ss-frame {
+      border: 2px solid #C0D4B8; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 12px 40px rgba(20,40,20,.12);
+    }
+    .ss-frame img { display: block; width: 100%; height: auto; }
+    .ss-frame img.hidden { display: none; }
 
     /* Status legend */
     .status-row {
@@ -225,158 +214,167 @@
     .section-label {
       font-family: var(--mono); font-size: 11px;
       letter-spacing: .16em; text-transform: uppercase;
-      color: var(--amber); text-align: center; margin-bottom: 48px;
+      color: var(--sky); text-align: center; margin-bottom: 48px;
     }
 
     /* ============================================================
-       FEATURES — pixel dots, no cards
+       FEATURES
+       15px body text for readability at normal viewing distance.
+       Dot size/color from the app's session status indicators.
     ============================================================ */
-    .features-sec {
-      max-width: 900px; margin: 0 auto;
-      padding: 0 32px 96px;
-    }
+    .features-sec { max-width: 900px; margin: 0 auto; padding: 0 32px 96px; }
     .feat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px 48px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 48px;
     }
-    @media (max-width: 640px) {
-      .feat-grid { grid-template-columns: 1fr; gap: 28px; }
-    }
-    .feat-px {
-      width: 8px; height: 8px; margin-bottom: 14px;
-      image-rendering: pixelated;
-    }
-    .feat-item h3 { font-size: 15px; font-weight: 700; margin-bottom: 7px; letter-spacing: -.01em; }
-    .feat-item p  { font-size: 14px; color: var(--muted); line-height: 1.65; }
+    @media (max-width: 640px) { .feat-grid { grid-template-columns: 1fr; gap: 28px; } }
+    .feat-px { width: 8px; height: 8px; margin-bottom: 14px; image-rendering: pixelated; }
+    .feat-item h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: -.01em; }
+    .feat-item p  { font-size: 15px; color: var(--muted); line-height: 1.65; }
     .feat-kbd {
-      display: inline-block;
-      font-family: var(--mono); font-size: 11px;
+      display: inline-block; font-family: var(--mono); font-size: 12px;
       background: var(--surf2); border: 2px solid var(--border);
-      border-radius: 2px; padding: 1px 6px;
-      color: var(--text);
+      border-radius: 2px; padding: 1px 6px; color: var(--text);
     }
 
     /* ============================================================
        PRICING
+       Baseline fix: all cards get an identical top-space div.
+       Non-featured cards show it invisible; featured shows label.
+       This keeps price-tier / price-main vertically aligned.
+
+       Price display: cur ($) + int + dec split for precise baseline.
+       align-items: flex-end aligns bottom of $ to bottom of number.
+
+       15px feature list text for comfortable reading.
     ============================================================ */
-    .pricing-sec {
-      max-width: 860px; margin: 0 auto;
-      padding: 0 32px 96px;
-    }
+    .pricing-sec { max-width: 860px; margin: 0 auto; padding: 0 32px 96px; }
     .price-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      background: var(--border);
-      border: 2px solid var(--border);
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0; background: var(--border); border: 2px solid var(--border);
     }
     @media (max-width: 660px) {
-      .price-grid {
-        grid-template-columns: 1fr;
-        background: transparent; border: none; gap: 12px;
-      }
+      .price-grid { grid-template-columns: 1fr; background: transparent; border: none; gap: 12px; }
     }
+
     .price-card {
-      background: var(--surf);
-      padding: 28px 24px 28px;
-      position: relative;
-      display: flex; flex-direction: column;
+      background: var(--surf); padding: 24px 22px 24px;
+      position: relative; display: flex; flex-direction: column;
     }
     .price-card.featured { background: var(--surf2); }
-    .price-badge {
-      font-family: var(--mono); font-size: 10px; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--amber); margin-bottom: 8px;
+
+    /* Badge row — present in all cards, invisible on non-featured.
+       Height is fixed so price-tier starts at the same Y for all cards. */
+    .price-badge-row {
+      height: 20px; display: flex; align-items: center;
+      margin-bottom: 14px;
     }
+    .price-badge-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--sky);
+    }
+    .price-badge-label.hidden { visibility: hidden; }
+
     .price-tier {
       font-family: var(--mono); font-size: 11px;
       letter-spacing: .14em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 14px;
+      color: var(--muted); margin-bottom: 10px;
     }
-    .price-main { display: flex; align-items: baseline; gap: 2px; margin-bottom: 4px; }
-    .price-cur  { font-family: var(--mono); font-size: 16px; color: var(--muted); }
-    .price-amt  { font-family: var(--mono); font-size: 42px; font-weight: 400; line-height: 1; }
-    .price-cyc  { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
-    .price-div  { border: none; border-top: 1px solid var(--border); margin-bottom: 18px; }
+
+    /* Price number — cur($) + int + dec, bottom-aligned */
+    .price-main {
+      display: flex; align-items: flex-end; gap: 0;
+      margin-bottom: 6px; line-height: 1;
+    }
+    .price-cur {
+      font-family: var(--mono); font-size: 18px; font-weight: 400;
+      color: var(--muted); padding-bottom: 7px; margin-right: 1px;
+    }
+    .price-int {
+      font-family: var(--mono); font-size: 52px; font-weight: 300;
+      line-height: 1; letter-spacing: -.02em;
+    }
+    .price-dec {
+      font-family: var(--mono); font-size: 20px; font-weight: 400;
+      color: var(--muted); padding-bottom: 7px;
+    }
+
+    .price-cyc { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .price-div { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
     .price-feats {
-      list-style: none; font-size: 14px; color: var(--muted);
+      list-style: none; font-size: 15px; color: var(--muted);
       display: flex; flex-direction: column; gap: 10px;
-      margin-bottom: 24px; flex: 1;
+      margin-bottom: 22px; flex: 1;
     }
     .price-feats li { display: flex; gap: 8px; align-items: flex-start; }
     .price-feats li::before {
-      content: '▸'; color: var(--green);
+      content: '▸'; color: var(--grass);
       font-family: var(--mono); flex-shrink: 0;
     }
     .price-feats li.off { color: var(--dim); }
-    .price-feats li.off::before { color: var(--dim); }
+    .price-feats li.off::before { color: var(--dim); content: '–'; }
+
     .price-cta {
       display: block; text-align: center;
-      padding: 11px 20px; border-radius: var(--r);
+      padding: 11px 16px; border-radius: var(--r);
       font-family: var(--mono); font-size: 12px; font-weight: 700;
-      letter-spacing: .08em; text-transform: uppercase;
-      text-decoration: none; transition: opacity .12s;
-      margin-top: auto;
+      letter-spacing: .06em; text-transform: uppercase;
+      text-decoration: none; transition: opacity .12s; margin-top: auto;
     }
-    .price-cta:hover { opacity: .8; }
-    .price-cta-amber  { background: var(--amber); color: var(--bg); }
-    .price-cta-ghost  { border: 2px solid var(--border); color: var(--muted); }
-    .price-cta-ghost:hover { border-color: var(--dim); color: var(--text); }
+    .price-cta:hover { opacity: .82; }
+    .price-cta-sky   { background: var(--sky); color: #fff; }
+    .price-cta-ghost { border: 2px solid var(--border); color: var(--muted); }
+    .price-cta-ghost:hover { border-color: var(--sky); color: var(--text); }
+
+    /* Note below monthly CTA */
+    .price-cta-note {
+      font-family: var(--mono); font-size: 10px; color: var(--dim);
+      text-align: center; margin-top: 8px; letter-spacing: .03em;
+    }
+
     .price-note {
       text-align: center; margin-top: 20px;
       font-family: var(--mono); font-size: 11px;
       color: var(--muted); letter-spacing: .04em;
     }
-    .price-note a { color: var(--amber); text-decoration: none; }
+    .price-note a { color: var(--sky); text-decoration: none; }
     .price-note a:hover { text-decoration: underline; }
 
     /* ============================================================
        INSTALL
     ============================================================ */
-    .install-sec {
-      max-width: 560px; margin: 0 auto;
-      padding: 0 32px 96px;
-    }
+    .install-sec { max-width: 560px; margin: 0 auto; padding: 0 32px 96px; }
     .steps { list-style: none; }
     .step {
       display: grid; grid-template-columns: 40px 1fr;
-      gap: 16px; padding: 24px 0;
-      border-bottom: 1px solid var(--border);
+      gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--border);
     }
     .step:last-child { border-bottom: none; }
     .step-n {
-      font-family: var(--mono); font-size: 24px; font-weight: 700;
+      font-family: var(--mono); font-size: 22px; font-weight: 700;
       color: var(--border); line-height: 1; padding-top: 2px;
     }
     .step-body strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 5px; }
-    .step-body span   { font-size: 14px; color: var(--muted); }
-    .step-body a      { color: var(--amber); text-decoration: none; }
-    .step-body a:hover{ text-decoration: underline; }
+    .step-body span   { font-size: 15px; color: var(--muted); }
+    .step-body a      { color: var(--sky); text-decoration: none; }
+    .step-body a:hover { text-decoration: underline; }
     .step-body code   { font-family: var(--mono); font-size: 13px; color: var(--text); }
 
     /* ============================================================
        REQUIREMENTS
     ============================================================ */
     .req-sec { text-align: center; padding-bottom: 80px; }
-    .req-chips {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      justify-content: center; margin-top: 16px;
-    }
+    .req-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
     .req-chip {
-      font-family: var(--mono); font-size: 11px;
-      color: var(--muted); border: 2px solid var(--border);
-      border-radius: var(--r); padding: 5px 12px; letter-spacing: .03em;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      border: 2px solid var(--border); border-radius: var(--r); padding: 5px 12px; letter-spacing: .03em;
     }
 
     /* ============================================================
        FOOTER
     ============================================================ */
     footer {
-      border-top: 2px solid var(--border);
-      padding: 28px 24px; text-align: center;
-      font-family: var(--mono); font-size: 11px;
-      color: var(--dim); letter-spacing: .04em;
+      border-top: 2px solid var(--border); padding: 28px 24px; text-align: center;
+      font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .04em;
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
@@ -384,15 +382,13 @@
     /* ============================================================
        ACCESSIBLE / RESPONSIVE
     ============================================================ */
-    :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; }
     @media (max-width: 480px) {
-      .hero-grid { padding: 40px 20px 36px; }
+      .hero-grid { padding: 36px 20px 28px; }
       .features-sec, .pricing-sec, .install-sec { padding-left: 20px; padding-right: 20px; }
       .feat-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
     }
-    @media (max-width: 360px) {
-      .feat-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 360px) { .feat-grid { grid-template-columns: 1fr; } }
     @media (prefers-reduced-motion: reduce) {
       * { animation: none !important; transition: none !important; }
     }
@@ -410,23 +406,20 @@
     </div>
     <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
        class="hdr-cta"
-       data-en="Free trial"
-       data-ja="無料で試す">Free trial</a>
+       data-en="Free trial" data-ja="無料で試す">Free trial</a>
   </div>
 </header>
 
 <!-- HERO -->
 <div class="hero-grid">
-
   <!-- LEFT: text -->
   <div>
-    <!-- Decorative pixel dots (replacing the fake CLI command) -->
     <div class="hero-badge">
       <div class="px-dots" aria-hidden="true">
         <svg class="px-dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#F5A623"/></svg>
         <svg class="px-dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#5ECC41"/></svg>
         <svg class="px-dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#6AABFF"/></svg>
-        <svg class="px-dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#4A4068"/></svg>
+        <svg class="px-dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#C0D4B8"/></svg>
       </div>
       <span class="badge-label"
             data-en="for Claude Code · macOS"
@@ -446,13 +439,11 @@
 
     <div class="cta-row">
       <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-         class="btn btn-amber"
-         data-en="Start 7-day free trial"
-         data-ja="7日間 無料で試す">Start 7-day free trial</a>
+         class="btn btn-sky"
+         data-en="Start 7-day free trial" data-ja="7日間 無料で試す">Start 7-day free trial</a>
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
          class="btn btn-ghost"
-         data-en="↓ Download DMG"
-         data-ja="↓ DMG をダウンロード">↓ Download DMG</a>
+         data-en="↓ Download DMG" data-ja="↓ DMG をダウンロード">↓ Download DMG</a>
     </div>
 
     <div class="cta-note"
@@ -462,7 +453,7 @@
     </div>
   </div>
 
-  <!-- RIGHT: App window -->
+  <!-- RIGHT: App window (demo.gif → screenshot-day.png fallback) -->
   <div class="hero-window">
     <div class="app-window">
       <div class="win-bar">
@@ -474,9 +465,8 @@
         <span class="win-title">AgentManager</span>
       </div>
       <div class="win-body">
-        <!-- demo.gif 録画後に差し替え。それまでは screenshot-day.png を表示 -->
         <img src="demo.gif"
-             alt="AgentManager — Claude Code セッションモニター（ピクセルアートの猫入り）"
+             alt="AgentManager demo"
              onerror="this.onerror=null; this.src='screenshot-day.png';">
       </div>
     </div>
@@ -498,8 +488,25 @@
     <span data-en="Processing" data-ja="処理中">Processing</span>
   </div>
   <div class="status-item">
-    <svg class="dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#4A4068"/></svg>
+    <svg class="dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#C0D4B8"/></svg>
     <span data-en="Idle" data-ja="待機">Idle</span>
+  </div>
+</div>
+
+<!-- SCREENSHOT TOGGLE -->
+<div class="screenshots">
+  <div class="ss-toggle">
+    <button class="ss-btn active" id="ss-btn-day" onclick="showDay()"
+            data-en="☀ Day" data-ja="☀ 昼">☀ Day</button>
+    <button class="ss-btn"       id="ss-btn-night" onclick="showNight()"
+            data-en="🌙 Night" data-ja="🌙 夜">🌙 Night</button>
+  </div>
+  <div class="ss-frame">
+    <img id="ss-day"   src="screenshot-day.png"
+         alt="AgentManager — day scene" data-en-alt="Day scene" data-ja-alt="昼の表示">
+    <img id="ss-night" src="screenshot-night.png"
+         alt="AgentManager — night scene" class="hidden"
+         data-en-alt="Night scene" data-ja-alt="夜の表示">
   </div>
 </div>
 
@@ -511,13 +518,13 @@
     <div class="feat-item">
       <svg class="feat-px" viewBox="0 0 8 8"><rect width="8" height="8" fill="#F5A623"/></svg>
       <h3 data-en="Surfaces when you need it" data-ja="必要なときだけ表示">Surfaces when you need it</h3>
-      <p data-en="The panel appears the moment any session needs your input, then hides itself when everything is resolved."
-         data-ja="セッションに確認が必要になった瞬間に自動で表示。全て解消すると自動で引っ込みます。">The panel appears the moment any session needs your input, then hides itself when everything is resolved.</p>
+      <p data-en="The window appears automatically the moment any session needs your input, then hides itself when everything is resolved."
+         data-ja="セッションに確認が必要になった瞬間に自動で表示。全て解消すると自動で引っ込みます。">The window appears automatically the moment any session needs your input, then hides itself when everything is resolved.</p>
     </div>
 
     <div class="feat-item">
       <svg class="feat-px" viewBox="0 0 8 8"><rect width="8" height="8" fill="#5ECC41"/></svg>
-      <h3 data-en="Jump to the right window" data-ja="1クリックでジャンプ">Jump to the right window</h3>
+      <h3 data-en="Jump to the right terminal" data-ja="1クリックでターミナルへ">Jump to the right terminal</h3>
       <p data-en="Click any session row to immediately focus the correct pane in iTerm2, Terminal, or Warp."
          data-ja="セッション行をクリックすると iTerm2 / Terminal / Warp の該当ペインへ即ジャンプ。">Click any session row to immediately focus the correct pane in iTerm2, Terminal, or Warp.</p>
     </div>
@@ -525,15 +532,8 @@
     <div class="feat-item">
       <svg class="feat-px" viewBox="0 0 8 8"><rect width="8" height="8" fill="#6AABFF"/></svg>
       <h3 data-en="Keyboard first" data-ja="キーボードで全操作">Keyboard first</h3>
-      <p data-en="Toggle the panel with <kbd class=feat-kbd>⌥ Space</kbd>. Navigate sessions and jump to terminals — all without touching the mouse."
-         data-ja="<kbd class=feat-kbd>⌥ Space</kbd> でパネルをトグル。セッションの移動・ターミナルジャンプもキーボードだけで完結。">Toggle the panel with <kbd class="feat-kbd">⌥ Space</kbd>. Navigate sessions and jump to terminals — all without touching the mouse.</p>
-    </div>
-
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 8 8"><rect width="8" height="8" fill="#C488FF"/></svg>
-      <h3 data-en="Pixel-art cat room" data-ja="ピクセルアートの猫部屋">Pixel-art cat room</h3>
-      <p data-en="A cat wanders the room in sync with your sessions. The scene shifts between day, dusk, and night as the clock moves."
-         data-ja="セッション数・状態に連動して猫が動き、時刻で昼・夕・夜の景色が変わります。">A cat wanders the room in sync with your sessions. The scene shifts between day, dusk, and night as the clock moves.</p>
+      <p data-en="Toggle the window with <kbd class=feat-kbd>⌥ Space</kbd>. Navigate sessions and jump to terminals — all without touching the mouse."
+         data-ja="<kbd class=feat-kbd>⌥ Space</kbd> でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。">Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd>. Navigate sessions and jump to terminals — all without touching the mouse.</p>
     </div>
 
     <div class="feat-item">
@@ -546,8 +546,16 @@
     <div class="feat-item">
       <svg class="feat-px" viewBox="0 0 8 8"><rect width="8" height="8" fill="#5ECC41"/></svg>
       <h3 data-en="Mute &amp; focus" data-ja="ミュート &amp; フォーカス">Mute &amp; focus</h3>
-      <p data-en="Mute the panel when you need deep focus. Re-enable with one keystroke when you're ready to check in again."
-         data-ja="集中したいときはミュート。一発のキー操作でいつでも再開できます。">Mute the panel when you need deep focus. Re-enable with one keystroke when you're ready to check in again.</p>
+      <p data-en="Mute the window when you need deep focus. Re-enable with one keystroke when you're ready to check in again."
+         data-ja="集中したいときはミュート。一発のキー操作でいつでも再開できます。">Mute the window when you need deep focus. Re-enable with one keystroke when you're ready to check in again.</p>
+    </div>
+
+    <!-- Cat room LAST — it's ambience, not a core feature -->
+    <div class="feat-item">
+      <svg class="feat-px" viewBox="0 0 8 8"><rect width="8" height="8" fill="#C488FF"/></svg>
+      <h3 data-en="Pixel-art cat room" data-ja="ピクセルアートの猫部屋">Pixel-art cat room</h3>
+      <p data-en="A cat wanders the room in sync with your sessions. The scene changes between day and night as the clock moves."
+         data-ja="セッション数・状態に連動して猫が動き、時刻で昼と夜の景色が変わります。">A cat wanders the room in sync with your sessions. The scene changes between day and night as the clock moves.</p>
     </div>
 
   </div>
@@ -560,9 +568,13 @@
 
     <!-- Trial -->
     <div class="price-card">
+      <div class="price-badge-row">
+        <span class="price-badge-label hidden">placeholder</span>
+      </div>
       <div class="price-tier" data-en="Free Trial" data-ja="無料トライアル">Free Trial</div>
       <div class="price-main">
-        <span class="price-amt">$0</span>
+        <span class="price-cur">$</span>
+        <span class="price-int">0</span>
       </div>
       <div class="price-cyc"
            data-en="7 days · no card required"
@@ -582,54 +594,68 @@
 
     <!-- Monthly -->
     <div class="price-card">
+      <div class="price-badge-row">
+        <span class="price-badge-label hidden">placeholder</span>
+      </div>
       <div class="price-tier" data-en="Monthly" data-ja="月額">Monthly</div>
       <div class="price-main">
         <span class="price-cur">$</span>
-        <span class="price-amt">4.99</span>
+        <span class="price-int">4</span>
+        <span class="price-dec">.99</span>
       </div>
       <div class="price-cyc"
-           data-en="/ month, billed monthly"
-           data-ja="/ 月 · 月払い">/ month, billed monthly</div>
+           data-en="per month, billed monthly"
+           data-ja="月払い">per month, billed monthly</div>
       <hr class="price-div">
       <ul class="price-feats">
         <li data-en="All features unlocked"    data-ja="全機能が使い放題">All features unlocked</li>
         <li data-en="Unlimited sessions"        data-ja="セッション数無制限">Unlimited sessions</li>
         <li data-en="Cancel anytime"            data-ja="いつでもキャンセル可">Cancel anytime</li>
       </ul>
+      <!--
+        TODO: Freemius ダッシュボード → Pricing → 月額プランの pricing_id を確認し
+        下記 URL を ?pricing_id=XXXXX に変更すると月額が直接選択された状態でチェックアウトが開きます
+      -->
       <a href="https://checkout.freemius.com/app/32620/plan/53509/"
          class="price-cta price-cta-ghost"
-         data-en="Start monthly" data-ja="月額で始める">Start monthly</a>
+         data-en="View monthly plan" data-ja="月額プランを見る">View monthly plan</a>
+      <p class="price-cta-note"
+         data-en="Select monthly billing at checkout"
+         data-ja="チェックアウト画面で月額を選択してください">Select monthly billing at checkout</p>
     </div>
 
-    <!-- Annual -->
+    <!-- Annual — featured -->
     <div class="price-card featured">
-      <div class="price-badge"
-           data-en="▸ BEST VALUE — 2 months free"
-           data-ja="▸ おすすめ — 2ヶ月分お得">▸ BEST VALUE — 2 months free</div>
+      <div class="price-badge-row">
+        <span class="price-badge-label"
+              data-en="▸ BEST VALUE — 2 months free"
+              data-ja="▸ おすすめ — 2ヶ月分お得">▸ BEST VALUE — 2 months free</span>
+      </div>
       <div class="price-tier" data-en="Annual" data-ja="年額">Annual</div>
       <div class="price-main">
         <span class="price-cur">$</span>
-        <span class="price-amt">4.17</span>
+        <span class="price-int">4</span>
+        <span class="price-dec">.17</span>
       </div>
       <div class="price-cyc"
-           data-en="/ month · $49.99 billed annually"
-           data-ja="/ 月 · 年額 $49.99（一括払い）">/ month · $49.99 billed annually</div>
+           data-en="per month · $49.99 billed annually"
+           data-ja="月換算 · 年額 $49.99（一括払い）">per month · $49.99 billed annually</div>
       <hr class="price-div">
       <ul class="price-feats">
         <li data-en="All features unlocked"          data-ja="全機能が使い放題">All features unlocked</li>
         <li data-en="Unlimited sessions"             data-ja="セッション数無制限">Unlimited sessions</li>
         <li data-en="Cancel anytime"                 data-ja="いつでもキャンセル可">Cancel anytime</li>
-        <li data-en="Saves $9.89 vs monthly plan"    data-ja="月額より $9.89 お得（約2ヶ月分）">Saves $9.89 vs monthly plan</li>
+        <li data-en="Saves $9.89 vs monthly"         data-ja="月額より $9.89 お得">Saves $9.89 vs monthly</li>
       </ul>
       <a href="https://checkout.freemius.com/app/32620/plan/53509/"
-         class="price-cta price-cta-amber"
+         class="price-cta price-cta-sky"
          data-en="Start annual plan" data-ja="年額プランで始める">Start annual plan</a>
     </div>
 
   </div>
   <p class="price-note">
-    <span data-en="All plans start with a 7-day free trial · Secure checkout by"
-          data-ja="全プランに 7日間トライアル付き · 安全決済">All plans start with a 7-day free trial · Secure checkout by</span>
+    <span data-en="All plans include a 7-day free trial · Secure checkout by"
+          data-ja="全プランに 7日間トライアル付き · 安全決済">All plans include a 7-day free trial · Secure checkout by</span>
     <a href="https://freemius.com" target="_blank" rel="noopener">Freemius</a>
   </p>
 </section>
@@ -650,7 +676,7 @@
     <li class="step">
       <span class="step-n">02</span>
       <div class="step-body">
-        <strong data-en="Download and install"  data-ja="DMG をインストール">Download and install</strong>
+        <strong data-en="Download and install" data-ja="DMG をインストール">Download and install</strong>
         <span data-en="Download the DMG, open it, drag AgentManager.app to Applications."
               data-ja="DMG をダウンロードし、AgentManager.app を Applications にドラッグ。"
         >Download the DMG, open it, drag AgentManager.app to Applications.</span>
@@ -659,7 +685,7 @@
     <li class="step">
       <span class="step-n">03</span>
       <div class="step-body">
-        <strong data-en="Activate your license"  data-ja="ライセンスを有効化">Activate your license</strong>
+        <strong data-en="Activate your license" data-ja="ライセンスを有効化">Activate your license</strong>
         <span data-en="Open the app, go to Settings → License, paste your key and click Activate."
               data-ja="アプリを起動 → 設定 → ライセンスにキーを貼り付けて「有効化」。"
         >Open the app, go to Settings → License, paste your key and click Activate.</span>
@@ -668,7 +694,7 @@
     <li class="step">
       <span class="step-n">04</span>
       <div class="step-body">
-        <strong data-en="Run Claude Code"  data-ja="Claude Code を起動">Run Claude Code</strong>
+        <strong data-en="Run Claude Code" data-ja="Claude Code を起動">Run Claude Code</strong>
         <span data-en="Start any <code>claude</code> session. AgentManager detects it automatically."
               data-ja="<code>claude</code> コマンドを実行するだけ。AgentManager が自動で検出します。"
         >Start any <code>claude</code> session. AgentManager detects it automatically.</span>
@@ -698,6 +724,21 @@
 </footer>
 
 <script>
+  // Screenshot toggle
+  function showDay() {
+    document.getElementById('ss-day').classList.remove('hidden');
+    document.getElementById('ss-night').classList.add('hidden');
+    document.getElementById('ss-btn-day').classList.add('active');
+    document.getElementById('ss-btn-night').classList.remove('active');
+  }
+  function showNight() {
+    document.getElementById('ss-night').classList.remove('hidden');
+    document.getElementById('ss-day').classList.add('hidden');
+    document.getElementById('ss-btn-night').classList.add('active');
+    document.getElementById('ss-btn-day').classList.remove('active');
+  }
+
+  // Language toggle
   function setLang(lang) {
     document.documentElement.lang = lang;
     document.querySelectorAll('[data-' + lang + ']').forEach(function(el) {
