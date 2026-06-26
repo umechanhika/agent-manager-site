@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentManager — Claude Code セッション管理ツール</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0f11;
+      --surface:   #161820;
+      --border:    #2a2d38;
+      --text:      #e8eaf0;
+      --muted:     #8b90a4;
+      --accent:    #6c8ef5;
+      --accent-dk: #4a6ce0;
+      --green:     #4ade80;
+      --amber:     #fbbf24;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 24px 60px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 99px;
+      padding: 4px 14px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(32px, 6vw, 54px);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 19px);
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+
+    /* ── CTA ── */
+    .cta-group {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity .15s, transform .1s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--muted); }
+    .cta-note { font-size: 13px; color: var(--muted); }
+
+    /* ── Screenshots ── */
+    .screenshots {
+      max-width: 860px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .screenshot-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .toggle-btn {
+      padding: 6px 18px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .toggle-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .screenshot-frame {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px rgba(0,0,0,.6);
+      text-align: center;
+      background: var(--surface);
+    }
+    .screenshot-frame img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    .screenshot-frame img.hidden { display: none; }
+
+    /* ── Features ── */
+    .features {
+      max-width: 860px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .feature-icon { font-size: 24px; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Install ── */
+    .install {
+      max-width: 560px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+      text-align: center;
+    }
+    .install-steps {
+      text-align: left;
+      list-style: none;
+      margin-top: 28px;
+    }
+    .install-steps li {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .install-steps li:last-child { border-bottom: none; }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-text { font-size: 15px; padding-top: 4px; }
+    .step-text strong { display: block; margin-bottom: 2px; }
+    .step-text span { font-size: 13px; color: var(--muted); }
+
+    /* ── Requirements ── */
+    .requirements {
+      max-width: 560px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+      text-align: center;
+    }
+    .req-list {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .req-tag {
+      font-size: 13px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 14px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">macOS メニューバーアプリ</div>
+  <h1>Claude Code の<br>確認待ちを見逃さない</h1>
+  <p class="hero-sub">
+    複数の Claude Code セッションを常時最前面のフローティングウィンドウで一覧。
+    確認が必要なセッションが現れると自動でウィンドウを表示します。
+  </p>
+  <div class="cta-group">
+    <a href="https://checkout.freemius.com/app/32620/plan/53509/"
+       class="btn btn-primary">
+      🛒 購入する
+    </a>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="btn btn-secondary">
+      ⬇ DMG をダウンロード
+    </a>
+  </div>
+  <p class="cta-note">macOS 13 Ventura 以降 · Apple Silicon / Intel 対応</p>
+</section>
+
+<!-- Screenshots -->
+<div class="screenshots">
+  <div class="screenshot-toggle">
+    <button class="toggle-btn active" onclick="showDay(this)">☀ 昼</button>
+    <button class="toggle-btn" onclick="showNight(this)">🌙 夜</button>
+  </div>
+  <div class="screenshot-frame">
+    <img id="ss-day"   src="screenshot-day.png"   alt="昼の表示">
+    <img id="ss-night" src="screenshot-night.png" alt="夜の表示" class="hidden">
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features">
+  <p class="section-title">主な機能</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🟡</div>
+      <h3>確認待ちを即検知</h3>
+      <p>ツール許可・プラン承認・質問回答など、Claude が止まっている理由をリアルタイムで表示。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🖱</div>
+      <h3>1クリックでターミナルへ</h3>
+      <p>行をクリックすると対応する iTerm2 / Terminal / Warp のペインへ即ジャンプ。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⌥Space</div>
+      <h3>グローバルホットキー</h3>
+      <p>⌥Space でどのアプリからでも一瞬でパネルを呼び出し、消す。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🐱</div>
+      <h3>セッション連動の猫</h3>
+      <p>部屋の床を走る猫がセッション数と状態に連動。時刻で昼・夕・夜の景色が変わります。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>自動アップデート</h3>
+      <p>Sparkle によるアプリ内自動更新。起動時に新バージョンがあれば通知します。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>ライセンス認証</h3>
+      <p>Freemius によるサブスクリプション管理。無料トライアル後に購入して有効化するだけ。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Install -->
+<section class="install">
+  <p class="section-title">インストール手順</p>
+  <ol class="install-steps">
+    <li>
+      <span class="step-num">1</span>
+      <div class="step-text">
+        <strong>購入 / トライアル開始</strong>
+        <span>「購入する」ボタンから Freemius チェックアウトへ。メールでライセンスキーが届きます。</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">2</span>
+      <div class="step-text">
+        <strong>DMG をダウンロード</strong>
+        <span>「DMG をダウンロード」ボタンからインストーラーを取得します。</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">3</span>
+      <div class="step-text">
+        <strong>Applications にドラッグ</strong>
+        <span>DMG を開き AgentManager.app を Applications フォルダへドラッグ。</span>
+      </div>
+    </li>
+    <li>
+      <span class="step-num">4</span>
+      <div class="step-text">
+        <strong>ライセンスキーを入力</strong>
+        <span>アプリを起動して 設定 → ライセンス にキーを貼り付けて「有効化」。</span>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- Requirements -->
+<section class="requirements">
+  <p class="section-title">動作環境</p>
+  <div class="req-list">
+    <span class="req-tag">macOS 13 Ventura 以降</span>
+    <span class="req-tag">Apple Silicon / Intel</span>
+    <span class="req-tag">Claude Code（claude CLI）</span>
+    <span class="req-tag">iTerm2 / Terminal / Warp</span>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>
+    &copy; 2026 umechanhika &nbsp;·&nbsp;
+    <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free">無料トライアルを開始</a>
+  </p>
+</footer>
+
+<script>
+  function showDay(btn) {
+    document.getElementById('ss-day').classList.remove('hidden');
+    document.getElementById('ss-night').classList.add('hidden');
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function showNight(btn) {
+    document.getElementById('ss-night').classList.remove('hidden');
+    document.getElementById('ss-day').classList.add('hidden');
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
