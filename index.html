@@ -612,16 +612,10 @@
         <li data-en="Unlimited sessions"        data-ja="セッション数無制限">Unlimited sessions</li>
         <li data-en="Cancel anytime"            data-ja="いつでもキャンセル可">Cancel anytime</li>
       </ul>
-      <!--
-        TODO: Freemius ダッシュボード → Pricing → 月額プランの pricing_id を確認し
-        下記 URL を ?pricing_id=XXXXX に変更すると月額が直接選択された状態でチェックアウトが開きます
-      -->
-      <a href="https://checkout.freemius.com/app/32620/plan/53509/"
+      <!-- billing_cycle=monthly で月額が選択された状態でチェックアウトが開く（Freemius URL パラメータ） -->
+      <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly"
          class="price-cta price-cta-ghost"
-         data-en="View monthly plan" data-ja="月額プランを見る">View monthly plan</a>
-      <p class="price-cta-note"
-         data-en="Select monthly billing at checkout"
-         data-ja="チェックアウト画面で月額を選択してください">Select monthly billing at checkout</p>
+         data-en="Start monthly plan" data-ja="月額プランで始める">Start monthly plan</a>
     </div>
 
     <!-- Annual — featured -->
@@ -647,7 +641,7 @@
         <li data-en="Cancel anytime"                 data-ja="いつでもキャンセル可">Cancel anytime</li>
         <li data-en="Saves $9.89 vs monthly"         data-ja="月額より $9.89 お得">Saves $9.89 vs monthly</li>
       </ul>
-      <a href="https://checkout.freemius.com/app/32620/plan/53509/"
+      <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual"
          class="price-cta price-cta-sky"
          data-en="Start annual plan" data-ja="年額プランで始める">Start annual plan</a>
     </div>
