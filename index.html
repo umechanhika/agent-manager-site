@@ -1,382 +1,681 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentManager — Claude Code セッション管理ツール</title>
+  <title>AgentManager — Claude Code session monitor for macOS</title>
+  <meta name="description" content="A floating macOS panel that shows every Claude Code session at a glance. Surfaces the moment Claude needs your input. Never miss a prompt again.">
+  <meta property="og:title" content="AgentManager">
+  <meta property="og:description" content="A floating macOS panel for Claude Code. Never miss a prompt.">
+
   <style>
+    /* ============================================================
+       TOKENS
+       Warm near-black background + pixel-art golden accent.
+       The "AI blue" dev-tool default is deliberately avoided.
+       Golden references the cat-room lantern / amber pixel art.
+    ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0e0f11;
-      --surface:   #161820;
-      --border:    #2a2d38;
-      --text:      #e8eaf0;
-      --muted:     #8b90a4;
-      --accent:    #6c8ef5;
-      --accent-dk: #4a6ce0;
-      --green:     #4ade80;
-      --amber:     #fbbf24;
-      --radius:    12px;
+      --bg:      #0D0C0B;
+      --surf:    #161412;
+      --surf2:   #1E1B18;
+      --border:  #252220;
+      --text:    #F0EDE8;
+      --muted:   #6E6860;
+      --dim:     #3A3530;
+      --gold:    #F0C040;
+      --gold-dk: #B89020;
+      --green:   #5AE87A;
+      --blue:    #6A9FD4;
+      --purple:  #C88AFF;
+      --r:       8px;
+      --mono:    ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+      --sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
+                 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
     }
 
+    html { scroll-behavior: smooth; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
-      line-height: 1.6;
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Hero ── */
-    .hero {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 80px 24px 60px;
-      text-align: center;
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,12,11,.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 28px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .hero-badge {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      border-radius: 99px;
-      padding: 4px 14px;
-      margin-bottom: 24px;
+    .logo {
+      font-family: var(--mono); font-size: 14px; font-weight: 400;
+      color: var(--text); text-decoration: none; letter-spacing: -.01em;
     }
-    h1 {
-      font-size: clamp(32px, 6vw, 54px);
-      font-weight: 700;
-      letter-spacing: -.02em;
-      line-height: 1.15;
-      margin-bottom: 20px;
-    }
-    .hero-sub {
-      font-size: clamp(16px, 2.5vw, 19px);
-      color: var(--muted);
-      max-width: 560px;
-      margin: 0 auto 40px;
-    }
+    .logo b { color: var(--gold); font-weight: 400; }
+    .hdr-right { display: flex; align-items: center; gap: 14px; }
 
-    /* ── CTA ── */
-    .cta-group {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: opacity .15s, transform .1s;
-      cursor: pointer;
-      border: none;
-    }
-    .btn:hover { opacity: .85; transform: translateY(-1px); }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1.5px solid var(--border);
-    }
-    .btn-secondary:hover { border-color: var(--muted); }
-    .cta-note { font-size: 13px; color: var(--muted); }
-
-    /* ── Screenshots ── */
-    .screenshots {
-      max-width: 860px;
-      margin: 0 auto 80px;
-      padding: 0 24px;
-    }
-    .screenshot-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .toggle-btn {
-      padding: 6px 18px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 500;
-      border: 1.5px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
-    }
-    .toggle-btn.active {
-      background: var(--surface);
-      color: var(--text);
-      border-color: var(--border);
-    }
-    .screenshot-frame {
-      border-radius: var(--radius);
-      overflow: hidden;
+    .lang-toggle {
+      display: flex; gap: 2px;
+      background: var(--surf);
       border: 1px solid var(--border);
-      box-shadow: 0 24px 80px rgba(0,0,0,.6);
-      text-align: center;
-      background: var(--surface);
+      border-radius: 6px; padding: 3px;
     }
-    .screenshot-frame img {
-      display: block;
-      width: auto;
-      max-width: 100%;
-      height: auto;
-      margin: 0 auto;
+    .lang-btn {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .06em; padding: 3px 9px;
+      border-radius: 4px; border: none;
+      background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .12s;
     }
-    .screenshot-frame img.hidden { display: none; }
+    .lang-btn.active { background: var(--surf2); color: var(--text); }
 
-    /* ── Features ── */
-    .features {
-      max-width: 860px;
-      margin: 0 auto 80px;
-      padding: 0 24px;
+    .hdr-cta {
+      font-size: 13px; font-weight: 600;
+      color: #0D0C0B; background: var(--gold);
+      padding: 7px 16px; border-radius: 6px;
+      text-decoration: none; transition: opacity .15s;
+      white-space: nowrap;
     }
-    .section-title {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .feature-grid {
+    .hdr-cta:hover { opacity: .84; }
+    @media (max-width: 540px) { .hdr-cta { display: none; } }
+
+    /* ============================================================
+       HERO — 2-column: text left, app window right
+    ============================================================ */
+    .hero-grid {
+      max-width: 1040px; margin: 0 auto;
+      padding: 80px 32px 56px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
+      grid-template-columns: 1fr 300px;
+      gap: 64px; align-items: center;
     }
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
+    @media (max-width: 760px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 44px; padding: 52px 24px 44px;
+      }
+      /* Window goes first on mobile */
+      .hero-window { order: -1; }
     }
-    .feature-icon { font-size: 24px; margin-bottom: 12px; }
-    .feature-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
-    /* ── Install ── */
-    .install {
-      max-width: 560px;
-      margin: 0 auto 80px;
-      padding: 0 24px;
-      text-align: center;
+    /* Eyebrow */
+    .eyebrow {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 12px;
+      color: var(--muted); margin-bottom: 26px;
+      letter-spacing: .02em;
     }
-    .install-steps {
-      text-align: left;
-      list-style: none;
-      margin-top: 28px;
+    .eyebrow::before { content: '$'; color: var(--gold); }
+    .cursor {
+      display: inline-block; width: 6px; height: .9em;
+      background: var(--gold); vertical-align: text-bottom;
+      animation: blink 1.1s step-end infinite; opacity: .8;
     }
-    .install-steps li {
-      display: flex;
+    @keyframes blink { 0%,100%{opacity:.8} 50%{opacity:0} }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 50px);
+      font-weight: 700; letter-spacing: -.028em; line-height: 1.14;
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: normal; color: var(--gold); }
+
+    .hero-sub {
+      font-size: clamp(15px, 1.9vw, 17px);
+      color: var(--muted); line-height: 1.72;
+      max-width: 440px; margin-bottom: 38px;
+    }
+
+    /* CTA row */
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 24px; border-radius: var(--r);
+      font-size: 15px; font-weight: 600;
+      text-decoration: none; cursor: pointer; border: none;
+      transition: opacity .14s, transform .1s; white-space: nowrap;
+    }
+    .btn:hover { opacity: .82; transform: translateY(-1px); }
+    .btn-gold  { background: var(--gold); color: #0D0C0B; }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--dim); }
+    .cta-note {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--dim); letter-spacing: .03em;
+    }
+
+    /* ── App window (signature element) ── */
+    .app-window {
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04),
+        0 40px 80px rgba(0,0,0,.7),
+        0 0 80px rgba(240,192,64,.05);
+    }
+    .win-bar {
+      background: var(--surf2);
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
+      user-select: none;
+    }
+    .traffic { display: flex; gap: 6px; }
+    .tl { width: 12px; height: 12px; border-radius: 50%; }
+    .tl-r { background: #FF5F57; }
+    .tl-y { background: #FEBC2E; }
+    .tl-g { background: #28C840; }
+    .win-title {
+      flex: 1; text-align: center;
+      font-family: var(--sans); font-size: 12px; font-weight: 500;
+      color: var(--muted); margin-right: 46px;
+    }
+    .win-body {
+      background: #0e0f11;
+      min-height: 200px;
+    }
+    .win-body img { display: block; width: 100%; height: auto; }
+
+    /* ── Status legend ── */
+    .status-row {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 24px 72px;
+    }
+    .status-item {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); letter-spacing: .04em;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ============================================================
+       SECTION LABEL (shared)
+    ============================================================ */
+    .section-label {
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); text-align: center; margin-bottom: 48px;
+    }
+
+    /* ============================================================
+       FEATURES — dots not cards
+    ============================================================ */
+    .features-sec {
+      max-width: 900px; margin: 0 auto;
+      padding: 0 32px 96px;
+    }
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px 48px;
+    }
+    @media (max-width: 640px) {
+      .feat-grid { grid-template-columns: 1fr; gap: 28px; }
+    }
+    .feat-dot {
+      display: inline-block;
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-bottom: 14px;
+    }
+    .feat-item h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .feat-item p  { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+    /* ============================================================
+       PRICING
+    ============================================================ */
+    .pricing-sec {
+      max-width: 900px; margin: 0 auto;
+      padding: 0 32px 96px;
+    }
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
-      align-items: flex-start;
-      padding: 16px 0;
+    }
+    @media (max-width: 660px) {
+      .price-grid { grid-template-columns: 1fr; }
+    }
+    .price-card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px 24px 28px;
+      position: relative;
+      display: flex; flex-direction: column;
+    }
+    .price-card.featured {
+      border-color: var(--gold);
+      box-shadow: 0 0 40px rgba(240,192,64,.07);
+    }
+    .price-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: var(--gold); color: #0D0C0B;
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: 3px 12px; border-radius: 99px; white-space: nowrap;
+    }
+    .price-tier {
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 14px;
+    }
+    .price-main { display: flex; align-items: baseline; gap: 2px; margin-bottom: 4px; }
+    .price-cur  { font-family: var(--mono); font-size: 16px; color: var(--muted); }
+    .price-amt  { font-family: var(--mono); font-size: 40px; font-weight: 400; line-height: 1; }
+    .price-cyc  { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+    .price-div  { border: none; border-top: 1px solid var(--border); margin-bottom: 18px; }
+    .price-feats {
+      list-style: none; font-size: 14px; color: var(--muted);
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 24px; flex: 1;
+    }
+    .price-feats li { display: flex; gap: 8px; align-items: flex-start; }
+    .price-feats li::before {
+      content: '✓'; color: var(--green);
+      font-family: var(--mono); flex-shrink: 0; margin-top: 1px;
+    }
+    .price-feats li.off { color: var(--dim); }
+    .price-feats li.off::before { color: var(--dim); }
+    .price-cta {
+      display: block; text-align: center;
+      padding: 11px 20px; border-radius: 6px;
+      font-size: 14px; font-weight: 600;
+      text-decoration: none; transition: opacity .15s;
+      margin-top: auto;
+    }
+    .price-cta:hover { opacity: .8; }
+    .price-cta-gold  { background: var(--gold); color: #0D0C0B; }
+    .price-cta-ghost {
+      border: 1px solid var(--border); color: var(--muted);
+    }
+    .price-cta-ghost:hover { border-color: var(--dim); color: var(--text); }
+    .price-note {
+      text-align: center; margin-top: 18px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); letter-spacing: .04em;
+    }
+
+    /* ============================================================
+       INSTALL
+    ============================================================ */
+    .install-sec {
+      max-width: 580px; margin: 0 auto;
+      padding: 0 32px 96px;
+    }
+    .steps { list-style: none; }
+    .step {
+      display: grid; grid-template-columns: 44px 1fr;
+      gap: 16px; padding: 24px 0;
       border-bottom: 1px solid var(--border);
     }
-    .install-steps li:last-child { border-bottom: none; }
-    .step-num {
-      flex-shrink: 0;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .step:last-child { border-bottom: none; }
+    .step-n {
+      font-family: var(--mono); font-size: 26px; font-weight: 400;
+      color: var(--border); line-height: 1; padding-top: 2px;
     }
-    .step-text { font-size: 15px; padding-top: 4px; }
-    .step-text strong { display: block; margin-bottom: 2px; }
-    .step-text span { font-size: 13px; color: var(--muted); }
+    .step-body strong { display: block; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .step-body span   { font-size: 14px; color: var(--muted); }
+    .step-body code   { font-family: var(--mono); font-size: 13px; color: var(--text); }
 
-    /* ── Requirements ── */
-    .requirements {
-      max-width: 560px;
-      margin: 0 auto 80px;
-      padding: 0 24px;
-      text-align: center;
+    /* ============================================================
+       REQUIREMENTS
+    ============================================================ */
+    .req-sec { text-align: center; padding-bottom: 80px; }
+    .req-chips {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center; margin-top: 16px;
     }
-    .req-list {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .req-tag {
-      font-size: 13px;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 99px;
-      padding: 4px 14px;
+    .req-chip {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); border: 1px solid var(--border);
+      border-radius: 4px; padding: 5px 12px; letter-spacing: .03em;
     }
 
-    /* ── Footer ── */
+    /* ============================================================
+       FOOTER
+    ============================================================ */
     footer {
       border-top: 1px solid var(--border);
-      padding: 32px 24px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--muted);
+      padding: 28px 24px; text-align: center;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--dim); letter-spacing: .04em;
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
+
+    /* ============================================================
+       ACCESSIBILITY & REDUCED MOTION
+    ============================================================ */
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
 
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-badge">macOS メニューバーアプリ</div>
-  <h1>Claude Code の<br>確認待ちを見逃さない</h1>
-  <p class="hero-sub">
-    複数の Claude Code セッションを常時最前面のフローティングウィンドウで一覧。
-    確認が必要なセッションが現れると自動でウィンドウを表示します。
-  </p>
-  <div class="cta-group">
-    <a href="https://checkout.freemius.com/app/32620/plan/53509/"
-       class="btn btn-primary">
-      🛒 購入する
-    </a>
-    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
-       class="btn btn-secondary">
-      ⬇ DMG をダウンロード
-    </a>
+<!-- ── HEADER ── -->
+<header>
+  <a href="/" class="logo">Agent<b>Manager</b></a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">JA</button>
+    </div>
+    <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
+       class="hdr-cta"
+       data-en="Start free trial"
+       data-ja="無料で試す">Start free trial</a>
   </div>
-  <p class="cta-note">macOS 13 Ventura 以降 · Apple Silicon / Intel 対応</p>
-</section>
+</header>
 
-<!-- Screenshots -->
-<div class="screenshots">
-  <div class="screenshot-toggle">
-    <button class="toggle-btn active" onclick="showDay(this)">☀ 昼</button>
-    <button class="toggle-btn" onclick="showNight(this)">🌙 夜</button>
+<!-- ── HERO ── -->
+<div class="hero-grid">
+
+  <!-- LEFT: text -->
+  <div class="hero-text">
+    <div class="eyebrow">
+      <span data-en="agentmanager --watch" data-ja="agentmanager --watch">agentmanager --watch</span>
+      <span class="cursor" aria-hidden="true"></span>
+    </div>
+
+    <h1 data-en="Your Claude sessions,<br><em>always in view.</em>"
+        data-ja="全 Claude セッションが、<br><em>常に視界に。</em>">
+      Your Claude sessions,<br><em>always in view.</em>
+    </h1>
+
+    <p class="hero-sub"
+       data-en="A floating macOS panel for every Claude Code session. When Claude needs your input, it surfaces. When it doesn't, it hides."
+       data-ja="全 Claude Code セッションを監視するフローティングパネル。確認が必要なとき自動で現れ、不要なときは引っ込みます。">
+      A floating macOS panel for every Claude Code session. When Claude needs your input, it surfaces. When it doesn't, it hides.
+    </p>
+
+    <div class="cta-row">
+      <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
+         class="btn btn-gold"
+         data-en="Start 7-day free trial"
+         data-ja="7日間 無料で試す">Start 7-day free trial</a>
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-ghost"
+         data-en="↓ Download DMG"
+         data-ja="↓ DMG をダウンロード">↓ Download DMG</a>
+    </div>
+
+    <div class="cta-note"
+         data-en="No credit card required · macOS 13+ · Apple Silicon &amp; Intel"
+         data-ja="クレジットカード不要 · macOS 13+ · Apple Silicon &amp; Intel">
+      No credit card required · macOS 13+ · Apple Silicon &amp; Intel
+    </div>
   </div>
-  <div class="screenshot-frame">
-    <img id="ss-day"   src="screenshot-day.png"   alt="昼の表示">
-    <img id="ss-night" src="screenshot-night.png" alt="夜の表示" class="hidden">
+
+  <!-- RIGHT: App window (signature element — product visible immediately) -->
+  <div class="hero-window">
+    <div class="app-window">
+      <div class="win-bar">
+        <div class="traffic" aria-hidden="true">
+          <span class="tl tl-r"></span>
+          <span class="tl tl-y"></span>
+          <span class="tl tl-g"></span>
+        </div>
+        <span class="win-title">AgentManager</span>
+      </div>
+      <div class="win-body">
+        <!--
+          demo.gif: Record a short screen capture of the running app to show the cat animation.
+          Fallback: screenshot-day.png while demo.gif is not yet available.
+        -->
+        <img src="demo.gif"
+             alt="AgentManager — Claude Code session monitor with pixel-art cat"
+             onerror="this.onerror=null; this.src='screenshot-day.png';">
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Features -->
-<section class="features">
-  <p class="section-title">主な機能</p>
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🟡</div>
-      <h3>確認待ちを即検知</h3>
-      <p>ツール許可・プラン承認・質問回答など、Claude が止まっている理由をリアルタイムで表示。</p>
+<!-- Status legend -->
+<div class="status-row" aria-hidden="true">
+  <div class="status-item">
+    <span class="dot" style="background:var(--gold)"></span>
+    <span data-en="Waiting for input" data-ja="確認待ち">Waiting for input</span>
+  </div>
+  <div class="status-item">
+    <span class="dot" style="background:var(--green)"></span>
+    <span data-en="Complete" data-ja="完了">Complete</span>
+  </div>
+  <div class="status-item">
+    <span class="dot" style="background:var(--blue)"></span>
+    <span data-en="Processing" data-ja="処理中">Processing</span>
+  </div>
+  <div class="status-item">
+    <span class="dot" style="background:var(--dim)"></span>
+    <span data-en="Idle" data-ja="待機">Idle</span>
+  </div>
+</div>
+
+<!-- ── FEATURES ── -->
+<section class="features-sec">
+  <p class="section-label" data-en="Features" data-ja="機能">Features</p>
+  <div class="feat-grid">
+
+    <div class="feat-item">
+      <span class="feat-dot" style="background:var(--gold)"></span>
+      <h3 data-en="Surfaces when you need it" data-ja="必要なときだけ表示">Surfaces when you need it</h3>
+      <p data-en="The panel appears automatically the moment any session needs your input, then hides itself when everything is resolved." data-ja="セッションに確認が必要になった瞬間に自動で表示。全て解消すると自動で引っ込みます。">The panel appears automatically the moment any session needs your input, then hides itself when everything is resolved.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🖱</div>
-      <h3>1クリックでターミナルへ</h3>
-      <p>行をクリックすると対応する iTerm2 / Terminal / Warp のペインへ即ジャンプ。</p>
+
+    <div class="feat-item">
+      <span class="feat-dot" style="background:var(--green)"></span>
+      <h3 data-en="Jump to the right window" data-ja="1クリックでターミナルへ">Jump to the right window</h3>
+      <p data-en="Click any session row to immediately focus the correct pane in iTerm2, Terminal, or Warp." data-ja="セッション行をクリックすると iTerm2 / Terminal / Warp の該当ペインへ即ジャンプ。">Click any session row to immediately focus the correct pane in iTerm2, Terminal, or Warp.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">⌥Space</div>
-      <h3>グローバルホットキー</h3>
-      <p>⌥Space でどのアプリからでも一瞬でパネルを呼び出し、消す。</p>
+
+    <div class="feat-item">
+      <span class="feat-dot" style="background:var(--blue)"></span>
+      <h3 data-en="⌥Space from anywhere" data-ja="どこからでも ⌥Space">⌥Space from anywhere</h3>
+      <p data-en="A global hotkey brings the panel forward over any app or Space. No dock, no command-tab." data-ja="全アプリ・全 Space からグローバルホットキーでパネルをトグル。Dock や Cmd-Tab は不要。">A global hotkey brings the panel forward over any app or Space. No dock, no command-tab.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🐱</div>
-      <h3>セッション連動の猫</h3>
-      <p>部屋の床を走る猫がセッション数と状態に連動。時刻で昼・夕・夜の景色が変わります。</p>
+
+    <div class="feat-item">
+      <span class="feat-dot" style="background:var(--purple)"></span>
+      <h3 data-en="Pixel-art cat room" data-ja="ピクセルアートの猫部屋">Pixel-art cat room</h3>
+      <p data-en="A cat wanders the room in sync with your sessions. The scene shifts between day, dusk, and night as the clock moves." data-ja="セッション数・状態に連動して猫が動き、時刻で昼・夕・夜の景色が変わります。">A cat wanders the room in sync with your sessions. The scene shifts between day, dusk, and night as the clock moves.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h3>自動アップデート</h3>
-      <p>Sparkle によるアプリ内自動更新。起動時に新バージョンがあれば通知します。</p>
+
+    <div class="feat-item">
+      <span class="feat-dot" style="background:var(--gold)"></span>
+      <h3 data-en="Always on top" data-ja="常時最前面">Always on top</h3>
+      <p data-en="Floats above every window, every Space, every full-screen app. You never have to go looking for it." data-ja="全ウィンドウ・全スペース・フルスクリーンアプリの上に常に浮かびます。">Floats above every window, every Space, every full-screen app. You never have to go looking for it.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔒</div>
-      <h3>ライセンス認証</h3>
-      <p>Freemius によるサブスクリプション管理。無料トライアル後に購入して有効化するだけ。</p>
+
+    <div class="feat-item">
+      <span class="feat-dot" style="background:var(--green)"></span>
+      <h3 data-en="Auto-update" data-ja="自動アップデート">Auto-update</h3>
+      <p data-en="Sparkle checks for updates on launch and installs them in place. You stay current without thinking about it." data-ja="Sparkle が起動時に更新を確認し、その場でインストール。バージョン管理を考える必要がありません。">Sparkle checks for updates on launch and installs them in place. You stay current without thinking about it.</p>
     </div>
+
   </div>
 </section>
 
-<!-- Install -->
-<section class="install">
-  <p class="section-title">インストール手順</p>
-  <ol class="install-steps">
-    <li>
-      <span class="step-num">1</span>
-      <div class="step-text">
-        <strong>購入 / トライアル開始</strong>
-        <span>「購入する」ボタンから Freemius チェックアウトへ。メールでライセンスキーが届きます。</span>
+<!-- ── PRICING ── -->
+<section class="pricing-sec">
+  <p class="section-label" data-en="Pricing" data-ja="料金">Pricing</p>
+  <div class="price-grid">
+
+    <!-- Trial -->
+    <div class="price-card">
+      <div class="price-tier" data-en="Free Trial" data-ja="無料トライアル">Free Trial</div>
+      <div class="price-main">
+        <span class="price-amt">$0</span>
+      </div>
+      <div class="price-cyc"
+           data-en="7 days · no card required"
+           data-ja="7日間 · カード不要">7 days · no card required</div>
+      <hr class="price-div">
+      <ul class="price-feats">
+        <li data-en="All features unlocked"       data-ja="全機能が使い放題">All features unlocked</li>
+        <li data-en="Unlimited sessions"           data-ja="セッション数無制限">Unlimited sessions</li>
+        <li class="off"
+            data-en="Requires a paid plan after 7 days"
+            data-ja="7日後は有料プランが必要">Requires a paid plan after 7 days</li>
+      </ul>
+      <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
+         class="price-cta price-cta-ghost"
+         data-en="Start free trial" data-ja="無料で試す">Start free trial</a>
+    </div>
+
+    <!-- Monthly -->
+    <div class="price-card">
+      <div class="price-tier" data-en="Monthly" data-ja="月額">Monthly</div>
+      <div class="price-main">
+        <!-- ▼ TODO: Set monthly price (replace ? with actual amount) -->
+        <span class="price-cur">$</span>
+        <span class="price-amt">?</span>
+      </div>
+      <div class="price-cyc"
+           data-en="/ month, billed monthly"
+           data-ja="/ 月 · 月払い">/ month, billed monthly</div>
+      <hr class="price-div">
+      <ul class="price-feats">
+        <li data-en="All features unlocked"      data-ja="全機能が使い放題">All features unlocked</li>
+        <li data-en="Unlimited sessions"          data-ja="セッション数無制限">Unlimited sessions</li>
+        <li data-en="Auto-updates via Sparkle"    data-ja="Sparkle 自動アップデート">Auto-updates via Sparkle</li>
+      </ul>
+      <a href="https://checkout.freemius.com/app/32620/plan/53509/"
+         class="price-cta price-cta-ghost"
+         data-en="Start monthly" data-ja="月額で始める">Start monthly</a>
+    </div>
+
+    <!-- Annual — highlighted -->
+    <div class="price-card featured">
+      <div class="price-badge" data-en="Best value" data-ja="おすすめ">Best value</div>
+      <div class="price-tier" data-en="Annual" data-ja="年額">Annual</div>
+      <div class="price-main">
+        <!-- ▼ TODO: Set annual price per month (annual total ÷ 12, replace ? with actual amount) -->
+        <span class="price-cur">$</span>
+        <span class="price-amt">?</span>
+      </div>
+      <div class="price-cyc"
+           data-en="/ month · billed annually · 2 months free"
+           data-ja="/ 月 · 年払い · 2ヶ月分お得">/ month · billed annually · 2 months free</div>
+      <hr class="price-div">
+      <ul class="price-feats">
+        <li data-en="All features unlocked"          data-ja="全機能が使い放題">All features unlocked</li>
+        <li data-en="Unlimited sessions"             data-ja="セッション数無制限">Unlimited sessions</li>
+        <li data-en="Auto-updates via Sparkle"       data-ja="Sparkle 自動アップデート">Auto-updates via Sparkle</li>
+        <li data-en="2 months free vs. monthly plan" data-ja="月額より 2ヶ月分お得">2 months free vs. monthly plan</li>
+      </ul>
+      <a href="https://checkout.freemius.com/app/32620/plan/53509/"
+         class="price-cta price-cta-gold"
+         data-en="Start annual plan" data-ja="年額プランで始める">Start annual plan</a>
+    </div>
+
+  </div>
+  <p class="price-note"
+     data-en="All plans include a 7-day free trial · Cancel anytime · Secure checkout by Freemius"
+     data-ja="全プランに 7日間トライアル付き · いつでもキャンセル可 · Freemius 安全決済">
+    All plans include a 7-day free trial · Cancel anytime · Secure checkout by Freemius
+  </p>
+</section>
+
+<!-- ── INSTALL ── -->
+<section class="install-sec">
+  <p class="section-label" data-en="Getting started" data-ja="使い始め方">Getting started</p>
+  <ol class="steps">
+    <li class="step">
+      <span class="step-n">01</span>
+      <div class="step-body">
+        <strong data-en="Start your free trial"  data-ja="無料トライアルを開始">Start your free trial</strong>
+        <span data-en='Click "Start 7-day free trial" above. No card required. Your license key arrives by email after checkout.'
+              data-ja="上の「7日間 無料で試す」をクリック。カード不要。チェックアウト後にライセンスキーがメールで届きます。"
+        >Click "Start 7-day free trial" above. No card required. Your license key arrives by email after checkout.</span>
       </div>
     </li>
-    <li>
-      <span class="step-num">2</span>
-      <div class="step-text">
-        <strong>DMG をダウンロード</strong>
-        <span>「DMG をダウンロード」ボタンからインストーラーを取得します。</span>
+    <li class="step">
+      <span class="step-n">02</span>
+      <div class="step-body">
+        <strong data-en="Download and install"  data-ja="DMG をダウンロードしてインストール">Download and install</strong>
+        <span data-en="Download the DMG, open it, drag AgentManager.app to Applications."
+              data-ja="DMG をダウンロードし、AgentManager.app を Applications にドラッグ。"
+        >Download the DMG, open it, drag AgentManager.app to Applications.</span>
       </div>
     </li>
-    <li>
-      <span class="step-num">3</span>
-      <div class="step-text">
-        <strong>Applications にドラッグ</strong>
-        <span>DMG を開き AgentManager.app を Applications フォルダへドラッグ。</span>
+    <li class="step">
+      <span class="step-n">03</span>
+      <div class="step-body">
+        <strong data-en="Activate your license"  data-ja="ライセンスを有効化">Activate your license</strong>
+        <span data-en="Open the app, go to Settings → License, paste your key and click Activate."
+              data-ja="アプリを起動 → 設定 → ライセンス にキーを貼り付けて「有効化」。"
+        >Open the app, go to Settings → License, paste your key and click Activate.</span>
       </div>
     </li>
-    <li>
-      <span class="step-num">4</span>
-      <div class="step-text">
-        <strong>ライセンスキーを入力</strong>
-        <span>アプリを起動して 設定 → ライセンス にキーを貼り付けて「有効化」。</span>
+    <li class="step">
+      <span class="step-n">04</span>
+      <div class="step-body">
+        <strong data-en="Run Claude Code"  data-ja="Claude Code を起動">Run Claude Code</strong>
+        <span data-en="Start any <code>claude</code> session. AgentManager detects it automatically."
+              data-ja="<code>claude</code> コマンドを実行するだけ。AgentManager が自動で検出します。"
+        >Start any <code>claude</code> session. AgentManager detects it automatically.</span>
       </div>
     </li>
   </ol>
 </section>
 
-<!-- Requirements -->
-<section class="requirements">
-  <p class="section-title">動作環境</p>
-  <div class="req-list">
-    <span class="req-tag">macOS 13 Ventura 以降</span>
-    <span class="req-tag">Apple Silicon / Intel</span>
-    <span class="req-tag">Claude Code（claude CLI）</span>
-    <span class="req-tag">iTerm2 / Terminal / Warp</span>
+<!-- ── REQUIREMENTS ── -->
+<section class="req-sec">
+  <p class="section-label" data-en="Requirements" data-ja="動作環境">Requirements</p>
+  <div class="req-chips">
+    <span class="req-chip">macOS 13 Ventura+</span>
+    <span class="req-chip">Apple Silicon / Intel</span>
+    <span class="req-chip">Claude Code (claude CLI)</span>
+    <span class="req-chip">iTerm2 / Terminal / Warp</span>
   </div>
 </section>
 
-<!-- Footer -->
+<!-- ── FOOTER ── -->
 <footer>
   <p>
-    &copy; 2026 umechanhika &nbsp;·&nbsp;
-    <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free">無料トライアルを開始</a>
+    &copy; 2026 AgentManager &nbsp;·&nbsp;
+    <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
+       data-en="Start free trial" data-ja="無料トライアルを開始">Start free trial</a>
   </p>
 </footer>
 
 <script>
-  function showDay(btn) {
-    document.getElementById('ss-day').classList.remove('hidden');
-    document.getElementById('ss-night').classList.add('hidden');
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+  function setLang(lang) {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-' + lang + ']').forEach(function(el) {
+      el.innerHTML = el.getAttribute('data-' + lang);
+    });
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-ja').classList.toggle('active', lang === 'ja');
+    try { localStorage.setItem('am-lang', lang); } catch(e) {}
   }
-  function showNight(btn) {
-    document.getElementById('ss-night').classList.remove('hidden');
-    document.getElementById('ss-day').classList.add('hidden');
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
+
+  // Auto-detect language on load
+  (function() {
+    var saved = '';
+    try { saved = localStorage.getItem('am-lang') || ''; } catch(e) {}
+    if (!saved) {
+      var nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
+      if (nav.startsWith('ja')) saved = 'ja';
+    }
+    if (saved === 'ja') setLang('ja');
+  }());
 </script>
 </body>
 </html>
