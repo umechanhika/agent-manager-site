@@ -29,7 +29,7 @@
       --surf2:  #F3F9EE;
       --border: #B2CFA2;
       --text:   #152010;
-      --muted:  #4C7840;
+      --muted:  #2E5820;
       --dim:    #8CAA7C;
       --sky:    #1A6FB8;
       --sky-lt: #4498DC;
@@ -195,6 +195,8 @@
     }
     .ss-frame img { display: block; width: 100%; height: auto; }
     .ss-frame img.hidden { display: none; }
+    img.hidden { display: none; }
+    .hero-window { display: flex; flex-direction: column; gap: 10px; }
 
     /* Status legend */
     .status-row {
@@ -229,7 +231,7 @@
     @media (max-width: 640px) { .feat-grid { grid-template-columns: 1fr; gap: 28px; } }
     .feat-px { width: 8px; height: 8px; margin-bottom: 14px; image-rendering: pixelated; }
     .feat-item h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: -.01em; }
-    .feat-item p  { font-size: 15px; color: var(--muted); line-height: 1.65; }
+    .feat-item p  { font-size: 16px; color: var(--muted); line-height: 1.65; }
     .feat-kbd {
       display: inline-block; font-family: var(--mono); font-size: 12px;
       background: var(--surf2); border: 2px solid var(--border);
@@ -298,10 +300,10 @@
       color: var(--muted); padding-bottom: 7px;
     }
 
-    .price-cyc { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .price-cyc { font-size: 15px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
     .price-div { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
     .price-feats {
-      list-style: none; font-size: 15px; color: var(--muted);
+      list-style: none; font-size: 16px; color: var(--muted);
       display: flex; flex-direction: column; gap: 10px;
       margin-bottom: 22px; flex: 1;
     }
@@ -453,8 +455,14 @@
     </div>
   </div>
 
-  <!-- RIGHT: App window (demo.gif → screenshot-day.png fallback) -->
+  <!-- RIGHT: スクショ昼夜トグル -->
   <div class="hero-window">
+    <div class="ss-toggle">
+      <button class="ss-btn active" id="ss-btn-day" onclick="showDay()"
+              data-en="☀ Day" data-ja="☀ 昼">☀ Day</button>
+      <button class="ss-btn" id="ss-btn-night" onclick="showNight()"
+              data-en="🌙 Night" data-ja="🌙 夜">🌙 Night</button>
+    </div>
     <div class="app-window">
       <div class="win-bar">
         <div class="traffic" aria-hidden="true">
@@ -465,9 +473,8 @@
         <span class="win-title">AgentManager</span>
       </div>
       <div class="win-body">
-        <img src="demo.gif"
-             alt="AgentManager demo"
-             onerror="this.onerror=null; this.src='screenshot-day.png';">
+        <img id="ss-day" src="screenshot-day.png" alt="AgentManager — day scene">
+        <img id="ss-night" src="screenshot-night.png" alt="AgentManager — night scene" class="hidden">
       </div>
     </div>
   </div>
@@ -490,23 +497,6 @@
   <div class="status-item">
     <svg class="dot" viewBox="0 0 8 8"><rect width="8" height="8" fill="#C0D4B8"/></svg>
     <span data-en="Idle" data-ja="待機">Idle</span>
-  </div>
-</div>
-
-<!-- SCREENSHOT TOGGLE -->
-<div class="screenshots">
-  <div class="ss-toggle">
-    <button class="ss-btn active" id="ss-btn-day" onclick="showDay()"
-            data-en="☀ Day" data-ja="☀ 昼">☀ Day</button>
-    <button class="ss-btn"       id="ss-btn-night" onclick="showNight()"
-            data-en="🌙 Night" data-ja="🌙 夜">🌙 Night</button>
-  </div>
-  <div class="ss-frame">
-    <img id="ss-day"   src="screenshot-day.png"
-         alt="AgentManager — day scene" data-en-alt="Day scene" data-ja-alt="昼の表示">
-    <img id="ss-night" src="screenshot-night.png"
-         alt="AgentManager — night scene" class="hidden"
-         data-en-alt="Night scene" data-ja-alt="夜の表示">
   </div>
 </div>
 
