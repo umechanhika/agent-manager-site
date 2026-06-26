@@ -69,7 +69,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    img.hidden { display: none; }
+    .hidden { display: none !important; }
 
     /* ── HEADER ─────────────────────────────────────────────── */
     header {
@@ -565,9 +565,9 @@
 <!-- PAIN SECTION: why you need this — one beat, before features -->
 <section class="pain-sec">
   <div class="pain-inner">
-    <p data-en="You&rsquo;re running <strong>4 Claude sessions at once.</strong> Two finished. Two are waiting for your input. <em>You won&rsquo;t know until you check</em> — which you forgot to do. AgentManager fixes that."
-       data-ja="<strong>4つのClaudeセッションを同時に動かしている。</strong>2つは完了。2つはあなたの確認待ち。<em>確認しないと気づかない。</em>その確認を忘れていた。AgentManagerがこれを解決します。">
-      You&rsquo;re running <strong>4 Claude sessions at once.</strong> Two finished. Two are waiting for your input. <em>You won&rsquo;t know until you check</em> — which you forgot to do. AgentManager fixes that.
+    <p data-en="Running multiple sessions? <strong>You won&rsquo;t notice which one is waiting</strong> until it&rsquo;s too late. AgentManager fixes that."
+       data-ja="複数のセッションが同時進行。<strong>どれが確認待ちか、気づかない。</strong>AgentManagerが解決します。">
+      Running multiple sessions? <strong>You won&rsquo;t notice which one is waiting</strong> until it&rsquo;s too late. AgentManager fixes that.
     </p>
   </div>
 </section>
@@ -609,7 +609,8 @@
     <div class="feat-item">
       <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#4E8BC8"/></svg>
       <h3 data-en="Keyboard first" data-ja="キーボードで全操作">Keyboard first</h3>
-      <p data-en="Toggle the window with &nbsp;" data-ja=""><span data-en="Toggle the window with " data-ja=""></span><kbd class="feat-kbd">⌥ Space</kbd><span data-en=". Navigate sessions and jump to terminals — all without the mouse." data-ja="でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。">. Navigate sessions and jump to terminals — all without the mouse.</span></p>
+      <p data-en='Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd>. Navigate sessions and jump to terminals — all without the mouse.'
+         data-ja='<kbd class="feat-kbd">⌥ Space</kbd> でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。'>Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd>. Navigate sessions and jump to terminals — all without the mouse.</p>
     </div>
 
     <div class="feat-item">
@@ -697,9 +698,6 @@
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly"
            class="price-cta price-cta-light"
            data-en="Start monthly plan" data-ja="月額プランを見る">Start monthly plan</a>
-        <p class="price-cta-note"
-           data-en="Select monthly billing at checkout"
-           data-ja="チェックアウト画面で月額を選択">Select monthly billing at checkout</p>
       </div>
 
       <!-- Annual — featured -->
