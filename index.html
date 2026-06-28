@@ -396,6 +396,22 @@
       text-align: center; margin-top: 8px; letter-spacing: .03em;
     }
 
+    /* ── COMING SOON: 公開準備中 CTA 非活性化 ───────────────── */
+    .is-soon {
+      opacity: .45;
+      filter: grayscale(1);
+      pointer-events: none;
+      cursor: not-allowed;
+      box-shadow: none !important;
+    }
+    .is-soon:hover, .is-soon:active { transform: none; box-shadow: none !important; }
+    .soon-note {
+      display: block; margin-top: 6px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+      color: var(--dim); text-transform: uppercase;
+    }
+    .soon-inline { color: var(--dim); text-decoration: line-through; cursor: not-allowed; }
+
     .price-note {
       text-align: center; margin-top: 24px;
       font-family: var(--mono); font-size: 11px; color: var(--muted);
@@ -472,7 +488,8 @@
       <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">JA</button>
     </div>
     <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-       class="hdr-cta"
+       class="hdr-cta is-soon"
+       aria-disabled="true" tabindex="-1"
        data-en="Free trial" data-ja="無料で試す">Free trial</a>
   </div>
 </header>
@@ -506,12 +523,20 @@
     </p>
 
     <div class="cta-row">
-      <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-         class="btn btn-primary"
-         data-en="Start 7-day free trial" data-ja="7日間 無料で試す">Start 7-day free trial</a>
-      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
-         class="btn btn-ghost"
-         data-en="↓ Download DMG" data-ja="↓ DMG をダウンロード">↓ Download DMG</a>
+      <div>
+        <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
+           class="btn btn-primary is-soon"
+           aria-disabled="true" tabindex="-1"
+           data-en="Start 7-day free trial" data-ja="7日間 無料で試す">Start 7-day free trial</a>
+        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
+      </div>
+      <div>
+        <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+           class="btn btn-ghost is-soon"
+           aria-disabled="true" tabindex="-1"
+           data-en="↓ Download DMG" data-ja="↓ DMG をダウンロード">↓ Download DMG</a>
+        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
+      </div>
     </div>
     <div class="cta-note"
          data-en="No credit card required · macOS 13+ · Apple Silicon &amp; Intel"
@@ -674,8 +699,10 @@
               data-ja="7日後は有料プランが必要">Paid plan required after 7 days</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-           class="price-cta price-cta-dark"
+           class="price-cta price-cta-dark is-soon"
+           aria-disabled="true" tabindex="-1"
            data-en="Start free trial" data-ja="無料で試す">Start free trial</a>
+        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
 
       <!-- Monthly -->
@@ -699,8 +726,10 @@
           <li data-en="Cancel anytime"         data-ja="いつでもキャンセル可">Cancel anytime</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly"
-           class="price-cta price-cta-light"
+           class="price-cta price-cta-light is-soon"
+           aria-disabled="true" tabindex="-1"
            data-en="Start monthly plan" data-ja="月額プランを見る">Start monthly plan</a>
+        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
 
       <!-- Annual — featured -->
@@ -727,8 +756,10 @@
           <li data-en="Saves $9.89 vs monthly"   data-ja="月額より $9.89 お得">Saves $9.89 vs monthly</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual"
-           class="price-cta price-cta-blue"
+           class="price-cta price-cta-blue is-soon"
+           aria-disabled="true" tabindex="-1"
            data-en="Start annual plan" data-ja="年額プランで始める">Start annual plan</a>
+        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
 
     </div>
@@ -762,9 +793,9 @@
       <span class="step-n">01</span>
       <div class="step-body">
         <strong data-en="Start trial &amp; install" data-ja="トライアル開始 &amp; インストール">Start trial &amp; install</strong>
-        <span data-en='Click <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free">7-day free trial</a> — no card needed. Download the DMG, open it, drag AgentManager to Applications. Your license key arrives by email.'
-              data-ja='<a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free">7日間無料トライアル</a>を開始（カード不要）。DMG をダウンロードして Applications へドラッグ。ライセンスキーはメールで届きます。'
-        >Click <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free">7-day free trial</a> — no card needed. Download the DMG, open it, drag AgentManager to Applications. Your license key arrives by email.</span>
+        <span data-en='Click <span class="soon-inline">7-day free trial</span> (coming soon) — no card needed. Download the DMG, open it, drag AgentManager to Applications. Your license key arrives by email.'
+              data-ja='<span class="soon-inline">7日間無料トライアル</span>（準備中）を開始（カード不要）。DMG をダウンロードして Applications へドラッグ。ライセンスキーはメールで届きます。'
+        >Click <span class="soon-inline">7-day free trial</span> (coming soon) — no card needed. Download the DMG, open it, drag AgentManager to Applications. Your license key arrives by email.</span>
       </div>
     </li>
     <li class="step">
@@ -803,7 +834,10 @@
   <p>
     &copy; 2026 AgentManager &nbsp;·&nbsp;
     <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
+       class="is-soon"
+       aria-disabled="true" tabindex="-1"
        data-en="Start free trial" data-ja="無料で試す">Start free trial</a>
+    <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
   </p>
 </footer>
 
