@@ -465,6 +465,7 @@
     }
     footer a { color: var(--amber); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
+    .ja-only { display: none; }
 
     /* ── RESPONSIVE / ACCESSIBILITY ────────────────────────── */
     :focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; }
@@ -864,8 +865,7 @@
     <a href="privacy.html" data-en="Privacy" data-ja="プライバシーポリシー">Privacy</a>
     &nbsp;·&nbsp;
     <a href="terms.html" data-en="Terms" data-ja="利用規約">Terms</a>
-    &nbsp;·&nbsp;
-    <a href="legal.html" data-en="Legal" data-ja="特定商取引法に基づく表記">Legal</a>
+    <span class="ja-only">&nbsp;·&nbsp;<a href="legal.html">特定商取引法に基づく表記</a></span>
   </p>
 </footer>
 
@@ -890,6 +890,9 @@
     });
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     document.getElementById('btn-ja').classList.toggle('active', lang === 'ja');
+    document.querySelectorAll('.ja-only').forEach(function(el) {
+      el.style.display = lang === 'ja' ? 'inline' : 'none';
+    });
     try { localStorage.setItem('am-lang', lang); } catch(e) {}
   }
 
