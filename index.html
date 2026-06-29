@@ -445,13 +445,31 @@
     .step-body a:hover { text-decoration: underline; }
     .step-body code   { font-family: var(--mono); font-size: 13px; color: var(--text); }
 
-    /* ── REQUIREMENTS ──────────────────────────────────────── */
-    .req-sec { text-align: center; padding: 0 24px 64px; }
-    .req-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
-    .req-chip {
-      font-family: var(--mono); font-size: 11px; color: var(--muted);
-      border: 2px solid var(--border); padding: 5px 12px;
+    /* ── FAQ ──────────────────────────────────────────────── */
+    .faq-sec {
+      max-width: 580px; margin: 0 auto; padding: 80px 32px;
     }
+    .faq-sec .sec-head { margin-bottom: 0; }
+    .faq-list { list-style: none; margin-top: 8px; }
+    .faq-item { border-bottom: 2px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-item summary {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 0; cursor: pointer;
+      font-size: 15px; font-weight: 700; color: var(--text);
+      list-style: none; gap: 16px;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: '+'; font-family: var(--mono); font-size: 18px; font-weight: 700;
+      color: var(--muted); flex-shrink: 0; line-height: 1;
+    }
+    .faq-item details[open] summary::after { content: '−'; }
+    .faq-ans {
+      margin: 0; padding: 0 0 20px;
+      font-size: 15px; color: var(--muted); line-height: 1.6;
+    }
+    .faq-ans code { font-family: var(--mono); font-size: 13px; color: var(--text); }
 
     /* ── FOOTER ────────────────────────────────────────────── */
     footer {
@@ -470,7 +488,7 @@
     :focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; }
     @media (max-width: 480px) {
       .hero { padding: 36px 20px; }
-      .features-sec, .pricing-inner, .setup-sec { padding-left: 20px; padding-right: 20px; }
+      .features-sec, .pricing-inner, .setup-sec, .faq-sec { padding-left: 20px; padding-right: 20px; }
     }
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; animation: none !important; }
@@ -539,9 +557,9 @@
       </div>
     </div>
     <div class="cta-note"
-         data-en="No credit card required · macOS 13+ · Apple Silicon &amp; Intel"
-         data-ja="クレジットカード不要 · macOS 13+ · Apple Silicon &amp; Intel">
-      No credit card required · macOS 13+ · Apple Silicon &amp; Intel
+         data-en="No credit card required"
+         data-ja="クレジットカード不要">
+      No credit card required
     </div>
   </div>
 
@@ -840,14 +858,92 @@
   </ol>
 </section>
 
-<!-- REQUIREMENTS -->
-<section class="req-sec">
-  <div class="req-chips">
-    <span class="req-chip">macOS 13 Ventura+</span>
-    <span class="req-chip">Apple Silicon / Intel</span>
-    <span class="req-chip">Claude Code (claude CLI)</span>
-    <span class="req-chip">iTerm2 / Terminal / Warp</span>
+<!-- FAQ -->
+<section class="faq-sec">
+  <div class="sec-head">
+    <span class="section-label" data-en="FAQ" data-ja="よくあるご質問">FAQ</span>
   </div>
+  <ul class="faq-list">
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="What are the system requirements?"
+          data-ja="動作環境は何ですか？">What are the system requirements?</summary>
+        <p class="faq-ans"
+           data-en="macOS 13 Ventura or later, on Apple Silicon or Intel. Claude Code (<code>claude</code> CLI) must be installed."
+           data-ja="macOS 13 Ventura 以降（Apple Silicon・Intel 両対応）が必要です。Claude Code（<code>claude</code> CLI）のインストールも必要です。">
+          macOS 13 Ventura or later, on Apple Silicon or Intel. Claude Code (<code>claude</code> CLI) must be installed.
+        </p>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="Which terminals are supported?"
+          data-ja="対応しているターミナルは？">Which terminals are supported?</summary>
+        <p class="faq-ans"
+           data-en="iTerm2, macOS Terminal, and Warp are natively supported. Sessions launched from IDE integrated terminals — VS Code, Cursor, Android Studio, and more — are also detected automatically."
+           data-ja="iTerm2・Terminal・Warp をネイティブでサポートしています。VS Code・Cursor・Android Studio などの統合ターミナルから起動したセッションも自動で検出されます。">
+          iTerm2, macOS Terminal, and Warp are natively supported. Sessions launched from IDE integrated terminals — VS Code, Cursor, Android Studio, and more — are also detected automatically.
+        </p>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="How does AgentManager detect sessions?"
+          data-ja="セッションはどうやって検出されますか？">How does AgentManager detect sessions?</summary>
+        <p class="faq-ans"
+           data-en="AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically — after that, every <code>claude</code> session you start appears in the list with no further setup."
+           data-ja="AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が自動で登録されるため、それ以降は <code>claude</code> を起動するだけで一覧に表示されます。追加の設定は不要です。">
+          AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically — after that, every <code>claude</code> session you start appears in the list with no further setup.
+        </p>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="Where does my session data go?"
+          data-ja="セッションデータはどこかに送信されますか？">Where does my session data go?</summary>
+        <p class="faq-ans"
+           data-en="Nowhere. AgentManager runs entirely on your Mac and does not send session data to any external server. Your sessions stay on your machine."
+           data-ja="どこにも送信されません。AgentManager は Mac 上でのみ動作し、セッション情報を外部サーバーには送信しません。データはあなたの端末に留まります。">
+          Nowhere. AgentManager runs entirely on your Mac and does not send session data to any external server. Your sessions stay on your machine.
+        </p>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="Is there a free trial? How is pricing structured?"
+          data-ja="無料トライアルはありますか？料金プランは？">Is there a free trial? How is pricing structured?</summary>
+        <p class="faq-ans"
+           data-en='Yes — a <span class="soon-inline">7-day free trial</span> (coming soon) with all features unlocked, no credit card required. After the trial: Monthly at $4.99/mo, or Annual at $49.99/yr (~2 months free).'
+           data-ja='はい — <span class="soon-inline">7日間の無料トライアル</span>（準備中）があり、全機能を利用できます（カード不要）。トライアル後は月額 $4.99 または年額 $49.99（約2ヶ月分お得）からお選びください。'>
+          Yes — a <span class="soon-inline">7-day free trial</span> (coming soon) with all features unlocked, no credit card required. After the trial: Monthly at $4.99/mo, or Annual at $49.99/yr (~2 months free).
+        </p>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="How many Macs can I use one license on?"
+          data-ja="1ライセンスで何台の Mac で使えますか？">How many Macs can I use one license on?</summary>
+        <p class="faq-ans"
+           data-en="There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like."
+           data-ja="台数の上限はありません。お手持ちの Mac すべてにインストールしてご利用いただけます。">
+          There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like.
+        </p>
+      </details>
+    </li>
+
+  </ul>
 </section>
 
 <!-- FOOTER -->
