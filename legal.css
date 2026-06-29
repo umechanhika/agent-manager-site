@@ -1,0 +1,205 @@
+/*
+ * legal.css — AgentManager 法務ページ共通スタイル
+ * privacy.html / terms.html / legal.html から読み込む
+ *
+ * デザインシステムは index.html と同じ PIXEL ART トークンを使用:
+ *   ピクセルアート感・4px ハードシャドウ・border-radius: 0 を踏襲
+ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Palette — index.html と同一 */
+  --bg:     #F4ECD8;
+  --surf:   #FDFAF3;
+  --surf2:  #EDE3CC;
+  --border: #1A1714;
+  --text:   #1A1714;
+  --muted:  #5C5040;
+  --dim:    #9A8A78;
+
+  --sky:    #4E8BC8;
+  --grass:  #3BAD52;
+  --amber:  #F5A623;
+  --wood:   #C8A060;
+
+  --sh-sm: 3px 3px 0 var(--border);
+
+  --mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
+          'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hidden { display: none !important; }
+
+/* ── HEADER ──────────────────────────────────────────────── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 2px solid var(--border);
+  padding: 12px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font-family: var(--mono); font-size: 15px; font-weight: 700;
+  color: var(--text); text-decoration: none; letter-spacing: .02em;
+}
+.logo span { color: var(--sky); }
+
+.hdr-right { display: flex; align-items: center; gap: 12px; }
+
+.lang-toggle {
+  display: flex;
+  border: 2px solid var(--border);
+  background: var(--surf);
+}
+.lang-btn {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; padding: 5px 10px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; transition: background .08s, color .08s;
+}
+.lang-btn + .lang-btn { border-left: 2px solid var(--border); }
+.lang-btn.active { background: var(--border); color: var(--bg); }
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+footer {
+  border-top: 2px solid var(--border);
+  background: var(--border); color: var(--bg);
+  padding: 28px 24px; text-align: center;
+}
+footer p {
+  font-family: var(--mono); font-size: 11px;
+  color: rgba(244,236,216,.5); letter-spacing: .04em;
+}
+footer a { color: var(--amber); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* ── LEGAL PROSE CONTAINER ────────────────────────────────── */
+.legal-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 64px 32px 96px;
+}
+@media (max-width: 600px) {
+  .legal-wrap { padding: 40px 20px 72px; }
+}
+
+/* Page title */
+.legal-wrap h1 {
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 900;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+/* Effective date / last updated */
+.legal-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  display: block;
+}
+
+/* Section headings */
+.legal-wrap h2 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  border-left: 4px solid var(--amber);
+}
+
+/* Body text */
+.legal-wrap p {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.75;
+}
+
+/* Links in prose */
+.legal-wrap a {
+  color: var(--sky);
+  text-decoration: none;
+}
+.legal-wrap a:hover { text-decoration: underline; }
+
+/* Lists */
+.legal-wrap ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 14px;
+}
+.legal-wrap ul li {
+  font-size: 15px;
+  color: var(--muted);
+  padding-left: 20px;
+  position: relative;
+  margin-bottom: 6px;
+  line-height: 1.7;
+}
+.legal-wrap ul li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px;
+  width: 7px; height: 7px;
+  background: var(--amber);
+}
+
+/* Disclaimer / callout box */
+.legal-note {
+  margin: 32px 0;
+  padding: 16px 18px;
+  background: var(--surf2);
+  border: 2px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.65;
+  letter-spacing: .02em;
+}
+
+/* Divider */
+.legal-wrap hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  opacity: .15;
+  margin: 40px 0;
+}
+
+/* Contact info block */
+.legal-contact {
+  margin-top: 10px;
+  margin-bottom: 14px;
+  padding: 14px 18px;
+  background: var(--surf);
+  border: 2px solid var(--border);
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.8;
+}
+.legal-contact a { color: var(--sky); text-decoration: none; }
+.legal-contact a:hover { text-decoration: underline; }
+
+/* Responsive */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
