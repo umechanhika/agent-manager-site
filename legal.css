@@ -68,6 +68,10 @@ header {
 }
 .lang-btn + .lang-btn { border-left: 2px solid var(--border); }
 .lang-btn.active { background: var(--border); color: var(--bg); }
+@media (max-width: 540px) {
+  header { padding: 10px 16px; }
+  .logo-img { height: 14px; }
+}
 
 /* ── FOOTER ───────────────────────────────────────────────── */
 footer {

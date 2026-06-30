@@ -126,7 +126,11 @@
     }
     .hdr-cta:hover  { transform: translate(3px,3px); box-shadow: none; }
     .hdr-cta:active { transform: translate(3px,3px); box-shadow: none; }
-    @media (max-width: 540px) { .hdr-cta { display: none; } }
+    @media (max-width: 540px) {
+      header { padding: 10px 16px; }
+      .logo-img { height: 14px; }
+      .hdr-cta { display: none; }
+    }
 
     /* ── HERO ───────────────────────────────────────────────── */
     .hero {
