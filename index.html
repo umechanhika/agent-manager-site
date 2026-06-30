@@ -7,6 +7,7 @@
   <meta name="description" content="A floating macOS window for every Claude Code session. Surfaces the moment Claude needs your input.">
   <meta property="og:title" content="AgentManager">
   <meta property="og:description" content="Never miss a Claude Code prompt. A floating macOS window for your sessions.">
+  <link rel="icon" type="image/svg+xml" href="logo-mark.svg">
 
   <style>
     /*
@@ -79,11 +80,8 @@
       padding: 12px 28px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .logo {
-      font-family: var(--mono); font-size: 15px; font-weight: 700;
-      color: var(--text); text-decoration: none; letter-spacing: .02em;
-    }
-    .logo span { color: var(--sky); }
+    .logo { display: inline-flex; align-items: center; text-decoration: none; }
+    .logo-img { height: 16px; width: auto; display: block; }
 
     .hdr-right { display: flex; align-items: center; gap: 12px; }
 
@@ -500,7 +498,9 @@
 
 <!-- HEADER -->
 <header>
-  <a href="/agent-manager-site/" class="logo">Agent<span>Manager</span></a>
+  <a href="/agent-manager-site/" class="logo">
+    <img class="logo-img" src="logo.svg" alt="AgentManager" width="160" height="14">
+  </a>
   <div class="hdr-right">
     <div class="lang-toggle" role="group" aria-label="Language">
       <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
