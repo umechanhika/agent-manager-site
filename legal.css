@@ -51,7 +51,7 @@ header {
   display: flex; align-items: center; justify-content: space-between;
 }
 .logo { display: inline-flex; align-items: center; text-decoration: none; }
-.logo-img { height: 16px; width: auto; display: block; }
+.logo-img { height: 20px; width: auto; display: block; }
 
 .hdr-right { display: flex; align-items: center; gap: 12px; }
 
