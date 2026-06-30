@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
     <title>AgentManager Updates</title>
-    <link>https://umechanhika.github.io/agent-manager-site/appcast.xml</link>
+    <link>https://agentmgr.app/appcast.xml</link>
     <description>AgentManager の更新フィード</description>
     <language>ja</language>
 
