@@ -731,8 +731,8 @@
         <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#3BAD52"/></svg>
         <h3 data-en="Jump to the right terminal" data-ja="1クリックでターミナルへ">Jump to the right terminal</h3>
       </div>
-      <p data-en="Click any row to immediately focus the correct pane in iTerm2, Terminal, or Warp."
-         data-ja="行をクリックすると iTerm2 / Terminal / Warp の該当ペインへ即ジャンプ。">Click any row to immediately focus the correct pane in iTerm2, Terminal, or Warp.</p>
+      <p data-en="Click any row to jump straight to that session — down to the exact pane in iTerm2 and Terminal."
+         data-ja="行をクリックするとそのセッションへ即ジャンプ。iTerm2 / Terminal では該当ペインまで移動します。">Click any row to jump straight to that session — down to the exact pane in iTerm2 and Terminal.</p>
     </div>
 
     <div class="feat-item feat-item--shot">
@@ -990,12 +990,12 @@
     <li class="faq-item">
       <details>
         <summary
-          data-en="Which terminals are supported?"
-          data-ja="対応しているターミナルは？">Which terminals are supported?</summary>
+          data-en="Which terminals and IDEs are supported?"
+          data-ja="対応しているターミナル・IDE は？">Which terminals and IDEs are supported?</summary>
         <p class="faq-ans"
-           data-en="iTerm2, macOS Terminal, and Warp are natively supported. Sessions launched from IDE integrated terminals — VS Code, Cursor, Android Studio, and more — are also detected automatically."
-           data-ja="iTerm2・Terminal・Warp をネイティブでサポートしています。VS Code・Cursor・Android Studio などの統合ターミナルから起動したセッションも自動で検出されます。">
-          iTerm2, macOS Terminal, and Warp are natively supported. Sessions launched from IDE integrated terminals — VS Code, Cursor, Android Studio, and more — are also detected automatically.
+           data-en="<strong>Verified environments:</strong> iTerm2, VS Code, and Android Studio.<br>Session detection is powered by Claude Code hooks and is terminal-agnostic — Terminal, Warp, Ghostty, kitty, WezTerm, Alacritty, tmux, and the integrated terminals of Cursor, Zed, and JetBrains IDEs should all work, though we haven't formally tested them yet.<br>How deep a click can jump depends on the app: to the exact pane in iTerm2 and Terminal, to the project window in VS Code and other IDEs, and to the app itself for other terminals."
+           data-ja="<strong>動作検証済みの環境:</strong> iTerm2・VS Code・Android Studio。<br>セッションの検出は Claude Code の hook を利用しており、ターミナルの種類に依存しません。Terminal・Warp・Ghostty・kitty・WezTerm・Alacritty・tmux や、Cursor・Zed・JetBrains 系 IDE の統合ターミナルも動作するはずですが、検証は未実施です。<br>クリックでジャンプできる深さはアプリにより異なります。iTerm2・Terminal は該当ペインまで、VS Code などの IDE はプロジェクトウィンドウまで、その他のターミナルはアプリの前面表示までとなります。">
+          <strong>Verified environments:</strong> iTerm2, VS Code, and Android Studio.<br>Session detection is powered by Claude Code hooks and is terminal-agnostic — Terminal, Warp, Ghostty, kitty, WezTerm, Alacritty, tmux, and the integrated terminals of Cursor, Zed, and JetBrains IDEs should all work, though we haven't formally tested them yet.<br>How deep a click can jump depends on the app: to the exact pane in iTerm2 and Terminal, to the project window in VS Code and other IDEs, and to the app itself for other terminals.
         </p>
       </details>
     </li>
