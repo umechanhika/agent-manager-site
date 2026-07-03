@@ -287,6 +287,7 @@
     }
     .feat-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      align-items: start;
     }
     @media (max-width: 640px) {
       .feat-grid { grid-template-columns: 1fr 1fr; }
@@ -304,16 +305,39 @@
     }
     .feat-item:hover { transform: translate(2px,2px); box-shadow: var(--sh-sm); }
 
-    .feat-px {
-      width: 10px; height: 10px; margin-bottom: 14px;
-      image-rendering: pixelated;
-    }
-    .feat-item h3 { font-size: 17px; font-weight: 700; margin-bottom: 9px; letter-spacing: -.01em; }
+    .feat-title { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+    .feat-px { width: 10px; height: 10px; flex-shrink: 0; image-rendering: pixelated; }
+    .feat-item h3 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
     .feat-item p  { font-size: 17px; color: var(--muted); line-height: 1.65; }
     .feat-kbd {
       display: inline-block; font-family: var(--mono); font-size: 12px;
       background: var(--surf2); border: 2px solid var(--border);
       padding: 1px 6px; color: var(--text);
+    }
+
+    /* ── FEATURES: in-card thumbnail ───────────────────────────
+       Screenshot lives inside the same bordered .feat-item as its
+       heading and copy, so the image-to-feature link is unambiguous.
+       One fixed thumbnail slot + object-fit:contain for every shot —
+       whatever the source crop's native size (a wide sliver of the
+       menu bar, a tall panel), it letterboxes cleanly instead of
+       stretching to fill. */
+    /* Full-bleed image header: the card border itself frames the image
+       (same one-outer-border pattern as the hero .px-window) — no double frame.
+       Negative margins cancel the card padding (22px 20px). */
+    .feat-thumb {
+      aspect-ratio: 8 / 5;
+      margin: -22px -20px 16px;
+      border-bottom: 2px solid var(--border);
+      background: var(--surf2);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    /* 全アセットが 8:5 の合成キャンバスなので枠を隙間なく満たす。
+       ダウンスケール表示のため image-rendering は既定（スムーズ）のまま。 */
+    .feat-thumb-img {
+      display: block; width: 100%; height: 100%;
+      object-fit: contain;
     }
 
     /* ── PRICING ───────────────────────────────────────────── */
@@ -672,65 +696,119 @@
   </div>
   <div class="feat-grid">
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
-      <h3 data-en="See what's waiting" data-ja="待ちがひと目でわかる">See what's waiting</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-waiting.png" loading="lazy"
+             alt="The AgentManager window listing sessions that are running, waiting, and done — each with a colored status dot">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="See what's waiting" data-ja="待ちがひと目でわかる">See what's waiting</h3>
+      </div>
       <p data-en="Every session's status is shown at a glance — which is running, which needs you, which is done."
          data-ja="全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済み——すべてひと目でわかります。">Every session's status is shown at a glance — which is running, which needs you, which is done.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
-      <h3 data-en="Surfaces when you need it" data-ja="必要なときだけ表示">Surfaces when you need it</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-autoshow.gif" loading="lazy"
+             alt="The session list pops up when a session starts waiting, and disappears once everything is resolved">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="Surfaces when you need it" data-ja="必要なときだけ表示">Surfaces when you need it</h3>
+      </div>
       <p data-en="Appears the moment any session needs input. Hides when everything is clear."
          data-ja="確認が必要な瞬間に自動で現れ、全て解消すると自動で消えます。">Appears the moment any session needs input. Hides when everything is clear.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#3BAD52"/></svg>
-      <h3 data-en="Jump to the right terminal" data-ja="1クリックでターミナルへ">Jump to the right terminal</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-jump.png" loading="lazy"
+             alt="AgentManager session list with the waiting row highlighted for jumping to its terminal">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#3BAD52"/></svg>
+        <h3 data-en="Jump to the right terminal" data-ja="1クリックでターミナルへ">Jump to the right terminal</h3>
+      </div>
       <p data-en="Click any row to jump straight to that session — down to the exact pane in iTerm2 and Terminal."
          data-ja="行をクリックするとそのセッションへ即ジャンプ。iTerm2 / Terminal では該当ペインまで移動します。">Click any row to jump straight to that session — down to the exact pane in iTerm2 and Terminal.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#4E8BC8"/></svg>
-      <h3 data-en="Keyboard first" data-ja="キーボードで全操作">Keyboard first</h3>
-      <p data-en='Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd>. Navigate sessions and jump to terminals — all without the mouse.'
-         data-ja='<kbd class="feat-kbd">⌥ Space</kbd> でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。'>Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd>. Navigate sessions and jump to terminals — all without the mouse.</p>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-keyboard.gif" loading="lazy"
+             alt="Pressing Option and Space toggles the AgentManager window on and off">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#4E8BC8"/></svg>
+        <h3 data-en="Keyboard first" data-ja="キーボードで全操作">Keyboard first</h3>
+      </div>
+      <p data-en='Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd> (customizable). Navigate sessions and jump to terminals — all without the mouse.'
+         data-ja='<kbd class="feat-kbd">⌥ Space</kbd>（変更可能）でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。'>Toggle the window with <kbd class="feat-kbd">⌥ Space</kbd> (customizable). Navigate sessions and jump to terminals — all without the mouse.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#3BAD52"/></svg>
-      <h3 data-en="Works inside your IDE" data-ja="IDE 内のターミナルにも対応">Works inside your IDE</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-ide.png" loading="lazy"
+             alt="A macOS dock holding the Android Studio and Visual Studio Code icons">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#3BAD52"/></svg>
+        <h3 data-en="Works inside your IDE" data-ja="IDEにも対応">Works inside your IDE</h3>
+      </div>
       <p data-en="Sessions launched from the integrated terminal of Android Studio, VS Code, Cursor and more show up in the list too — click to jump to that project's window."
          data-ja="Android Studio・VS Code・Cursor などの統合ターミナルから起動したセッションも一覧に表示。クリックでそのプロジェクトのウィンドウへ遷移できます。">Sessions launched from the integrated terminal of Android Studio, VS Code, Cursor and more show up in the list too — click to jump to that project's window.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#4E8BC8"/></svg>
-      <h3 data-en="Status in your menu bar" data-ja="メニューバーで状態がわかる">Status in your menu bar</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-menubar.png" loading="lazy"
+             alt="macOS menu bar showing AgentManager status dots with per-status session counts">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#4E8BC8"/></svg>
+        <h3 data-en="Status in your menu bar" data-ja="メニューバーで状態表示">Status in your menu bar</h3>
+      </div>
       <p data-en="Without opening the window, the menu-bar icon shows counts by status as colored dots — so you always know how many sessions are waiting."
          data-ja="ウィンドウを開かなくても、メニューバーのアイコンが状態別の件数を色付きドットで表示。確認待ちが何件あるか常に把握できます。">Without opening the window, the menu-bar icon shows counts by status as colored dots — so you always know how many sessions are waiting.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
-      <h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">Cat sound alerts</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-catsound.gif" loading="lazy"
+             alt="A pixel-art cat meowing with music notes floating up">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">Cat sound alerts</h3>
+      </div>
       <p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away."
          data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。">A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#C488FF"/></svg>
-      <h3 data-en="Pixel-art cat room" data-ja="ピクセルアートの猫部屋">Pixel-art cat room</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-catroom.gif" loading="lazy"
+             alt="The pixel-art cat room shifting between a daytime and a nighttime scene">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#C488FF"/></svg>
+        <h3 data-en="Pixel-art cat room" data-ja="ピクセルアートの猫部屋">Pixel-art cat room</h3>
+      </div>
       <p data-en="A cat wanders the room in sync with your sessions. The scene shifts between day and night."
          data-ja="セッション状態に連動して猫が動き、時刻で昼と夜の景色が変わります。">A cat wanders the room in sync with your sessions. The scene shifts between day and night.</p>
     </div>
 
-    <div class="feat-item">
-      <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#A070D0"/></svg>
-      <h3 data-en="Simple mode" data-ja="シンプルモード">Simple mode</h3>
+    <div class="feat-item feat-item--shot">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="feature-simple.png" loading="lazy"
+             alt="Simple mode: a minimal list-only view of sessions without decorations">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#A070D0"/></svg>
+        <h3 data-en="Simple mode" data-ja="シンプルモード">Simple mode</h3>
+      </div>
       <p data-en="Hide the cat and room decorations for a minimal, list-only view. Keyboard navigation and jump-to-terminal keep working just the same."
          data-ja="猫や部屋の装飾を非表示にして、セッション一覧だけのミニマル表示に。キーボード操作もターミナル遷移もそのまま使えます。">Hide the cat and room decorations for a minimal, list-only view. Keyboard navigation and jump-to-terminal keep working just the same.</p>
     </div>
