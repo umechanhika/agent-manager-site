@@ -97,11 +97,38 @@
       border-bottom: 2px solid var(--border);
       padding: 12px 28px;
       display: flex; align-items: center; justify-content: space-between;
+      gap: 20px;
     }
-    .logo { display: inline-flex; align-items: center; text-decoration: none; }
+    .logo { display: inline-flex; align-items: center; text-decoration: none; flex: none; }
     .logo-img { height: 20px; width: auto; display: block; }
 
-    .hdr-right { display: flex; align-items: center; gap: 12px; }
+    /* Section nav — mono links matching the pixel/retro header */
+    .hdr-nav { display: flex; align-items: center; gap: 4px; }
+    .hdr-nav a {
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+      letter-spacing: .04em; color: var(--muted);
+      text-decoration: none; padding: 6px 10px;
+      border: 2px solid transparent;
+      transition: color .08s, border-color .08s, background .08s;
+      white-space: nowrap;
+    }
+    .hdr-nav a:hover { color: var(--text); border-color: var(--border); background: var(--surf); }
+
+    .hdr-right { display: flex; align-items: center; gap: 12px; flex: none; }
+
+    /* Hamburger — hidden on desktop, revealed when the row gets tight */
+    .hdr-burger {
+      display: none;
+      font-family: var(--mono); font-size: 16px; line-height: 1;
+      color: var(--bg); background: var(--border);
+      border: 2px solid var(--border);
+      width: 34px; height: 30px;
+      align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: var(--sh-sm);
+      transition: transform .08s, box-shadow .08s;
+    }
+    .hdr-burger:hover  { transform: translate(3px,3px); box-shadow: none; }
+    .hdr-burger:active { transform: translate(3px,3px); box-shadow: none; }
 
     .lang-toggle {
       display: flex;
@@ -131,6 +158,27 @@
     }
     .hdr-cta:hover  { transform: translate(3px,3px); box-shadow: none; }
     .hdr-cta:active { transform: translate(3px,3px); box-shadow: none; }
+    /* Anchor targets clear the sticky header */
+    #features, #pricing, #setup, #faq { scroll-margin-top: 64px; }
+
+    /* Collapse the inline nav into a hamburger dropdown when the row gets tight */
+    @media (max-width: 860px) {
+      .hdr-burger { display: inline-flex; }
+      .hdr-nav {
+        position: absolute; top: 100%; right: 0;
+        flex-direction: column; align-items: stretch; gap: 0;
+        min-width: 180px;
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-top: none;
+        box-shadow: var(--sh);
+        padding: 6px;
+        display: none;
+      }
+      header.nav-open .hdr-nav { display: flex; }
+      .hdr-nav a { padding: 10px 12px; border: 2px solid transparent; }
+      .hdr-nav a:hover { border-color: var(--border); }
+    }
     @media (max-width: 540px) {
       header { padding: 10px 16px; }
       .logo-img { height: 14px; }
@@ -563,7 +611,15 @@
   <a href="/" class="logo">
     <img class="logo-img" src="logo.svg" alt="AgentManager" width="322" height="20">
   </a>
+
   <div class="hdr-right">
+    <nav class="hdr-nav" id="hdr-nav" aria-label="Sections">
+      <a href="#features" data-en="Features" data-ja="機能">Features</a>
+      <a href="#pricing"  data-en="Pricing"  data-ja="料金">Pricing</a>
+      <a href="#setup"    data-en="Setup"    data-ja="始め方">Setup</a>
+      <a href="#faq"      data-en="FAQ"      data-ja="よくあるご質問">FAQ</a>
+    </nav>
+
     <div class="lang-toggle" role="group" aria-label="Language">
       <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
       <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">JA</button>
@@ -572,6 +628,9 @@
        class="hdr-cta is-soon"
        aria-disabled="true" tabindex="-1"
        data-en="Free trial" data-ja="無料で試す">Free trial</a>
+    <button class="hdr-burger" id="hdr-burger" type="button"
+            aria-label="Menu" aria-expanded="false" aria-controls="hdr-nav"
+            onclick="toggleNav()">☰</button>
   </div>
 </header>
 
@@ -682,7 +741,7 @@
 </section>
 
 <!-- PIXEL DIVIDER -->
-<div class="px-divider" aria-hidden="true">
+<div class="px-divider" id="features" aria-hidden="true">
   <svg class="px-sq" viewBox="0 0 8 8"><rect width="8" height="8" fill="#F5A623"/></svg>
   <svg class="px-sq" viewBox="0 0 8 8"><rect width="8" height="8" fill="#1A1714"/></svg>
   <svg class="px-sq" viewBox="0 0 8 8"><rect width="8" height="8" fill="#3BAD52"/></svg>
@@ -822,7 +881,7 @@
 </section>
 
 <!-- PRICING -->
-<section class="pricing-sec">
+<section class="pricing-sec" id="pricing">
   <div class="pricing-inner">
     <div class="sec-head">
       <span class="section-label" data-en="Pricing" data-ja="料金">Pricing</span>
@@ -937,7 +996,7 @@
 </div>
 
 <!-- SETUP — 3 steps (compressed from 4) -->
-<section class="setup-sec">
+<section class="setup-sec" id="setup">
   <div class="sec-head">
     <span class="section-label" data-en="Setup" data-ja="始め方">Setup</span>
   </div>
@@ -973,7 +1032,7 @@
 </section>
 
 <!-- FAQ -->
-<section class="faq-sec">
+<section class="faq-sec" id="faq">
   <div class="sec-head">
     <span class="section-label" data-en="FAQ" data-ja="よくあるご質問">FAQ</span>
   </div>
@@ -1063,12 +1122,7 @@
 <!-- FOOTER -->
 <footer>
   <p>
-    &copy; 2026 AgentManager &nbsp;·&nbsp;
-    <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-       class="is-soon"
-       aria-disabled="true" tabindex="-1"
-       data-en="Start free trial" data-ja="無料で試す">Start free trial</a>
-    <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
+    &copy; 2026 AgentManager
   </p>
   <p style="margin-top:10px;">
     <a href="privacy.html" data-en="Privacy" data-ja="プライバシーポリシー">Privacy</a>
@@ -1091,6 +1145,27 @@
     document.getElementById('ss-btn-night').classList.add('active');
     document.getElementById('ss-btn-day').classList.remove('active');
   }
+
+  function setNavOpen(open) {
+    var hdr = document.querySelector('header');
+    var burger = document.getElementById('hdr-burger');
+    hdr.classList.toggle('nav-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function toggleNav() {
+    var hdr = document.querySelector('header');
+    setNavOpen(!hdr.classList.contains('nav-open'));
+  }
+  // Close the dropdown after picking a section, on outside click, or Esc
+  document.getElementById('hdr-nav').addEventListener('click', function(e) {
+    if (e.target.closest('a')) setNavOpen(false);
+  });
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('header')) setNavOpen(false);
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') setNavOpen(false);
+  });
 
   function setLang(lang) {
     document.documentElement.lang = lang;
