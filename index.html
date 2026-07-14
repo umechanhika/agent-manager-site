@@ -562,6 +562,42 @@
       font-size: 15px; color: var(--muted); line-height: 1.6;
     }
     .faq-ans code { font-family: var(--mono); font-size: 13px; color: var(--text); }
+    .faq-ans p { margin: 0 0 10px; }
+    .faq-ans p:last-child { margin-bottom: 0; }
+
+    /* Support matrix (FAQ) — pixel chips, zero radius, hard shadow */
+    .faq-matrix {
+      margin: 12px 0;
+      border: 2px solid var(--border);
+      background: var(--surf);
+      box-shadow: var(--sh-sm);
+    }
+    .fm-row {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 12px; align-items: center;
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--surf2);
+      font-size: 14px; color: var(--text);
+    }
+    .fm-row:last-child { border-bottom: none; }
+    .fm-head {
+      background: var(--surf2);
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    }
+    .fm-chip {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .04em; white-space: nowrap;
+      padding: 2px 8px;
+      border: 2px solid var(--border); color: #fff;
+      box-shadow: 2px 2px 0 var(--border);
+    }
+    .fm-chip--pane   { background: var(--grass); }
+    .fm-chip--tab    { background: var(--sky); }
+    .fm-chip--window { background: #8A63C9; }
+    .fm-chip--app    { background: var(--dim); }
+    .fm-chip--none   { background: var(--surf2); color: var(--muted); box-shadow: none; }
+    .fm-note { font-size: 13px; color: var(--dim); }
 
     /* ── FOOTER ────────────────────────────────────────────── */
     footer {
@@ -763,14 +799,14 @@
     <div class="feat-item feat-item--shot">
       <div class="feat-thumb">
         <img class="feat-thumb-img" src="feature-waiting.png" loading="lazy"
-             alt="The AgentManager window listing sessions that are running, waiting, and done — each with a colored status dot">
+             alt="The AgentManager window listing sessions that are running, waiting, and done — each with a colored status dot and elapsed time">
       </div>
       <div class="feat-title">
         <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
         <h3 data-en="See what's waiting" data-ja="待ちがひと目でわかる">See what's waiting</h3>
       </div>
-      <p data-en="Every session's status is shown at a glance — which is running, which needs you, which is done."
-         data-ja="全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済み——すべてひと目でわかります。">Every session's status is shown at a glance — which is running, which needs you, which is done.</p>
+      <p data-en="Every session's status at a glance — which is running, which needs you, which is done — and how long each has been that way."
+         data-ja="全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済み、そしてその状態になってからの経過時間までひと目でわかります。">Every session's status at a glance — which is running, which needs you, which is done — and how long each has been that way.</p>
     </div>
 
     <div class="feat-item feat-item--shot">
@@ -795,8 +831,8 @@
         <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#3BAD52"/></svg>
         <h3 data-en="Jump to the right terminal" data-ja="1クリックでターミナルへ">Jump to the right terminal</h3>
       </div>
-      <p data-en="Click any row to jump straight to that session — down to the exact pane in iTerm2 and Terminal."
-         data-ja="行をクリックするとそのセッションへ即ジャンプ。iTerm2 / Terminal では該当ペインまで移動します。">Click any row to jump straight to that session — down to the exact pane in iTerm2 and Terminal.</p>
+      <p data-en="Click any row to jump straight to that session — the exact pane in iTerm2, the right tab in Terminal and Ghostty, the project window in your IDE."
+         data-ja="行をクリックするとそのセッションへ即ジャンプ。iTerm2 は該当ペイン、Terminal / Ghostty は該当タブ、IDE はプロジェクトウィンドウまで移動します。">Click any row to jump straight to that session — the exact pane in iTerm2, the right tab in Terminal and Ghostty, the project window in your IDE.</p>
     </div>
 
     <div class="feat-item feat-item--shot">
@@ -847,8 +883,8 @@
         <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
         <h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">Cat sound alerts</h3>
       </div>
-      <p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away."
-         data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。">A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away.</p>
+      <p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way."
+         data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。">A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way.</p>
     </div>
 
     <div class="feat-item feat-item--shot">
@@ -1056,10 +1092,59 @@
         <summary
           data-en="Which terminals and IDEs are supported?"
           data-ja="対応しているターミナル・IDE は？">Which terminals and IDEs are supported?</summary>
+        <div class="faq-ans">
+          <p data-en="Detection works in any terminal — it's powered by Claude Code hooks. What differs is how precisely a click can jump:"
+             data-ja="セッション検出は Claude Code の hook を使うため、どのターミナルでも動作します。異なるのは、クリックでどこまで正確にジャンプできるかです。">Detection works in any terminal — it's powered by Claude Code hooks. What differs is how precisely a click can jump:</p>
+          <div class="faq-matrix">
+            <div class="fm-row fm-head">
+              <span data-en="Host" data-ja="ホスト">Host</span>
+              <span data-en="Jump precision" data-ja="ジャンプ精度">Jump precision</span>
+            </div>
+            <div class="fm-row">
+              <span>iTerm2</span>
+              <span class="fm-chip fm-chip--pane" data-en="Pane" data-ja="ペイン">Pane</span>
+            </div>
+            <div class="fm-row">
+              <span>Terminal</span>
+              <span class="fm-chip fm-chip--tab" data-en="Tab" data-ja="タブ">Tab</span>
+            </div>
+            <div class="fm-row">
+              <span>Ghostty 1.3+</span>
+              <span class="fm-chip fm-chip--tab" data-en="Tab / Pane" data-ja="タブ / ペイン">Tab / Pane</span>
+            </div>
+            <div class="fm-row">
+              <span>VS Code · Cursor · Zed</span>
+              <span class="fm-chip fm-chip--window" data-en="Window" data-ja="ウィンドウ">Window</span>
+            </div>
+            <div class="fm-row">
+              <span>Android Studio · JetBrains IDEs</span>
+              <span class="fm-chip fm-chip--window" data-en="Window" data-ja="ウィンドウ">Window</span>
+            </div>
+            <div class="fm-row">
+              <span>Warp · kitty · WezTerm · Alacritty</span>
+              <span class="fm-chip fm-chip--app" data-en="App" data-ja="アプリ">App</span>
+            </div>
+            <div class="fm-row">
+              <span>tmux</span>
+              <span class="fm-chip fm-chip--none" data-en="Detect only" data-ja="検出のみ">Detect only</span>
+            </div>
+          </div>
+          <p class="fm-note"
+             data-en="tmux sessions are detected and tracked, but jump is not supported yet."
+             data-ja="tmux のセッションは検出・追跡されますが、ジャンプは現状非対応です。">tmux sessions are detected and tracked, but jump is not supported yet.</p>
+        </div>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="Which macOS permissions does it need?"
+          data-ja="必要な macOS の権限は？">Which macOS permissions does it need?</summary>
         <p class="faq-ans"
-           data-en="<strong>Verified environments:</strong> iTerm2, VS Code, and Android Studio.<br>Session detection is powered by Claude Code hooks and is terminal-agnostic — Terminal, Warp, Ghostty, kitty, WezTerm, Alacritty, tmux, and the integrated terminals of Cursor, Zed, and JetBrains IDEs should all work, though we haven't formally tested them yet.<br>How deep a click can jump depends on the app: to the exact pane in iTerm2 and Terminal, to the project window in VS Code and other IDEs, and to the app itself for other terminals."
-           data-ja="<strong>動作検証済みの環境:</strong> iTerm2・VS Code・Android Studio。<br>セッションの検出は Claude Code の hook を利用しており、ターミナルの種類に依存しません。Terminal・Warp・Ghostty・kitty・WezTerm・Alacritty・tmux や、Cursor・Zed・JetBrains 系 IDE の統合ターミナルも動作するはずですが、検証は未実施です。<br>クリックでジャンプできる深さはアプリにより異なります。iTerm2・Terminal は該当ペインまで、VS Code などの IDE はプロジェクトウィンドウまで、その他のターミナルはアプリの前面表示までとなります。">
-          <strong>Verified environments:</strong> iTerm2, VS Code, and Android Studio.<br>Session detection is powered by Claude Code hooks and is terminal-agnostic — Terminal, Warp, Ghostty, kitty, WezTerm, Alacritty, tmux, and the integrated terminals of Cursor, Zed, and JetBrains IDEs should all work, though we haven't formally tested them yet.<br>How deep a click can jump depends on the app: to the exact pane in iTerm2 and Terminal, to the project window in VS Code and other IDEs, and to the app itself for other terminals.
+           data-en="Session detection needs no special permissions. Jumping depends on the destination: Automation permission for iTerm2 / Terminal / Ghostty (a dialog appears on your first jump — just click Allow), Accessibility for Android Studio and similar IDEs, and nothing at all for VS Code, Cursor, Zed, Warp, kitty, WezTerm, and Alacritty."
+           data-ja="セッション検出に特別な権限は不要です。ジャンプはジャンプ先により異なります。iTerm2 / Terminal / Ghostty はオートメーション権限（初回ジャンプ時のダイアログで「許可」を押すだけ）、Android Studio などの IDE はアクセシビリティ権限が必要で、VS Code 系・Warp・kitty・WezTerm・Alacritty は権限不要です。">
+          Session detection needs no special permissions. Jumping depends on the destination: Automation permission for iTerm2 / Terminal / Ghostty (a dialog appears on your first jump — just click Allow), Accessibility for Android Studio and similar IDEs, and nothing at all for VS Code, Cursor, Zed, Warp, kitty, WezTerm, and Alacritty.
         </p>
       </details>
     </li>
@@ -1070,9 +1155,9 @@
           data-en="How does AgentManager detect sessions?"
           data-ja="セッションはどうやって検出されますか？">How does AgentManager detect sessions?</summary>
         <p class="faq-ans"
-           data-en="AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically — after that, every <code>claude</code> session you start appears in the list with no further setup."
-           data-ja="AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が自動で登録されるため、それ以降は <code>claude</code> を起動するだけで一覧に表示されます。追加の設定は不要です。">
-          AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically — after that, every <code>claude</code> session you start appears in the list with no further setup.
+           data-en="AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically in <code>~/.claude/settings.json</code> (a <code>.bak</code> backup is created first) — after that, every <code>claude</code> session you start appears in the list with no further setup. Sessions running subagents stay marked as running until the last subagent finishes."
+           data-ja="AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が <code>~/.claude/settings.json</code> へ自動で登録されるため（書き込み前に <code>.bak</code> バックアップを作成）、それ以降は <code>claude</code> を起動するだけで一覧に表示されます。追加の設定は不要です。サブエージェント実行中のセッションは、最後の1つが終わるまで「処理中」のまま表示されます。">
+          AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically in <code>~/.claude/settings.json</code> (a <code>.bak</code> backup is created first) — after that, every <code>claude</code> session you start appears in the list with no further setup. Sessions running subagents stay marked as running until the last subagent finishes.
         </p>
       </details>
     </li>
@@ -1083,9 +1168,9 @@
           data-en="Where does my session data go?"
           data-ja="セッションデータはどこかに送信されますか？">Where does my session data go?</summary>
         <p class="faq-ans"
-           data-en="Nowhere. AgentManager runs entirely on your Mac and does not send session data to any external server. Your sessions stay on your machine."
-           data-ja="どこにも送信されません。AgentManager は Mac 上でのみ動作し、セッション情報を外部サーバーには送信しません。データはあなたの端末に留まります。">
-          Nowhere. AgentManager runs entirely on your Mac and does not send session data to any external server. Your sessions stay on your machine.
+           data-en="Your session data — prompts, file paths, session names — never leaves your Mac. AgentManager sends only anonymized crash reports and usage statistics, and even those never include paths, session names, or license keys."
+           data-ja="セッションの内容（プロンプト・パス・セッション名）が Mac の外に出ることはありません。送信されるのは匿名のクラッシュレポートと利用統計のみで、そこにもパス・セッション名・ライセンスキーは含まれません。">
+          Your session data — prompts, file paths, session names — never leaves your Mac. AgentManager sends only anonymized crash reports and usage statistics, and even those never include paths, session names, or license keys.
         </p>
       </details>
     </li>
@@ -1109,9 +1194,22 @@
           data-en="How many Macs can I use one license on?"
           data-ja="1ライセンスで何台の Mac で使えますか？">How many Macs can I use one license on?</summary>
         <p class="faq-ans"
-           data-en="There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like."
-           data-ja="台数の上限はありません。お手持ちの Mac すべてにインストールしてご利用いただけます。">
-          There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like.
+           data-en="There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like. Each Mac is activated individually, and you can deactivate a device anytime from Settings → License."
+           data-ja="台数の上限はありません。お手持ちの Mac すべてにインストールしてご利用いただけます。有効化は端末ごとに行われ、設定 → ライセンスの「この端末を解除」でいつでも解除できます。">
+          There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like. Each Mac is activated individually, and you can deactivate a device anytime from Settings → License.
+        </p>
+      </details>
+    </li>
+
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="How do updates work? Is the app safe?"
+          data-ja="アップデートはどう届きますか？アプリは安全ですか？">How do updates work? Is the app safe?</summary>
+        <p class="faq-ans"
+           data-en="Updates are delivered automatically in-app — each one is cryptographically verified before install. The app itself is notarized by Apple."
+           data-ja="アップデートはアプリ内で自動的に届きます。すべての更新はインストール前に署名検証され、アプリ本体も Apple の公証（ノータリゼーション）を受けています。">
+          Updates are delivered automatically in-app — each one is cryptographically verified before install. The app itself is notarized by Apple.
         </p>
       </details>
     </li>
