@@ -6,6 +6,21 @@
     <description>AgentManager の更新フィード</description>
     <language>ja</language>
 
+
+    <item>
+      <title>Version 1.12.4</title>
+      <pubDate>Wed, 15 Jul 2026 12:47:41 +0000</pubDate>
+      <sparkle:version>243</sparkle:version>
+      <sparkle:shortVersionString>1.12.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/umechanhika/agent-manager-site/releases/download/v1.12.4/AgentManager-1.12.4.dmg"
+        sparkle:edSignature="M3+gH4+buW03PzLOxoQ/5R7f+cUSKLsihSw1H3x6dWriUe6Ymk6AyTgzGcE5ef5SEVZahWWggzVK0jxj/JXbCw=="
+        length=""
+        type="application/octet-stream"
+      />
+    </item>
+
     <!--
     リリースのたびに <item> を先頭に追加する。
     sign_update コマンドで edSignature と length を取得:
