@@ -488,22 +488,6 @@
       text-align: center; margin-top: 8px; letter-spacing: .03em;
     }
 
-    /* ── COMING SOON: 公開準備中 CTA 非活性化 ───────────────── */
-    .is-soon {
-      opacity: .45;
-      filter: grayscale(1);
-      pointer-events: none;
-      cursor: not-allowed;
-      box-shadow: none !important;
-    }
-    .is-soon:hover, .is-soon:active { transform: none; box-shadow: none !important; }
-    .soon-note {
-      display: block; margin-top: 6px;
-      font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
-      color: var(--dim); text-transform: uppercase;
-    }
-    .soon-inline { color: var(--dim); text-decoration: line-through; cursor: not-allowed; }
-
     .price-note {
       text-align: center; margin-top: 24px;
       font-family: var(--mono); font-size: 11px; color: var(--muted);
@@ -661,8 +645,7 @@
       <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">JA</button>
     </div>
     <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-       class="hdr-cta is-soon"
-       aria-disabled="true" tabindex="-1"
+       class="hdr-cta"
        data-en="Free trial" data-ja="無料で試す">Free trial</a>
     <button class="hdr-burger" id="hdr-burger" type="button"
             aria-label="Menu" aria-expanded="false" aria-controls="hdr-nav"
@@ -701,17 +684,13 @@
     <div class="cta-row">
       <div>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-           class="btn btn-primary is-soon"
-           aria-disabled="true" tabindex="-1"
+           class="btn btn-primary"
            data-en="Start 7-day free trial" data-ja="7日間 無料で試す">Start 7-day free trial</a>
-        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
       <div>
         <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
-           class="btn btn-ghost is-soon"
-           aria-disabled="true" tabindex="-1"
+           class="btn btn-ghost"
            data-en="↓ Download App" data-ja="↓ アプリをダウンロード">↓ Download App</a>
-        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
     </div>
     <div class="cta-note"
@@ -947,10 +926,8 @@
               data-ja="7日後は有料プランが必要">Paid plan required after 7 days</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-           class="price-cta price-cta-dark is-soon"
-           aria-disabled="true" tabindex="-1"
+           class="price-cta price-cta-dark"
            data-en="Start free trial" data-ja="無料で試す">Start free trial</a>
-        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
 
       <!-- Monthly -->
@@ -974,10 +951,8 @@
           <li data-en="Cancel anytime"         data-ja="いつでもキャンセル可">Cancel anytime</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly"
-           class="price-cta price-cta-light is-soon"
-           aria-disabled="true" tabindex="-1"
+           class="price-cta price-cta-light"
            data-en="Start monthly plan" data-ja="月額プランを見る">Start monthly plan</a>
-        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
 
       <!-- Annual — featured -->
@@ -1001,13 +976,11 @@
           <li data-en="All features unlocked"    data-ja="全機能が使い放題">All features unlocked</li>
           <li data-en="Unlimited sessions"        data-ja="セッション数無制限">Unlimited sessions</li>
           <li data-en="Cancel anytime"            data-ja="いつでもキャンセル可">Cancel anytime</li>
-          <li data-en="20% off vs monthly"   data-ja="月額より 20% お得">20% off vs monthly</li>
+          <li data-en="~20% off vs monthly"   data-ja="月額より約 20% お得">~20% off vs monthly</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual"
-           class="price-cta price-cta-blue is-soon"
-           aria-disabled="true" tabindex="-1"
+           class="price-cta price-cta-blue"
            data-en="Start annual plan" data-ja="年額プランで始める">Start annual plan</a>
-        <span class="soon-note" data-en="Coming soon" data-ja="準備中">Coming soon</span>
       </div>
 
     </div>
@@ -1041,9 +1014,9 @@
       <span class="step-n">01</span>
       <div class="step-body">
         <strong data-en="Start trial &amp; install" data-ja="トライアル開始 &amp; インストール">Start trial &amp; install</strong>
-        <span data-en='Click <span class="soon-inline">7-day free trial</span> (coming soon) — no card needed. Download the app, open it, drag AgentManager to Applications. Your license key arrives by email.'
-              data-ja='<span class="soon-inline">7日間無料トライアル</span>（準備中）を開始（カード不要）。アプリをダウンロードして Applications へドラッグ。ライセンスキーはメールで届きます。'
-        >Click <span class="soon-inline">7-day free trial</span> (coming soon) — no card needed. Download the app, open it, drag AgentManager to Applications. Your license key arrives by email.</span>
+        <span data-en='Click 7-day free trial — no card needed. Download the app, open it, drag AgentManager to Applications. Your license key arrives by email.'
+              data-ja='7日間無料トライアルを開始（カード不要）。アプリをダウンロードして Applications へドラッグ。ライセンスキーはメールで届きます。'
+        >Click 7-day free trial — no card needed. Download the app, open it, drag AgentManager to Applications. Your license key arrives by email.</span>
       </div>
     </li>
     <li class="step">
@@ -1181,9 +1154,9 @@
           data-en="Is there a free trial? How is pricing structured?"
           data-ja="無料トライアルはありますか？料金プランは？">Is there a free trial? How is pricing structured?</summary>
         <p class="faq-ans"
-           data-en='Yes — a <span class="soon-inline">7-day free trial</span> (coming soon) with all features unlocked, no credit card required. After the trial: Monthly at $4.99/mo, or Annual at $48/yr (~2 months free).'
-           data-ja='はい — <span class="soon-inline">7日間の無料トライアル</span>（準備中）があり、全機能を利用できます（カード不要）。トライアル後は月額 $4.99 または年額 $48（約2ヶ月分お得）からお選びください。'>
-          Yes — a <span class="soon-inline">7-day free trial</span> (coming soon) with all features unlocked, no credit card required. After the trial: Monthly at $4.99/mo, or Annual at $48/yr (~2 months free).
+           data-en='Yes — a 7-day free trial with all features unlocked, no credit card required. After the trial: Monthly at $4.99/mo, or Annual at $48/yr (~2 months free).'
+           data-ja='はい — 7日間の無料トライアルがあり、全機能を利用できます（カード不要）。トライアル後は月額 $4.99 または年額 $48（約2ヶ月分お得）からお選びください。'>
+          Yes — a 7-day free trial with all features unlocked, no credit card required. After the trial: Monthly at $4.99/mo, or Annual at $48/yr (~2 months free).
         </p>
       </details>
     </li>
