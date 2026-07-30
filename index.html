@@ -253,22 +253,8 @@
       letter-spacing: .03em;
     }
 
-    /* ── HERO RIGHT: pixel window + screenshot toggle ─────── */
+    /* ── HERO RIGHT: pixel window ─────── */
     .hero-right { display: flex; flex-direction: column; gap: 10px; padding-right: 4px; padding-bottom: 4px; }
-
-    .ss-toggle {
-      display: flex;
-      border: 2px solid var(--border);
-      background: var(--surf); align-self: flex-start;
-    }
-    .ss-btn {
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
-      letter-spacing: .06em; padding: 5px 16px;
-      border: none; background: transparent; color: var(--muted); cursor: pointer;
-      transition: background .08s, color .08s;
-    }
-    .ss-btn + .ss-btn { border-left: 2px solid var(--border); }
-    .ss-btn.active { background: var(--border); color: var(--bg); }
 
     /* Pixel-art window frame — hard shadow, zero radius, square traffic lights */
     .px-window {
@@ -655,7 +641,7 @@
       <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">JA</button>
     </div>
     <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-       class="hdr-cta"
+       class="hdr-cta" data-cta="header_trial"
        data-en="Free trial" data-ja="無料で試す">Free trial</a>
     <button class="hdr-burger" id="hdr-burger" type="button"
             aria-label="Menu" aria-expanded="false" aria-controls="hdr-nav"
@@ -694,13 +680,13 @@
     <div class="cta-row">
       <div>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-           class="btn btn-primary"
+           class="btn btn-primary" data-cta="hero_trial"
            data-en="Start 7-day free trial" data-ja="7日間 無料で試す">Start 7-day free trial</a>
       </div>
       <div>
         <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
            id="download-btn"
-           class="btn btn-ghost"
+           class="btn btn-ghost" data-cta="hero_download"
            data-en="↓ Download App" data-ja="↓ アプリをダウンロード">↓ Download App</a>
         <span id="macos-only-note" class="macos-note hidden"
               data-en="Available on macOS — open this page on your Mac to download"
@@ -717,14 +703,8 @@
     </div>
   </div>
 
-  <!-- RIGHT: pixel window + day/night toggle + status legend -->
+  <!-- RIGHT: pixel window (session status list) + status legend -->
   <div class="hero-right">
-    <div class="ss-toggle" role="group">
-      <button class="ss-btn active" id="ss-btn-day" onclick="showDay()"
-              data-en="☀ Day" data-ja="☀ 昼">☀ Day</button>
-      <button class="ss-btn" id="ss-btn-night" onclick="showNight()"
-              data-en="🌙 Night" data-ja="🌙 夜">🌙 Night</button>
-    </div>
     <div class="px-window">
       <div class="px-titlebar">
         <div class="px-traffic" aria-hidden="true">
@@ -735,8 +715,8 @@
         <span class="px-wintitle">AgentManager</span>
       </div>
       <div class="px-winbody">
-        <img id="ss-day"   src="screenshot-day.gif"   alt="AgentManager — day scene">
-        <img id="ss-night" src="screenshot-night.gif" alt="AgentManager — night scene" class="hidden">
+        <img id="ss-main" src="feature-simple.png"
+             alt="The AgentManager window listing sessions with colored status dots — waiting, done, running, idle — and elapsed times">
       </div>
     </div>
     <!-- Status legend in context, directly below the screenshot -->
@@ -943,7 +923,7 @@
               data-ja="7日後は有料プランが必要">Paid plan required after 7 days</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?trial=free"
-           class="price-cta price-cta-dark"
+           class="price-cta price-cta-dark" data-cta="pricing_trial"
            data-en="Start free trial" data-ja="無料で試す">Start free trial</a>
       </div>
 
@@ -968,7 +948,7 @@
           <li data-en="Cancel anytime"         data-ja="いつでもキャンセル可">Cancel anytime</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly"
-           class="price-cta price-cta-light"
+           class="price-cta price-cta-light" data-cta="pricing_monthly"
            data-en="Start monthly plan" data-ja="月額プランを見る">Start monthly plan</a>
       </div>
 
@@ -996,7 +976,7 @@
           <li data-en="~20% off vs monthly"   data-ja="月額より約 20% お得">~20% off vs monthly</li>
         </ul>
         <a href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual"
-           class="price-cta price-cta-blue"
+           class="price-cta price-cta-blue" data-cta="pricing_annual"
            data-en="Start annual plan" data-ja="年額プランで始める">Start annual plan</a>
       </div>
 
@@ -1221,19 +1201,6 @@
 </footer>
 
 <script>
-  function showDay() {
-    document.getElementById('ss-day').classList.remove('hidden');
-    document.getElementById('ss-night').classList.add('hidden');
-    document.getElementById('ss-btn-day').classList.add('active');
-    document.getElementById('ss-btn-night').classList.remove('active');
-  }
-  function showNight() {
-    document.getElementById('ss-night').classList.remove('hidden');
-    document.getElementById('ss-day').classList.add('hidden');
-    document.getElementById('ss-btn-night').classList.add('active');
-    document.getElementById('ss-btn-day').classList.remove('active');
-  }
-
   function setNavOpen(open) {
     var hdr = document.querySelector('header');
     var burger = document.getElementById('hdr-burger');
@@ -1277,6 +1244,14 @@
     }
     if (saved === 'ja') setLang('ja');
   }());
+
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  // 外部遷移前でも取りこぼさないよう gtag のデフォルト beacon 送信に任せる。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('a[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
 
   (function() {
     // iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
