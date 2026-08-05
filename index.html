@@ -403,6 +403,12 @@
       object-fit: contain;
     }
 
+    /* ── CAT BONUS: 幅を絞った2枚グリッド。カード自体は .feat-item を再利用。
+       機能グリッドより一段小ぶりにして「おまけ」の格を視覚的に伝える。 ── */
+    .cat-sec  { max-width: 640px; margin: 0 auto; padding: 0 32px 80px; }
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
+
     /* ── PRICING ───────────────────────────────────────────── */
     .pricing-sec {
       background: var(--surf2);
@@ -717,13 +723,13 @@
     </div>
   </div>
 
-  <!-- RIGHT: pixel window + day/night toggle + status legend -->
+  <!-- RIGHT: pixel window + view-mode toggle + status legend -->
   <div class="hero-right">
     <div class="ss-toggle" role="group">
-      <button class="ss-btn active" id="ss-btn-day" onclick="showDay()"
-              data-en="☀ Day" data-ja="☀ 昼">☀ Day</button>
-      <button class="ss-btn" id="ss-btn-night" onclick="showNight()"
-              data-en="🌙 Night" data-ja="🌙 夜">🌙 Night</button>
+      <button class="ss-btn active" id="ss-btn-simple" onclick="showSimple()"
+              data-en="▦ Simple" data-ja="▦ シンプル">▦ Simple</button>
+      <button class="ss-btn" id="ss-btn-cat" onclick="showCat()"
+              data-en="🐱 Cat Room" data-ja="🐱 猫部屋">🐱 Cat Room</button>
     </div>
     <div class="px-window">
       <div class="px-titlebar">
@@ -735,8 +741,10 @@
         <span class="px-wintitle">AgentManager</span>
       </div>
       <div class="px-winbody">
-        <img id="ss-day"   src="screenshot-day.gif"   alt="AgentManager — day scene">
-        <img id="ss-night" src="screenshot-night.gif" alt="AgentManager — night scene" class="hidden">
+        <img id="ss-simple" src="screenshot-simple.png"
+             alt="AgentManager simple mode — a minimal dark list of Claude Code sessions with status dots and elapsed times">
+        <img id="ss-cat" src="screenshot-cat.gif"
+             alt="AgentManager cat room mode — pixel-art cats living below the session list" class="hidden">
       </div>
     </div>
     <!-- Status legend in context, directly below the screenshot -->
@@ -872,16 +880,31 @@
 
     <div class="feat-item feat-item--shot">
       <div class="feat-thumb">
-        <img class="feat-thumb-img" src="feature-catsound.gif" loading="lazy"
-             alt="A pixel-art cat meowing with music notes floating up">
+        <img class="feat-thumb-img" src="feature-modes.png" loading="lazy"
+             alt="The onboarding screen where you choose between Cat Room and Simple view modes">
       </div>
       <div class="feat-title">
-        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
-        <h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">Cat sound alerts</h3>
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#A070D0"/></svg>
+        <h3 data-en="Choose your view" data-ja="表示モードを選べる">Choose your view</h3>
       </div>
-      <p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way."
-         data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。">A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way.</p>
+      <p data-en="Pick Simple or Cat Room during onboarding — and switch anytime in Settings. Same list, same shortcuts, same one-click jumps."
+         data-ja="初回セットアップでシンプル／猫部屋を選択。設定からいつでも切り替えられます。一覧・ショートカット・ワンクリックジャンプはどちらのモードでも同じです。">Pick Simple or Cat Room during onboarding — and switch anytime in Settings. Same list, same shortcuts, same one-click jumps.</p>
     </div>
+
+  </div>
+</section>
+
+<!-- BONUS: CAT ROOM MODE — 主機能ではなく「おまけの癒し」として独立させる -->
+<section class="cat-sec" id="cat-mode">
+  <div class="sec-head">
+    <span class="section-label"
+          data-en="Bonus: a cat room to keep you company"
+          data-ja="おまけ：癒しの猫部屋モード">Bonus: a cat room to keep you company</span>
+    <p class="sec-sub"
+       data-en="Prefer a little warmth while Claude works? Switch to Cat Room mode — the same session list, with pixel cats living beneath it."
+       data-ja="Claude の作業を見守る時間に、ちょっとした癒しを。猫部屋モードに切り替えると、同じセッション一覧の下でピクセルの猫たちが暮らします。">Prefer a little warmth while Claude works? Switch to Cat Room mode — the same session list, with pixel cats living beneath it.</p>
+  </div>
+  <div class="cat-grid">
 
     <div class="feat-item feat-item--shot">
       <div class="feat-thumb">
@@ -898,15 +921,15 @@
 
     <div class="feat-item feat-item--shot">
       <div class="feat-thumb">
-        <img class="feat-thumb-img" src="feature-simple.png" loading="lazy"
-             alt="Simple mode: a minimal list-only view of sessions without decorations">
+        <img class="feat-thumb-img" src="feature-catsound.gif" loading="lazy"
+             alt="A pixel-art cat meowing with music notes floating up">
       </div>
       <div class="feat-title">
-        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#A070D0"/></svg>
-        <h3 data-en="Simple mode" data-ja="シンプルモード">Simple mode</h3>
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">Cat sound alerts</h3>
       </div>
-      <p data-en="Hide the cat and room decorations for a minimal, list-only view. Keyboard navigation and jump-to-terminal keep working just the same."
-         data-ja="猫や部屋の装飾を非表示にして、セッション一覧だけのミニマル表示に。キーボード操作もターミナル遷移もそのまま使えます。">Hide the cat and room decorations for a minimal, list-only view. Keyboard navigation and jump-to-terminal keep working just the same.</p>
+      <p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way. The meow works in Simple mode too."
+         data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。鳴き声はシンプルモードでも使えます。">A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way. The meow works in Simple mode too.</p>
     </div>
 
   </div>
@@ -1204,6 +1227,19 @@
       </details>
     </li>
 
+    <li class="faq-item">
+      <details>
+        <summary
+          data-en="Can I switch between Simple and Cat Room modes later?"
+          data-ja="シンプルモードと猫部屋モードは後から切り替えられますか？">Can I switch between Simple and Cat Room modes later?</summary>
+        <p class="faq-ans"
+           data-en="Yes. You choose a view during onboarding, and you can switch anytime in Settings. All features work the same in both modes."
+           data-ja="はい。初回セットアップで選んだ表示モードは、設定からいつでも変更できます。機能は両モードで共通です。">
+          Yes. You choose a view during onboarding, and you can switch anytime in Settings. All features work the same in both modes.
+        </p>
+      </details>
+    </li>
+
   </ul>
 </section>
 
@@ -1221,17 +1257,17 @@
 </footer>
 
 <script>
-  function showDay() {
-    document.getElementById('ss-day').classList.remove('hidden');
-    document.getElementById('ss-night').classList.add('hidden');
-    document.getElementById('ss-btn-day').classList.add('active');
-    document.getElementById('ss-btn-night').classList.remove('active');
+  function showSimple() {
+    document.getElementById('ss-simple').classList.remove('hidden');
+    document.getElementById('ss-cat').classList.add('hidden');
+    document.getElementById('ss-btn-simple').classList.add('active');
+    document.getElementById('ss-btn-cat').classList.remove('active');
   }
-  function showNight() {
-    document.getElementById('ss-night').classList.remove('hidden');
-    document.getElementById('ss-day').classList.add('hidden');
-    document.getElementById('ss-btn-night').classList.add('active');
-    document.getElementById('ss-btn-day').classList.remove('active');
+  function showCat() {
+    document.getElementById('ss-cat').classList.remove('hidden');
+    document.getElementById('ss-simple').classList.add('hidden');
+    document.getElementById('ss-btn-cat').classList.add('active');
+    document.getElementById('ss-btn-simple').classList.remove('active');
   }
 
   function setNavOpen(open) {
