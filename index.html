@@ -764,7 +764,7 @@
 </div><!-- /hero -->
 
 <!-- PAIN SECTION: why you need this — one beat, before features -->
-<section class="pain-sec">
+<section class="pain-sec" data-section="pain">
   <div class="pain-inner">
     <p data-en="Running multiple sessions? <strong>You won&rsquo;t notice which one is waiting</strong> until it&rsquo;s too late. AgentManager fixes that."
        data-ja="複数のセッションが同時進行。<strong>どれが確認待ちか、気づかない。</strong>AgentManagerが解決します。">
@@ -787,7 +787,7 @@
 </div>
 
 <!-- FEATURES -->
-<section class="features-sec">
+<section class="features-sec" data-section="features">
   <div class="sec-head">
     <span class="section-label" data-en="Features" data-ja="機能">Features</span>
   </div>
@@ -888,7 +888,7 @@
 </section>
 
 <!-- BONUS: CAT ROOM MODE — 主機能ではなく「おまけの癒し」として独立させる -->
-<section class="cat-sec" id="cat-mode">
+<section class="cat-sec" id="cat-mode" data-section="cat_mode">
   <div class="sec-head">
     <span class="section-label"
           data-en="Bonus: a cat room to keep you company"
@@ -929,7 +929,7 @@
 </section>
 
 <!-- PRICING -->
-<section class="pricing-sec" id="pricing">
+<section class="pricing-sec" id="pricing" data-section="pricing">
   <div class="pricing-inner">
     <div class="sec-head">
       <span class="section-label" data-en="Pricing" data-ja="料金">Pricing</span>
@@ -1038,7 +1038,7 @@
 </div>
 
 <!-- SETUP — 3 steps (compressed from 4) -->
-<section class="setup-sec" id="setup">
+<section class="setup-sec" id="setup" data-section="setup">
   <div class="sec-head">
     <span class="section-label" data-en="Setup" data-ja="始め方">Setup</span>
   </div>
@@ -1074,14 +1074,14 @@
 </section>
 
 <!-- FAQ -->
-<section class="faq-sec" id="faq">
+<section class="faq-sec" id="faq" data-section="faq">
   <div class="sec-head">
     <span class="section-label" data-en="FAQ" data-ja="よくあるご質問">FAQ</span>
   </div>
   <ul class="faq-list">
 
     <li class="faq-item">
-      <details>
+      <details data-faq="requirements">
         <summary
           data-en="What are the system requirements?"
           data-ja="動作環境は何ですか？">What are the system requirements?</summary>
@@ -1094,7 +1094,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="terminals">
         <summary
           data-en="Which terminals and IDEs are supported?"
           data-ja="対応しているターミナル・IDE は？">Which terminals and IDEs are supported?</summary>
@@ -1143,7 +1143,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="permissions">
         <summary
           data-en="Which macOS permissions does it need?"
           data-ja="必要な macOS の権限は？">Which macOS permissions does it need?</summary>
@@ -1156,7 +1156,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="detection">
         <summary
           data-en="How does AgentManager detect sessions?"
           data-ja="セッションはどうやって検出されますか？">How does AgentManager detect sessions?</summary>
@@ -1169,7 +1169,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="privacy">
         <summary
           data-en="Where does my session data go?"
           data-ja="セッションデータはどこかに送信されますか？">Where does my session data go?</summary>
@@ -1182,7 +1182,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="pricing">
         <summary
           data-en="Is there a free trial? How is pricing structured?"
           data-ja="無料トライアルはありますか？料金プランは？">Is there a free trial? How is pricing structured?</summary>
@@ -1195,7 +1195,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="license">
         <summary
           data-en="How many Macs can I use one license on?"
           data-ja="1ライセンスで何台の Mac で使えますか？">How many Macs can I use one license on?</summary>
@@ -1208,7 +1208,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="updates">
         <summary
           data-en="How do updates work? Is the app safe?"
           data-ja="アップデートはどう届きますか？アプリは安全ですか？">How do updates work? Is the app safe?</summary>
@@ -1221,7 +1221,7 @@
     </li>
 
     <li class="faq-item">
-      <details>
+      <details data-faq="view-modes">
         <summary
           data-en="Can I switch between Simple and Cat Room modes later?"
           data-ja="シンプルモードと猫部屋モードは後から切り替えられますか？">Can I switch between Simple and Cat Room modes later?</summary>
@@ -1237,7 +1237,7 @@
 </section>
 
 <!-- FOOTER -->
-<footer>
+<footer data-section="footer">
   <p>
     &copy; 2026 AgentManager
   </p>
@@ -1251,16 +1251,21 @@
 
 <script>
   function showSimple() {
+    // 表示済みなら何もしない（連打で hero_toggle が重複計測されるのを防ぐ）
+    if (!document.getElementById('ss-simple').classList.contains('hidden')) return;
     document.getElementById('ss-simple').classList.remove('hidden');
     document.getElementById('ss-cat').classList.add('hidden');
     document.getElementById('ss-btn-simple').classList.add('active');
     document.getElementById('ss-btn-cat').classList.remove('active');
+    if (typeof gtag === 'function') gtag('event', 'hero_toggle', { hero_view: 'simple' });
   }
   function showCat() {
+    if (!document.getElementById('ss-cat').classList.contains('hidden')) return;
     document.getElementById('ss-cat').classList.remove('hidden');
     document.getElementById('ss-simple').classList.add('hidden');
     document.getElementById('ss-btn-cat').classList.add('active');
     document.getElementById('ss-btn-simple').classList.remove('active');
+    if (typeof gtag === 'function') gtag('event', 'hero_toggle', { hero_view: 'cat' });
   }
 
   function setNavOpen(open) {
@@ -1313,6 +1318,46 @@
     var cta = e.target.closest('a[data-cta]');
     if (!cta || typeof gtag !== 'function') return;
     gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  // セクション到達を GA4 に送る（1ページロードにつき各セクション1回、発火後に unobserve）。
+  // 背の高いセクションは可視面積比が閾値に届かず発火しないため、intersectionRatio ではなく
+  // 「セクション上端がビューポート上部70%の帯に入った」を threshold:0 + rootMargin で判定する。
+  (function() {
+    function onIntersect(entries, obs) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        obs.unobserve(entry.target);
+        if (typeof gtag !== 'function') return;
+        gtag('event', 'section_view', { section_id: entry.target.getAttribute('data-section') });
+      });
+    }
+    var sectionObserver = new IntersectionObserver(onIntersect,
+      { threshold: 0, rootMargin: '0px 0px -30% 0px' });
+    document.querySelectorAll('section[data-section]').forEach(function(el) {
+      sectionObserver.observe(el);
+    });
+    // フッターはページ最下部かつ背が低く、除外帯（下30%）から出られず永久に発火しないため、
+    // 「少しでも可視になった＝ページ最下部まで到達」で判定する。
+    var footerObserver = new IntersectionObserver(onIntersect, { threshold: 0 });
+    footerObserver.observe(document.querySelector('footer[data-section]'));
+  }());
+
+  // Product Hunt バッジクリック（KGI とは別イベントで計測）
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.ph-badge a') || typeof gtag !== 'function') return;
+    gtag('event', 'producthunt_click', {});
+  });
+
+  // FAQ 開閉。toggle イベントはバブリングしないため各 details に個別付与する。
+  document.querySelectorAll('details[data-faq]').forEach(function(d) {
+    d.addEventListener('toggle', function() {
+      if (typeof gtag !== 'function') return;
+      gtag('event', 'faq_toggle', {
+        faq_id: d.getAttribute('data-faq'),
+        faq_action: d.open ? 'open' : 'close'
+      });
+    });
   });
 
   (function() {
