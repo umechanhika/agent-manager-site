@@ -29,6 +29,8 @@ OG_DESCRIPTION = (
     "全セッションを監視する macOS 用フローティングウィンドウ。無料で使えます。"
 )
 OG_IMAGE_ALT = "AgentManager — 確認待ちのセッションを見逃さない。"
+# 日本語版OG画像。tools/og-image-ja.html を Chromium (1200x630) でスクリーンショットして生成する。
+OG_IMAGE = "https://agentmgr.app/og-image-ja.png"
 JA_URL = "https://agentmgr.app/ja.html"
 
 
@@ -70,13 +72,18 @@ def main() -> None:
         "og:url": JA_URL,
         "og:title": TITLE,
         "og:description": OG_DESCRIPTION,
+        "og:image": OG_IMAGE,
         "og:image:alt": OG_IMAGE_ALT,
         "og:locale": "ja",
         "og:locale:alternate": "en",
     }
     for prop, value in og.items():
         find_one(soup, "meta", attrs={"property": prop})["content"] = value
-    for name, value in {"twitter:title": TITLE, "twitter:description": OG_DESCRIPTION}.items():
+    for name, value in {
+        "twitter:title": TITLE,
+        "twitter:description": OG_DESCRIPTION,
+        "twitter:image": OG_IMAGE,
+    }.items():
         find_one(soup, "meta", attrs={"name": name})["content"] = value
 
     # JSON-LD の説明文を日本語化
