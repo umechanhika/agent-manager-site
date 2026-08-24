@@ -261,6 +261,9 @@
       letter-spacing: .03em;
     }
 
+    .nonmac-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+    .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
     /* ── HERO RIGHT: window frame + screenshot toggle ─────── */
     .hero-right { display: flex; flex-direction: column; gap: 10px; }
 
@@ -735,9 +738,17 @@
            id="download-btn"
            class="btn btn-primary" data-cta="hero_download"
            data-en="↓ Free Download" data-ja="↓ 無料ダウンロード">↓ Free Download</a>
-        <span id="macos-only-note" class="macos-note hidden"
-              data-en="Available on macOS — open this page on your Mac to download"
-              data-ja="macOS専用アプリです — Macからこのページを開くとダウンロードできます">Available on macOS — open this page on your Mac to download</span>
+        <div id="nonmac-cta" class="nonmac-cta hidden">
+          <span class="macos-note"
+                data-en="Available on macOS — save the link and open it on your Mac"
+                data-ja="macOS専用アプリです — リンクを保存して、あとでMacから開いてください">Available on macOS — save the link and open it on your Mac</span>
+          <div class="nonmac-actions">
+            <button type="button" id="nonmac-email" class="btn btn-ghost" data-cta="nonmac_email"
+                    data-en="✉ Email me the link" data-ja="✉ リンクを自分にメール">✉ Email me the link</button>
+            <button type="button" id="nonmac-copy" class="btn btn-ghost" data-cta="nonmac_copy"
+                    data-en="⧉ Copy the link" data-ja="⧉ リンクをコピー">⧉ Copy the link</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="cta-note"
@@ -1354,7 +1365,7 @@
   // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
   // 外部遷移前でも取りこぼさないよう gtag のデフォルト beacon 送信に任せる。
   document.addEventListener('click', function(e) {
-    var cta = e.target.closest('a[data-cta]');
+    var cta = e.target.closest('[data-cta]');
     if (!cta || typeof gtag !== 'function') return;
     gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
   });
@@ -1368,7 +1379,23 @@
     if (isMac) return;
     document.getElementById('download-btn').classList.add('hidden');
     document.getElementById('hdr-cta').classList.add('hidden');
-    document.getElementById('macos-only-note').classList.remove('hidden');
+    document.getElementById('nonmac-cta').classList.remove('hidden');
+
+    // 非Macでは行き止まりにせず、後で Mac から戻れる導線（メール送信 / リンクコピー）を出す。
+    var siteUrl = IS_JA ? 'https://agentmgr.app/ja.html' : 'https://agentmgr.app/';
+    document.getElementById('nonmac-email').addEventListener('click', function() {
+      var subject = IS_JA ? 'AgentManager — Macでダウンロード' : 'AgentManager — download on your Mac';
+      var body = (IS_JA ? 'Mac でこのリンクを開いてダウンロード:\n' : 'Open this link on your Mac to download:\n') + siteUrl;
+      location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    });
+    var copyBtn = document.getElementById('nonmac-copy');
+    copyBtn.addEventListener('click', function() {
+      navigator.clipboard.writeText(siteUrl).then(function() {
+        copyBtn.textContent = IS_JA ? '✓ コピーしました' : '✓ Copied';
+      }, function() {
+        copyBtn.textContent = IS_JA ? 'コピーできませんでした' : 'Copy failed';
+      });
+    });
   }());
 </script>
 </body>
