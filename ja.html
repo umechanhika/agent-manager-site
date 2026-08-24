@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+
+<!-- generated from index.html by tools/gen-ja.py — 直接編集しない -->
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AgentManager — Claude Code セッション監視ツール for macOS</title>
+<meta content="全 Claude Code セッションを監視する macOS 用フローティングウィンドウ。確認が必要な瞬間に自動で現れ、見逃しを防ぎます。無料で使えます。" name="description"/>
+<link href="https://agentmgr.app/ja.html" rel="canonical"/>
+<link href="https://agentmgr.app/" hreflang="en" rel="alternate"/>
+<link href="https://agentmgr.app/ja.html" hreflang="ja" rel="alternate"/>
+<link href="https://agentmgr.app/" hreflang="x-default" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="https://agentmgr.app/ja.html" property="og:url"/>
+<meta content="AgentManager" property="og:site_name"/>
+<meta content="AgentManager — Claude Code セッション監視ツール for macOS" property="og:title"/>
+<meta content="Claude Code の確認待ちをもう見逃さない。全セッションを監視する macOS 用フローティングウィンドウ。無料で使えます。" property="og:description"/>
+<meta content="https://agentmgr.app/og-image.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="AgentManager — 確認待ちのセッションを見逃さない。" property="og:image:alt"/>
+<meta content="ja" property="og:locale"/>
+<meta content="en" property="og:locale:alternate"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="AgentManager — Claude Code セッション監視ツール for macOS" name="twitter:title"/>
+<meta content="Claude Code の確認待ちをもう見逃さない。全セッションを監視する macOS 用フローティングウィンドウ。無料で使えます。" name="twitter:description"/>
+<meta content="https://agentmgr.app/og-image.png" name="twitter:image"/>
+<link href="favicon.ico" rel="icon" sizes="48x48"/>
+<link href="favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="site.webmanifest" rel="manifest"/>
+<meta content="#0B0D10" name="theme-color"/>
+<style>
+    /*
+     * DARK PRO-TOOL DESIGN SYSTEM
+     *
+     * Matches the app's simple mode: an always-dark, quiet utility panel.
+     *   Near-black bg (#0B0D10), elevated cards, 1px hairline borders.
+     *   Amber (#F5A623) = the "waiting" lamp = the single brand accent.
+     *   Sky / Grass / Gray = the remaining status lamps, used sparingly.
+     *
+     * Signature element: the waiting-row glow. Primary CTAs and the featured
+     *   plan carry a soft colored glow, echoing the app's waiting-row edge.
+     *
+     * Radius scale: 12 card / 8 control / 6 inner. Status indicators = dots.
+     *
+     * Font sizes (hard-won, do not regress):
+     *   section heading: 22px/700  feat body: 17px  price feats: 16px
+     *   price-cyc: 16px  step body: 15-16px
+     */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Palette */
+      --bg:       #0B0D10;
+      --surf:     #12151B;
+      --surf2:    #191E26;
+      --border:   rgba(255,255,255,.08);
+      --border-2: rgba(255,255,255,.16);
+      --text:     #E8EBF0;
+      --muted:    #9BA3B0;
+      --dim:      #646C7A;
+
+      /* Session-status lamp colors (same hues as the app) */
+      --amber:  #F5A623;
+      --grass:  #4EC46A;
+      --sky:    #5E9ED6;
+      --gray:   #9B9B9B;
+
+      /* Link / interactive blue with enough contrast on dark */
+      --link: #74A9E0;
+
+      --r: 12px;
+
+      --mono: ui-monospace, 'SF Mono', Menlo, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
+              'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background:
+        radial-gradient(720px 420px at 85% -80px, rgba(94,158,214,.09), transparent 70%),
+        radial-gradient(820px 480px at 8% -40px, rgba(245,166,35,.05), transparent 70%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: rgba(245,166,35,.3); }
+
+    .hidden { display: none !important; }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(11,13,16,.78);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      backdrop-filter: blur(14px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px;
+    }
+    .logo { display: inline-flex; align-items: center; text-decoration: none; flex: none; }
+    .logo-img { height: 20px; width: auto; display: block; }
+
+    .hdr-nav { display: flex; align-items: center; gap: 2px; }
+    .hdr-nav a {
+      font-size: 13px; font-weight: 500;
+      color: var(--muted);
+      text-decoration: none; padding: 6px 11px;
+      border-radius: 6px;
+      transition: color .12s, background .12s;
+      white-space: nowrap;
+    }
+    .hdr-nav a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+
+    .hdr-right { display: flex; align-items: center; gap: 12px; flex: none; }
+
+    /* Hamburger — hidden on desktop, revealed when the row gets tight */
+    .hdr-burger {
+      display: none;
+      font-size: 16px; line-height: 1;
+      color: var(--muted); background: transparent;
+      border: 1px solid var(--border-2);
+      border-radius: 6px;
+      width: 34px; height: 30px;
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: color .12s, background .12s;
+    }
+    .hdr-burger:hover  { color: var(--text); background: rgba(255,255,255,.06); }
+
+    .lang-toggle {
+      display: flex; gap: 2px; padding: 2px;
+      border: 1px solid var(--border);
+      background: var(--surf);
+      border-radius: 7px;
+    }
+    .lang-btn {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; padding: 4px 9px;
+      border: none; background: transparent; color: var(--dim);
+      border-radius: 5px;
+      cursor: pointer; transition: background .12s, color .12s;
+    }
+    .lang-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
+
+    .hdr-cta {
+      font-size: 13px; font-weight: 600;
+      color: #1A1207; background: var(--amber);
+      padding: 7px 15px;
+      border-radius: 7px;
+      text-decoration: none;
+      transition: filter .12s, box-shadow .12s;
+      display: inline-block;
+    }
+    .hdr-cta:hover { filter: brightness(1.08); box-shadow: 0 0 16px rgba(245,166,35,.35); }
+    /* Anchor targets clear the sticky header */
+    #features, #pricing, #setup, #faq { scroll-margin-top: 64px; }
+
+    /* Collapse the inline nav into a hamburger dropdown when the row gets tight */
+    @media (max-width: 860px) {
+      .hdr-burger { display: inline-flex; }
+      .hdr-nav {
+        position: absolute; top: calc(100% + 8px); right: 16px;
+        flex-direction: column; align-items: stretch; gap: 2px;
+        min-width: 180px;
+        background: var(--surf);
+        border: 1px solid var(--border-2);
+        border-radius: 10px;
+        box-shadow: 0 16px 40px rgba(0,0,0,.55);
+        padding: 6px;
+        display: none;
+      }
+      header.nav-open .hdr-nav { display: flex; }
+      .hdr-nav a { padding: 10px 12px; border-radius: 7px; }
+    }
+    @media (max-width: 540px) {
+      header { padding: 10px 16px; }
+      .logo-img { height: 14px; }
+      .hdr-cta { display: none; }
+    }
+
+    /* ── HERO ───────────────────────────────────────────────── */
+    .hero {
+      max-width: 1040px; margin: 0 auto;
+      padding: 72px 32px 56px;
+      display: grid; grid-template-columns: 1fr 296px;
+      gap: 56px; align-items: start;
+    }
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; gap: 36px; padding: 40px 24px; }
+      .hero-right { order: -1; }
+    }
+
+    /* Status dots — session lamp colors (SVG squares clipped round) */
+    .px-sq  { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 800; letter-spacing: -.03em; line-height: 1.08;
+      margin-bottom: 20px;
+    }
+    h1 em {
+      font-style: normal; color: var(--amber);
+      text-shadow: 0 0 28px rgba(245,166,35,.35);
+    }
+
+    .hero-sub {
+      font-size: 17px; color: var(--muted);
+      line-height: 1.7; max-width: 430px; margin-bottom: 36px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 22px;
+      font-size: 15px; font-weight: 600; font-family: var(--sans);
+      text-decoration: none; cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      transition: filter .12s, box-shadow .12s, background .12s, border-color .12s, transform .12s;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--amber); color: #1A1207;
+      box-shadow: 0 4px 24px rgba(245,166,35,.2);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 4px 32px rgba(245,166,35,.4);
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: var(--surf); color: var(--text);
+      border-color: var(--border-2);
+    }
+    .btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); }
+
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .cta-note {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--dim); letter-spacing: .03em;
+    }
+    .ph-badge { margin-top: 18px; }
+    .ph-badge img { display: block; width: 250px; height: 54px; }
+    .macos-note {
+      display: inline-flex; align-items: center;
+      padding: 13px 22px;
+      font-family: var(--mono); font-size: 12px;
+      color: var(--dim);
+      border: 1px dashed var(--border-2);
+      border-radius: 9px;
+      letter-spacing: .03em;
+    }
+
+    /* ── HERO RIGHT: window frame + screenshot toggle ─────── */
+    .hero-right { display: flex; flex-direction: column; gap: 10px; }
+
+    .ss-toggle {
+      display: flex; gap: 2px; padding: 2px;
+      border: 1px solid var(--border);
+      background: var(--surf);
+      border-radius: 8px;
+      align-self: flex-start;
+    }
+    .ss-btn {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; padding: 4px 14px;
+      border: none; background: transparent; color: var(--dim); cursor: pointer;
+      border-radius: 6px;
+      transition: background .12s, color .12s;
+    }
+    .ss-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
+
+    /* Dark macOS window frame — the hero screenshot is raw window content */
+    .px-window {
+      border: 1px solid var(--border-2);
+      border-radius: 12px;
+      box-shadow: 0 24px 48px -12px rgba(0,0,0,.55);
+      overflow: hidden;
+      width: 100%;
+      min-width: 0;
+      background: #0D1015;
+    }
+    .px-titlebar {
+      background: #171B22;
+      border-bottom: 1px solid var(--border);
+      padding: 9px 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .px-traffic { display: flex; gap: 7px; }
+    .px-tl { width: 11px; height: 11px; border-radius: 50%; }
+    .px-tl-r { background: #FF5F57; }
+    .px-tl-y { background: #FEBC2E; }
+    .px-tl-g { background: #28C840; }
+    .px-wintitle {
+      flex: 1; text-align: center;
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--dim); margin-right: 47px;
+    }
+    .px-winbody img { display: block; width: 100%; height: auto; }
+
+    /* Status legend under screenshot — contextual, not standalone */
+    .ss-legend {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      padding: 8px 2px 0;
+    }
+    .ss-legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      letter-spacing: .04em;
+    }
+
+    /* ── PAIN SECTION ──────────────────────────────────────── */
+    .pain-sec {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(245,166,35,.05), transparent 70%), var(--surf);
+      padding: 56px 32px;
+    }
+    .pain-inner {
+      max-width: 680px; margin: 0 auto; text-align: center;
+    }
+    .pain-inner p {
+      font-size: clamp(17px, 2.4vw, 22px);
+      line-height: 1.7; color: var(--text); font-weight: 500;
+    }
+    .pain-inner strong { color: var(--amber); font-weight: 700; }
+    .pain-inner em     { font-style: normal; color: var(--link); }
+
+    /* ── DIVIDER — a single hairline, centered ─────────────── */
+    .px-divider {
+      display: flex; justify-content: center;
+      padding: 44px 0;
+    }
+    .px-divider svg { display: none; }
+    .px-divider::before {
+      content: '';
+      width: min(520px, 70vw); height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+    }
+
+    /* ── SECTION HEADING ───────────────────────────────────── */
+    .sec-head { text-align: center; margin-bottom: 52px; }
+    .section-label {
+      font-family: var(--sans); font-size: 22px; font-weight: 700;
+      letter-spacing: -.01em; color: var(--text);
+      display: block; margin-bottom: 10px;
+    }
+    .sec-sub {
+      font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto;
+    }
+
+    /* ── FEATURES ──────────────────────────────────────────── */
+    .features-sec {
+      max-width: 920px; margin: 0 auto; padding: 0 32px 80px;
+    }
+    .feat-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 640px) {
+      .feat-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .feat-grid { grid-template-columns: 1fr; }
+    }
+
+    .feat-item {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px 20px;
+      background: var(--surf);
+      overflow: hidden;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .feat-item:hover {
+      border-color: var(--border-2);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.35);
+    }
+
+    .feat-title { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+    .feat-px { width: 9px; height: 9px; flex-shrink: 0; border-radius: 50%; }
+    .feat-item h3 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+    .feat-item p  { font-size: 17px; color: var(--muted); line-height: 1.65; }
+    .feat-kbd {
+      display: inline-block; font-family: var(--mono); font-size: 12px;
+      background: var(--bg); border: 1px solid var(--border-2);
+      border-radius: 5px;
+      padding: 1px 6px; color: var(--text);
+    }
+
+    /* ── FEATURES: in-card thumbnail ───────────────────────────
+       Full-bleed image header: the card border itself frames the image —
+       no double frame. Negative margins cancel the card padding (22px 20px). */
+    .feat-thumb {
+      aspect-ratio: 8 / 5;
+      margin: -22px -20px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #0D1015;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    /* 全アセットが 8:5 の合成キャンバスなので枠を隙間なく満たす。 */
+    .feat-thumb-img {
+      display: block; width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    /* ── CAT BONUS: 幅を絞った2枚グリッド。カード自体は .feat-item を再利用。
+       機能グリッドより一段小ぶりにして「おまけ」の格を視覚的に伝える。 ── */
+    .cat-sec  { max-width: 640px; margin: 0 auto; padding: 0 32px 80px; }
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
+
+    /* ── PRICING ───────────────────────────────────────────── */
+    .pricing-sec {
+      background: #0E1116;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 32px;
+    }
+    .pricing-inner { max-width: 860px; margin: 0 auto; }
+
+    .price-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    }
+    @media (max-width: 660px) { .price-grid { grid-template-columns: 1fr; } }
+
+    .price-card {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: var(--surf);
+      padding: 22px 20px;
+      display: flex; flex-direction: column;
+    }
+    /* Featured: sky-blue glow — the same treatment as a waiting row's edge */
+    .price-card.featured {
+      background: linear-gradient(180deg, rgba(94,158,214,.08), transparent 45%), var(--surf);
+      border-color: rgba(94,158,214,.45);
+      box-shadow: 0 0 28px rgba(94,158,214,.14);
+    }
+
+    /* Badge row: fixed height keeps price-tier/price-main baseline-aligned */
+    .price-badge-row { height: 22px; display: flex; align-items: center; margin-bottom: 12px; }
+    .price-badge {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: #0B1420; background: var(--sky);
+      border-radius: 5px;
+      padding: 3px 8px;
+    }
+    .price-badge.hidden { visibility: hidden; }
+
+    .price-tier {
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+
+    /* Price number: cur($) + int + dec, all bottom-aligned */
+    .price-main { display: flex; align-items: flex-end; margin-bottom: 6px; line-height: 1; }
+    .price-cur  { font-family: var(--mono); font-size: 18px; font-weight: 400; padding-bottom: 7px; color: var(--muted); }
+    .price-int  { font-family: var(--mono); font-size: 52px; font-weight: 300; line-height: 1; }
+    .price-dec  { font-family: var(--mono); font-size: 20px; font-weight: 400; padding-bottom: 7px; color: var(--muted); }
+
+    .price-cyc  { font-size: 16px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .price-div  { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
+
+    .price-feats {
+      list-style: none; font-size: 16px; color: var(--text);
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 24px; flex: 1;
+    }
+    .price-feats li { display: flex; gap: 9px; align-items: flex-start; }
+    /* Round status dot — grass green, like a done lamp */
+    .price-feats li::before {
+      content: '';
+      display: inline-block; width: 7px; height: 7px; flex-shrink: 0;
+      margin-top: 7px; background: var(--grass);
+      border-radius: 50%;
+    }
+    .price-feats li.off { color: var(--dim); }
+    .price-feats li.off::before { background: var(--dim); }
+
+    .price-cta {
+      display: block; text-align: center;
+      padding: 11px 16px;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: filter .12s, background .12s, border-color .12s, box-shadow .12s;
+      margin-top: auto;
+    }
+    .price-cta-dark  { background: var(--amber); color: #1A1207; }
+    .price-cta-dark:hover { filter: brightness(1.08); box-shadow: 0 0 20px rgba(245,166,35,.3); }
+    .price-cta-light { background: var(--surf2); color: var(--text); border-color: var(--border-2); }
+    .price-cta-light:hover { background: rgba(255,255,255,.12); }
+    .price-cta-blue  { background: var(--sky); color: #0B1420; }
+    .price-cta-blue:hover { filter: brightness(1.1); box-shadow: 0 0 20px rgba(94,158,214,.35); }
+
+    .price-note {
+      text-align: center; margin-top: 24px;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+    }
+    .price-note a { color: var(--link); text-decoration: none; }
+    .price-note a:hover { text-decoration: underline; }
+
+    /* ── SETUP ─────────────────────────────────────────────── */
+    .setup-sec {
+      max-width: 580px; margin: 0 auto; padding: 80px 32px;
+    }
+    .steps { list-style: none; }
+    .step {
+      display: grid; grid-template-columns: 42px 1fr;
+      gap: 16px; padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-n {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .08em;
+      width: 32px; height: 32px;
+      background: var(--surf2); color: var(--muted);
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-body strong { display: block; font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+    .step-body span   { font-size: 15px; color: var(--muted); }
+    .step-body a      { color: var(--link); text-decoration: none; }
+    .step-body a:hover { text-decoration: underline; }
+    .step-body code   { font-family: var(--mono); font-size: 13px; color: var(--text); }
+
+    /* ── FAQ ──────────────────────────────────────────────── */
+    .faq-sec {
+      max-width: 580px; margin: 0 auto; padding: 80px 32px;
+    }
+    .faq-sec .sec-head { margin-bottom: 0; }
+    .faq-list { list-style: none; margin-top: 8px; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-item summary {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 0; cursor: pointer;
+      font-size: 15px; font-weight: 600; color: var(--text);
+      list-style: none; gap: 16px;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: '+'; font-family: var(--mono); font-size: 18px; font-weight: 700;
+      color: var(--dim); flex-shrink: 0; line-height: 1;
+    }
+    .faq-item details[open] summary::after { content: '−'; }
+    .faq-ans {
+      margin: 0; padding: 0 0 20px;
+      font-size: 15px; color: var(--muted); line-height: 1.6;
+    }
+    .faq-ans code { font-family: var(--mono); font-size: 13px; color: var(--text); }
+    .faq-ans p { margin: 0 0 10px; }
+    .faq-ans p:last-child { margin-bottom: 0; }
+
+    /* Support matrix (FAQ) — tinted chips on an elevated panel */
+    .faq-matrix {
+      margin: 12px 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surf);
+      overflow: hidden;
+    }
+    .fm-row {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 12px; align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px; color: var(--text);
+    }
+    .fm-row:last-child { border-bottom: none; }
+    .fm-head {
+      background: var(--surf2);
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    }
+    .fm-chip {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .04em; white-space: nowrap;
+      padding: 2px 8px;
+      border-radius: 5px;
+      border: 1px solid;
+    }
+    .fm-chip--pane   { background: rgba(78,196,106,.12); color: #5FCB7C; border-color: rgba(78,196,106,.35); }
+    .fm-chip--tab    { background: rgba(94,158,214,.12); color: #74A9E0; border-color: rgba(94,158,214,.35); }
+    .fm-chip--window { background: rgba(167,139,250,.12); color: #B39DF5; border-color: rgba(167,139,250,.35); }
+    .fm-chip--app    { background: rgba(155,163,176,.12); color: #9BA3B0; border-color: rgba(155,163,176,.3); }
+    .fm-chip--none   { background: transparent; color: var(--dim); border-color: var(--border); }
+    .fm-note { font-size: 13px; color: var(--dim); }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg); color: var(--muted);
+      padding: 28px 24px; text-align: center;
+    }
+    footer p {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--dim); letter-spacing: .04em;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); text-decoration: underline; }
+    .ja-only { display: none; }
+
+    /* ── RESPONSIVE / ACCESSIBILITY ────────────────────────── */
+    :focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+    @media (max-width: 480px) {
+      .hero { padding: 36px 20px; }
+      .features-sec, .pricing-inner, .setup-sec, .faq-sec { padding-left: 20px; padding-right: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+<!-- Google Analytics (GA4) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+<!-- Structured data for search engines -->
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "AgentManager",
+  "url": "https://agentmgr.app/",
+  "description": "全 Claude Code セッションを監視する macOS 用フローティングウィンドウ。確認が必要な瞬間に自動で現れ、見逃しを防ぎます。無料で使えます。",
+  "image": "https://agentmgr.app/og-image.png",
+  "screenshot": "https://agentmgr.app/screenshot-simple.png",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS 13.0 or later",
+  "downloadUrl": "https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg",
+  "offers": [
+    {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free plan — every feature, up to 2 sessions shown at once"
+    },
+    {
+      "@type": "Offer",
+      "price": "4.99",
+      "priceCurrency": "USD",
+      "description": "Monthly plan — unlimited sessions"
+    },
+    {
+      "@type": "Offer",
+      "price": "48",
+      "priceCurrency": "USD",
+      "description": "Yearly plan — unlimited sessions"
+    }
+  ],
+  "inLanguage": "ja"
+}</script>
+</head>
+<body>
+<!-- HEADER -->
+<header>
+<a class="logo" href="/">
+<img alt="AgentManager" class="logo-img" height="20" src="logo-dark.svg" width="322"/>
+</a>
+<div class="hdr-right">
+<nav aria-label="Sections" class="hdr-nav" id="hdr-nav">
+<a data-en="Features" data-ja="機能" href="#features">機能</a>
+<a data-en="Pricing" data-ja="料金" href="#pricing">料金</a>
+<a data-en="Setup" data-ja="始め方" href="#setup">始め方</a>
+<a data-en="FAQ" data-ja="よくあるご質問" href="#faq">よくあるご質問</a>
+</nav>
+<div aria-label="Language" class="lang-toggle" role="group">
+<button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+<button class="lang-btn active" id="btn-ja" onclick="setLang('ja')">JA</button>
+</div>
+<a class="hdr-cta" data-cta="header_download" data-en="Free download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="hdr-cta">無料ダウンロード</a>
+<button aria-controls="hdr-nav" aria-expanded="false" aria-label="Menu" class="hdr-burger" id="hdr-burger" onclick="toggleNav()" type="button">☰</button>
+</div>
+</header>
+<!-- HERO -->
+<div class="hero">
+<!-- LEFT: copy -->
+<div>
+<h1 data-en="Your Claude Code sessions,&lt;br&gt;&lt;em&gt;always in view.&lt;/em&gt;" data-ja="Claude Code の全セッションが、&lt;br&gt;&lt;em&gt;常に視界に。&lt;/em&gt;">Claude Code の全セッションが、<br/><em>常に視界に。</em></h1>
+<p class="hero-sub" data-en="A floating macOS window for every Claude Code session. The moment one needs input, it surfaces. When all is clear, it hides." data-ja="全 Claude Code セッションを監視するフローティングウィンドウ。確認が必要な瞬間に自動で現れ、全て解消すると引っ込みます。">全 Claude Code セッションを監視するフローティングウィンドウ。確認が必要な瞬間に自動で現れ、全て解消すると引っ込みます。</p>
+<div class="cta-row">
+<div>
+<a class="btn btn-primary" data-cta="hero_download" data-en="↓ Free Download" data-ja="↓ 無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="download-btn">↓ 無料ダウンロード</a>
+<span class="macos-note hidden" data-en="Available on macOS — open this page on your Mac to download" data-ja="macOS専用アプリです — Macからこのページを開くとダウンロードできます" id="macos-only-note">macOS専用アプリです — Macからこのページを開くとダウンロードできます</span>
+</div>
+</div>
+<div class="cta-note" data-en="Free to use — no account or credit card required" data-ja="無料で使えます — アカウント登録・クレジットカード不要">無料で使えます — アカウント登録・クレジットカード不要</div>
+<div class="ph-badge">
+<a href="https://www.producthunt.com/products/agentmanager?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-agentmanager" rel="noopener noreferrer" target="_blank"><img alt="AgentManager - Never miss a Claude Code session waiting for your input | Product Hunt" decoding="async" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202701&amp;theme=dark&amp;t=1784854368793" width="250"/></a>
+</div>
+</div>
+<!-- RIGHT: pixel window + view-mode toggle + status legend -->
+<div class="hero-right">
+<div class="ss-toggle" role="group">
+<button class="ss-btn active" data-en="▦ Simple" data-ja="▦ シンプル" id="ss-btn-simple" onclick="showSimple()">▦ シンプル</button>
+<button class="ss-btn" data-en="🐱 Cat Room" data-ja="🐱 猫部屋" id="ss-btn-cat" onclick="showCat()">🐱 猫部屋</button>
+</div>
+<div class="px-window">
+<div class="px-titlebar">
+<div aria-hidden="true" class="px-traffic">
+<span class="px-tl px-tl-r"></span>
+<span class="px-tl px-tl-y"></span>
+<span class="px-tl px-tl-g"></span>
+</div>
+<span class="px-wintitle">AgentManager</span>
+</div>
+<div class="px-winbody">
+<img alt="AgentManager simple mode — a minimal dark list of Claude Code sessions with status dots and elapsed times" id="ss-simple" src="screenshot-simple.png"/>
+<img alt="AgentManager cat room mode — pixel-art cats living below the session list" class="hidden" id="ss-cat" src="screenshot-cat.gif"/>
+</div>
+</div>
+<!-- Status legend in context, directly below the screenshot -->
+<div aria-label="Session status colors" class="ss-legend">
+<div class="ss-legend-item">
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
+<span data-en="Waiting" data-ja="確認待ち">確認待ち</span>
+</div>
+<div class="ss-legend-item">
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#3BAD52" height="8" width="8"></rect></svg>
+<span data-en="Done" data-ja="完了">完了</span>
+</div>
+<div class="ss-legend-item">
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#4E8BC8" height="8" width="8"></rect></svg>
+<span data-en="Running" data-ja="処理中">処理中</span>
+</div>
+<div class="ss-legend-item">
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
+<span data-en="Idle" data-ja="待機">待機</span>
+</div>
+</div>
+</div>
+</div><!-- /hero -->
+<!-- PAIN SECTION: why you need this — one beat, before features -->
+<section class="pain-sec">
+<div class="pain-inner">
+<p data-en="Running multiple sessions? &lt;strong&gt;You won’t notice which one is waiting&lt;/strong&gt; until it’s too late. AgentManager fixes that." data-ja="複数のセッションが同時進行。&lt;strong&gt;どれが確認待ちか、気づかない。&lt;/strong&gt;AgentManagerが解決します。">複数のセッションが同時進行。<strong>どれが確認待ちか、気づかない。</strong>AgentManagerが解決します。</p>
+</div>
+</section>
+<!-- PIXEL DIVIDER -->
+<div aria-hidden="true" class="px-divider" id="features">
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#3BAD52" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#4E8BC8" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
+</div>
+<!-- FEATURES -->
+<section class="features-sec">
+<div class="sec-head">
+<span class="section-label" data-en="Features" data-ja="機能">機能</span>
+</div>
+<div class="feat-grid">
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="The AgentManager window listing sessions that are running, waiting, and done — each with a colored status dot" class="feat-thumb-img" loading="lazy" src="feature-waiting.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
+<h3 data-en="See what's waiting" data-ja="待ちがひと目でわかる">待ちがひと目でわかる</h3>
+</div>
+<p data-en="Every session's status at a glance — which is running, which needs you, which is done." data-ja="全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済みがひと目でわかります。">全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済みがひと目でわかります。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="The AgentManager session list with status dots showing icons for approval, plan review, and choice — labeled Approve or deny, Review the plan, and Pick an option" class="feat-thumb-img" loading="lazy" src="feature-waiting-kinds.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
+<h3 data-en="See why it's waiting" data-ja="待ちの理由もわかる">待ちの理由もわかる</h3>
+</div>
+<p data-en="A quick yes/no, a plan to review, or a choice to make — the status dot itself shows which, so you know what you're getting into before you jump in." data-ja="承認が要るだけなのか、プランをじっくり見る必要があるのか、選択肢から選ぶのか。ステータスドット自体が教えてくれるので、ジャンプする前に心構えができます。">承認が要るだけなのか、プランをじっくり見る必要があるのか、選択肢から選ぶのか。ステータスドット自体が教えてくれるので、ジャンプする前に心構えができます。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="The session list pops up when a session starts waiting, and disappears once everything is resolved" class="feat-thumb-img" loading="lazy" src="feature-autoshow.gif"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
+<h3 data-en="Surfaces when you need it" data-ja="必要なときだけ表示">必要なときだけ表示</h3>
+</div>
+<p data-en="Appears the moment any session needs input. Hides when everything is clear." data-ja="確認が必要な瞬間に自動で現れ、全て解消すると自動で消えます。">確認が必要な瞬間に自動で現れ、全て解消すると自動で消えます。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="AgentManager session list with the waiting row highlighted for jumping to its terminal" class="feat-thumb-img" loading="lazy" src="feature-jump.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#3BAD52" height="10" width="10"></rect></svg>
+<h3 data-en="Jump to the right terminal" data-ja="1クリックでターミナルへ">1クリックでターミナルへ</h3>
+</div>
+<p data-en="Click any row to jump straight to that session — the exact pane in iTerm2, the right tab in Terminal and Ghostty, the project window in your IDE." data-ja="行をクリックするとそのセッションへ即ジャンプ。iTerm2 は該当ペイン、Terminal / Ghostty は該当タブ、IDE はプロジェクトウィンドウまで移動します。">行をクリックするとそのセッションへ即ジャンプ。iTerm2 は該当ペイン、Terminal / Ghostty は該当タブ、IDE はプロジェクトウィンドウまで移動します。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="Pressing Option and Space toggles the AgentManager window on and off" class="feat-thumb-img" loading="lazy" src="feature-keyboard.gif"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#4E8BC8" height="10" width="10"></rect></svg>
+<h3 data-en="Keyboard first" data-ja="キーボードで全操作">キーボードで全操作</h3>
+</div>
+<p data-en='Toggle the window with &lt;kbd class="feat-kbd"&gt;⌥ Space&lt;/kbd&gt; (customizable). Navigate sessions and jump to terminals — all without the mouse.' data-ja='&lt;kbd class="feat-kbd"&gt;⌥ Space&lt;/kbd&gt;（変更可能）でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。'><kbd class="feat-kbd">⌥ Space</kbd>（変更可能）でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="A macOS dock holding the Android Studio and Visual Studio Code icons" class="feat-thumb-img" loading="lazy" src="feature-ide.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#3BAD52" height="10" width="10"></rect></svg>
+<h3 data-en="Works inside your IDE" data-ja="IDEにも対応">IDEにも対応</h3>
+</div>
+<p data-en="Sessions launched from the integrated terminal of Android Studio, VS Code, Cursor and more show up in the list too — click to jump to that project's window." data-ja="Android Studio・VS Code・Cursor などの統合ターミナルから起動したセッションも一覧に表示。クリックでそのプロジェクトのウィンドウへ遷移できます。">Android Studio・VS Code・Cursor などの統合ターミナルから起動したセッションも一覧に表示。クリックでそのプロジェクトのウィンドウへ遷移できます。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="macOS menu bar showing AgentManager status dots with per-status session counts" class="feat-thumb-img" loading="lazy" src="feature-menubar.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#4E8BC8" height="10" width="10"></rect></svg>
+<h3 data-en="Status in your menu bar" data-ja="メニューバーで状態表示">メニューバーで状態表示</h3>
+</div>
+<p data-en="Without opening the window, the menu-bar icon shows counts by status as colored dots — so you always know how many sessions are waiting." data-ja="ウィンドウを開かなくても、メニューバーのアイコンが状態別の件数を色付きドットで表示。確認待ちが何件あるか常に把握できます。">ウィンドウを開かなくても、メニューバーのアイコンが状態別の件数を色付きドットで表示。確認待ちが何件あるか常に把握できます。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="The onboarding screen where you choose between Cat Room and Simple view modes" class="feat-thumb-img" loading="lazy" src="feature-modes.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#A070D0" height="10" width="10"></rect></svg>
+<h3 data-en="Choose your view" data-ja="表示モードを選べる">表示モードを選べる</h3>
+</div>
+<p data-en="Pick Simple or Cat Room during onboarding — and switch anytime in Settings. Same list, same shortcuts, same one-click jumps." data-ja="初回セットアップでシンプル／猫部屋を選択。設定からいつでも切り替えられます。一覧・ショートカット・ワンクリックジャンプはどちらのモードでも同じです。">初回セットアップでシンプル／猫部屋を選択。設定からいつでも切り替えられます。一覧・ショートカット・ワンクリックジャンプはどちらのモードでも同じです。</p>
+</div>
+</div>
+</section>
+<!-- BONUS: CAT ROOM MODE — 主機能ではなく「おまけの癒し」として独立させる -->
+<section class="cat-sec" id="cat-mode">
+<div class="sec-head">
+<span class="section-label" data-en="Bonus: a cat room to keep you company" data-ja="おまけ：癒しの猫部屋モード">おまけ：癒しの猫部屋モード</span>
+<p class="sec-sub" data-en="Prefer a little warmth while Claude works? Switch to Cat Room mode — the same session list, with pixel cats living beneath it." data-ja="Claude の作業を見守る時間に、ちょっとした癒しを。猫部屋モードに切り替えると、同じセッション一覧の下でピクセルの猫たちが暮らします。">Claude の作業を見守る時間に、ちょっとした癒しを。猫部屋モードに切り替えると、同じセッション一覧の下でピクセルの猫たちが暮らします。</p>
+</div>
+<div class="cat-grid">
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="The pixel-art cat room shifting between a daytime and a nighttime scene" class="feat-thumb-img" loading="lazy" src="feature-catroom.gif"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#C488FF" height="10" width="10"></rect></svg>
+<h3 data-en="Pixel-art cat room" data-ja="ピクセルアートの猫部屋">ピクセルアートの猫部屋</h3>
+</div>
+<p data-en="A cat wanders the room in sync with your sessions. The scene shifts between day and night." data-ja="セッション状態に連動して猫が動き、時刻で昼と夜の景色が変わります。">セッション状態に連動して猫が動き、時刻で昼と夜の景色が変わります。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
+<img alt="A pixel-art cat meowing with music notes floating up" class="feat-thumb-img" loading="lazy" src="feature-catsound.gif"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
+<h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">猫の鳴き声で通知</h3>
+</div>
+<p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way. The meow works in Simple mode too." data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。鳴き声はシンプルモードでも使えます。">セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。鳴き声はシンプルモードでも使えます。</p>
+</div>
+</div>
+</section>
+<!-- PRICING -->
+<section class="pricing-sec" id="pricing">
+<div class="pricing-inner">
+<div class="sec-head">
+<span class="section-label" data-en="Pricing" data-ja="料金">料金</span>
+<p class="sec-sub" data-en="Free to use, forever. Upgrade to show unlimited sessions at once." data-ja="ずっと無料で使えます。アップグレードすると同時表示が無制限になります。">ずっと無料で使えます。アップグレードすると同時表示が無制限になります。</p>
+</div>
+<div class="price-grid">
+<!-- Free plan -->
+<div class="price-card">
+<div class="price-badge-row">
+<span class="price-badge hidden">placeholder</span>
+</div>
+<div class="price-tier" data-en="Free" data-ja="無料">無料</div>
+<div class="price-main">
+<span class="price-cur">$</span>
+<span class="price-int">0</span>
+</div>
+<div class="price-cyc" data-en="forever · no account required" data-ja="ずっと無料 · アカウント不要">ずっと無料 · アカウント不要</div>
+<hr class="price-div"/>
+<ul class="price-feats">
+<li data-en="All features included" data-ja="全機能を利用可能">全機能を利用可能</li>
+<li data-en="Up to 2 sessions shown at once" data-ja="同時表示は 2 セッションまで">同時表示は 2 セッションまで</li>
+<li data-en="No time limit" data-ja="期間制限なし">期間制限なし</li>
+</ul>
+<a class="price-cta price-cta-dark" data-cta="pricing_free_download" data-en="↓ Free download" data-ja="↓ 無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg">↓ 無料ダウンロード</a>
+</div>
+<!-- Monthly -->
+<div class="price-card">
+<div class="price-badge-row">
+<span class="price-badge hidden">placeholder</span>
+</div>
+<div class="price-tier" data-en="Monthly" data-ja="月額">月額</div>
+<div class="price-main">
+<span class="price-cur">$</span>
+<span class="price-int">4</span>
+<span class="price-dec">.99</span>
+</div>
+<div class="price-cyc" data-en="per month, billed monthly" data-ja="月払い">月払い</div>
+<hr class="price-div"/>
+<ul class="price-feats">
+<li data-en="Unlimited sessions shown" data-ja="セッション同時表示 無制限">セッション同時表示 無制限</li>
+<li data-en="Everything in Free" data-ja="無料プランの全機能を含む">無料プランの全機能を含む</li>
+<li data-en="Cancel anytime" data-ja="いつでもキャンセル可">いつでもキャンセル可</li>
+</ul>
+<a class="price-cta price-cta-light" data-cta="pricing_monthly" data-en="Start monthly plan" data-ja="月額プランを見る" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly">月額プランを見る</a>
+</div>
+<!-- Annual — featured -->
+<div class="price-card featured">
+<div class="price-badge-row">
+<span class="price-badge" data-en="▸ ~2 MONTHS FREE" data-ja="▸ 約2ヶ月分お得">▸ 約2ヶ月分お得</span>
+</div>
+<div class="price-tier" data-en="Annual" data-ja="年額">年額</div>
+<div class="price-main">
+<span class="price-cur">$</span>
+<span class="price-int">4</span>
+<span class="price-dec">.00</span>
+</div>
+<div class="price-cyc" data-en="per month · $48 billed annually" data-ja="月換算 · 年額 $48">月換算 · 年額 $48</div>
+<hr class="price-div"/>
+<ul class="price-feats">
+<li data-en="Unlimited sessions shown" data-ja="セッション同時表示 無制限">セッション同時表示 無制限</li>
+<li data-en="Everything in Free" data-ja="無料プランの全機能を含む">無料プランの全機能を含む</li>
+<li data-en="Cancel anytime" data-ja="いつでもキャンセル可">いつでもキャンセル可</li>
+<li data-en="~20% off vs monthly" data-ja="月額より約 20% お得">月額より約 20% お得</li>
+</ul>
+<a class="price-cta price-cta-blue" data-cta="pricing_annual" data-en="Start annual plan" data-ja="年額プランで始める" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual">年額プランで始める</a>
+</div>
+</div>
+<p class="price-note">
+<span data-en="Secure checkout by" data-ja="安全決済">安全決済</span>
+<a href="https://freemius.com" rel="noopener" target="_blank">Freemius</a>
+</p>
+</div>
+</section>
+<!-- PIXEL DIVIDER -->
+<div aria-hidden="true" class="px-divider">
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#4E8BC8" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#3BAD52" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
+<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
+</div>
+<!-- SETUP — 3 steps (compressed from 4) -->
+<section class="setup-sec" id="setup">
+<div class="sec-head">
+<span class="section-label" data-en="Setup" data-ja="始め方">始め方</span>
+</div>
+<ol class="steps">
+<li class="step">
+<span class="step-n">01</span>
+<div class="step-body">
+<strong data-en="Download the app" data-ja="アプリをダウンロード">アプリをダウンロード</strong>
+<span data-en="Free — no account or credit card. Open the DMG and drag AgentManager to Applications." data-ja="無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするだけ。">無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするだけ。</span>
+</div>
+</li>
+<li class="step">
+<span class="step-n">02</span>
+<div class="step-body">
+<strong data-en="Launch &amp; set up" data-ja="起動してセットアップ">起動してセットアップ</strong>
+<span data-en="Open AgentManager and finish the quick first-run setup — it takes about 30 seconds." data-ja="アプリを起動して、かんたんな初回セットアップを済ませれば OK。30秒ほどで終わります。">アプリを起動して、かんたんな初回セットアップを済ませれば OK。30秒ほどで終わります。</span>
+</div>
+</li>
+<li class="step">
+<span class="step-n">03</span>
+<div class="step-body">
+<strong data-en="Run Claude Code" data-ja="Claude Code を起動">Claude Code を起動</strong>
+<span data-en="Start any &lt;code&gt;claude&lt;/code&gt; session. AgentManager detects it automatically. That's it." data-ja="&lt;code&gt;claude&lt;/code&gt; を実行するだけ。AgentManager が自動で検出します。以上。"><code>claude</code> を実行するだけ。AgentManager が自動で検出します。以上。</span>
+</div>
+</li>
+</ol>
+</section>
+<!-- FAQ -->
+<section class="faq-sec" id="faq">
+<div class="sec-head">
+<span class="section-label" data-en="FAQ" data-ja="よくあるご質問">よくあるご質問</span>
+</div>
+<ul class="faq-list">
+<li class="faq-item">
+<details>
+<summary data-en="What are the system requirements?" data-ja="動作環境は何ですか？">動作環境は何ですか？</summary>
+<p class="faq-ans" data-en="macOS 13 Ventura or later, on Apple Silicon or Intel. Claude Code (&lt;code&gt;claude&lt;/code&gt; CLI) must be installed." data-ja="macOS 13 Ventura 以降（Apple Silicon・Intel 両対応）が必要です。Claude Code（&lt;code&gt;claude&lt;/code&gt; CLI）のインストールも必要です。">macOS 13 Ventura 以降（Apple Silicon・Intel 両対応）が必要です。Claude Code（<code>claude</code> CLI）のインストールも必要です。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="Which terminals and IDEs are supported?" data-ja="対応しているターミナル・IDE は？">対応しているターミナル・IDE は？</summary>
+<div class="faq-ans">
+<p data-en="Detection works in any terminal — it's powered by Claude Code hooks. What differs is how precisely a click can jump:" data-ja="セッション検出は Claude Code の hook を使うため、どのターミナルでも動作します。異なるのは、クリックでどこまで正確にジャンプできるかです。">セッション検出は Claude Code の hook を使うため、どのターミナルでも動作します。異なるのは、クリックでどこまで正確にジャンプできるかです。</p>
+<div class="faq-matrix">
+<div class="fm-row fm-head">
+<span data-en="Host" data-ja="ホスト">ホスト</span>
+<span data-en="Jump precision" data-ja="ジャンプ精度">ジャンプ精度</span>
+</div>
+<div class="fm-row">
+<span>iTerm2</span>
+<span class="fm-chip fm-chip--pane" data-en="Pane" data-ja="ペイン">ペイン</span>
+</div>
+<div class="fm-row">
+<span>Terminal</span>
+<span class="fm-chip fm-chip--tab" data-en="Tab" data-ja="タブ">タブ</span>
+</div>
+<div class="fm-row">
+<span>Ghostty 1.3+</span>
+<span class="fm-chip fm-chip--tab" data-en="Tab / Pane" data-ja="タブ / ペイン">タブ / ペイン</span>
+</div>
+<div class="fm-row">
+<span>VS Code · Cursor · Zed</span>
+<span class="fm-chip fm-chip--window" data-en="Window" data-ja="ウィンドウ">ウィンドウ</span>
+</div>
+<div class="fm-row">
+<span>Android Studio · JetBrains IDEs</span>
+<span class="fm-chip fm-chip--window" data-en="Window" data-ja="ウィンドウ">ウィンドウ</span>
+</div>
+<div class="fm-row">
+<span>Warp · kitty · WezTerm · Alacritty</span>
+<span class="fm-chip fm-chip--app" data-en="App" data-ja="アプリ">アプリ</span>
+</div>
+<div class="fm-row">
+<span>tmux</span>
+<span class="fm-chip fm-chip--none" data-en="Detect only" data-ja="検出のみ">検出のみ</span>
+</div>
+</div>
+<p class="fm-note" data-en="tmux sessions are detected and tracked, but jump is not supported yet." data-ja="tmux のセッションは検出・追跡されますが、ジャンプは現状非対応です。">tmux のセッションは検出・追跡されますが、ジャンプは現状非対応です。</p>
+</div>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="Which macOS permissions does it need?" data-ja="必要な macOS の権限は？">必要な macOS の権限は？</summary>
+<p class="faq-ans" data-en="Session detection needs no special permissions. Jumping depends on the destination: Automation permission for iTerm2 / Terminal / Ghostty (a dialog appears on your first jump — just click Allow), Accessibility for Android Studio and similar IDEs, and nothing at all for VS Code, Cursor, Zed, Warp, kitty, WezTerm, and Alacritty." data-ja="セッション検出に特別な権限は不要です。ジャンプはジャンプ先により異なります。iTerm2 / Terminal / Ghostty はオートメーション権限（初回ジャンプ時のダイアログで「許可」を押すだけ）、Android Studio などの IDE はアクセシビリティ権限が必要で、VS Code 系・Warp・kitty・WezTerm・Alacritty は権限不要です。">セッション検出に特別な権限は不要です。ジャンプはジャンプ先により異なります。iTerm2 / Terminal / Ghostty はオートメーション権限（初回ジャンプ時のダイアログで「許可」を押すだけ）、Android Studio などの IDE はアクセシビリティ権限が必要で、VS Code 系・Warp・kitty・WezTerm・Alacritty は権限不要です。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="How does AgentManager detect sessions?" data-ja="セッションはどうやって検出されますか？">セッションはどうやって検出されますか？</summary>
+<p class="faq-ans" data-en="AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically in &lt;code&gt;~/.claude/settings.json&lt;/code&gt; (a &lt;code&gt;.bak&lt;/code&gt; backup is created first) — after that, every &lt;code&gt;claude&lt;/code&gt; session you start appears in the list with no further setup. Sessions running subagents stay marked as running until the last subagent finishes." data-ja="AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が &lt;code&gt;~/.claude/settings.json&lt;/code&gt; へ自動で登録されるため（書き込み前に &lt;code&gt;.bak&lt;/code&gt; バックアップを作成）、それ以降は &lt;code&gt;claude&lt;/code&gt; を起動するだけで一覧に表示されます。追加の設定は不要です。サブエージェント実行中のセッションは、最後の1つが終わるまで「処理中」のまま表示されます。">AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が <code>~/.claude/settings.json</code> へ自動で登録されるため（書き込み前に <code>.bak</code> バックアップを作成）、それ以降は <code>claude</code> を起動するだけで一覧に表示されます。追加の設定は不要です。サブエージェント実行中のセッションは、最後の1つが終わるまで「処理中」のまま表示されます。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="Where does my session data go?" data-ja="セッションデータはどこかに送信されますか？">セッションデータはどこかに送信されますか？</summary>
+<p class="faq-ans" data-en="Your session data — prompts, file paths, session names — never leaves your Mac. AgentManager sends only anonymized crash reports and usage statistics, and even those never include paths, session names, or license keys." data-ja="セッションの内容（プロンプト・パス・セッション名）が Mac の外に出ることはありません。送信されるのは匿名のクラッシュレポートと利用統計のみで、そこにもパス・セッション名・ライセンスキーは含まれません。">セッションの内容（プロンプト・パス・セッション名）が Mac の外に出ることはありません。送信されるのは匿名のクラッシュレポートと利用統計のみで、そこにもパス・セッション名・ライセンスキーは含まれません。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="Is it really free? What does upgrading add?" data-ja="本当に無料で使えますか？アップグレードすると何が変わりますか？">本当に無料で使えますか？アップグレードすると何が変わりますか？</summary>
+<p class="faq-ans" data-en="Yes — the free plan has no time limit and includes every feature. The only difference: the free plan shows up to 2 sessions at once, and upgrading removes that limit. Upgrade for $4.99/mo, or $48/yr (~2 months free). Just download and start using it." data-ja="はい — 無料プランに期間制限はなく、全機能を利用できます。違いは同時に表示できるセッション数だけで、無料プランは 2 件まで、アップグレードすると無制限になります。料金は月額 $4.99 または年額 $48（約2ヶ月分お得）。ダウンロードするだけで使い始められます。">はい — 無料プランに期間制限はなく、全機能を利用できます。違いは同時に表示できるセッション数だけで、無料プランは 2 件まで、アップグレードすると無制限になります。料金は月額 $4.99 または年額 $48（約2ヶ月分お得）。ダウンロードするだけで使い始められます。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="How many Macs can I use one license on?" data-ja="1ライセンスで何台の Mac で使えますか？">1ライセンスで何台の Mac で使えますか？</summary>
+<p class="faq-ans" data-en="There is no limit on the number of Macs per license. Install and activate AgentManager on as many machines as you like. Each Mac is activated individually, and you can deactivate a device anytime from Settings → License." data-ja="台数の上限はありません。お手持ちの Mac すべてにインストールしてご利用いただけます。有効化は端末ごとに行われ、設定 → ライセンスの「この端末を解除」でいつでも解除できます。">台数の上限はありません。お手持ちの Mac すべてにインストールしてご利用いただけます。有効化は端末ごとに行われ、設定 → ライセンスの「この端末を解除」でいつでも解除できます。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="How do updates work? Is the app safe?" data-ja="アップデートはどう届きますか？アプリは安全ですか？">アップデートはどう届きますか？アプリは安全ですか？</summary>
+<p class="faq-ans" data-en="Updates are delivered automatically in-app — each one is cryptographically verified before install. The app itself is notarized by Apple." data-ja="アップデートはアプリ内で自動的に届きます。すべての更新はインストール前に署名検証され、アプリ本体も Apple の公証（ノータリゼーション）を受けています。">アップデートはアプリ内で自動的に届きます。すべての更新はインストール前に署名検証され、アプリ本体も Apple の公証（ノータリゼーション）を受けています。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="Can I switch between Simple and Cat Room modes later?" data-ja="シンプルモードと猫部屋モードは後から切り替えられますか？">シンプルモードと猫部屋モードは後から切り替えられますか？</summary>
+<p class="faq-ans" data-en="Yes. You choose a view during onboarding, and you can switch anytime in Settings. All features work the same in both modes." data-ja="はい。初回セットアップで選んだ表示モードは、設定からいつでも変更できます。機能は両モードで共通です。">はい。初回セットアップで選んだ表示モードは、設定からいつでも変更できます。機能は両モードで共通です。</p>
+</details>
+</li>
+</ul>
+</section>
+<!-- FOOTER -->
+<footer>
+<p>
+    © 2026 AgentManager
+  </p>
+<p style="margin-top:10px;">
+<a data-en="Privacy" data-ja="プライバシーポリシー" href="privacy.html">プライバシーポリシー</a>
+     · 
+    <a data-en="Terms" data-ja="利用規約" href="terms.html">利用規約</a>
+<span class="ja-only" style="display:inline"> · <a href="legal.html">特定商取引法に基づく表記</a></span>
+</p>
+</footer>
+<script>
+  function showSimple() {
+    document.getElementById('ss-simple').classList.remove('hidden');
+    document.getElementById('ss-cat').classList.add('hidden');
+    document.getElementById('ss-btn-simple').classList.add('active');
+    document.getElementById('ss-btn-cat').classList.remove('active');
+  }
+  function showCat() {
+    document.getElementById('ss-cat').classList.remove('hidden');
+    document.getElementById('ss-simple').classList.add('hidden');
+    document.getElementById('ss-btn-cat').classList.add('active');
+    document.getElementById('ss-btn-simple').classList.remove('active');
+  }
+
+  function setNavOpen(open) {
+    var hdr = document.querySelector('header');
+    var burger = document.getElementById('hdr-burger');
+    hdr.classList.toggle('nav-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function toggleNav() {
+    var hdr = document.querySelector('header');
+    setNavOpen(!hdr.classList.contains('nav-open'));
+  }
+  // Close the dropdown after picking a section, on outside click, or Esc
+  document.getElementById('hdr-nav').addEventListener('click', function(e) {
+    if (e.target.closest('a')) setNavOpen(false);
+  });
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('header')) setNavOpen(false);
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') setNavOpen(false);
+  });
+
+  // 言語は静的ページで分離している（EN: index.html, JA: ja.html）。
+  // 属性の innerHTML 差し替えでは日本語テキストが検索エンジンに載らないため、
+  // 切替はページ遷移で行う。ja.html は tools/gen-ja.py で index.html から生成する。
+  var IS_JA = document.documentElement.lang === 'ja';
+  function setLang(lang) {
+    try { localStorage.setItem('am-lang', lang); } catch(e) {}
+    if (lang === 'ja' && !IS_JA) location.href = 'ja.html';
+    if (lang === 'en' && IS_JA) location.href = './';
+  }
+
+  (function() {
+    if (IS_JA) return;
+    var saved = '';
+    try { saved = localStorage.getItem('am-lang') || ''; } catch(e) {}
+    if (saved === 'en') return;
+    var nav = (navigator.language || '').toLowerCase();
+    if (saved === 'ja' || (!saved && nav.startsWith('ja'))) location.replace('ja.html');
+  }());
+
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  // 外部遷移前でも取りこぼさないよう gtag のデフォルト beacon 送信に任せる。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('a[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  (function() {
+    // iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.getElementById('download-btn').classList.add('hidden');
+    document.getElementById('hdr-cta').classList.add('hidden');
+    document.getElementById('macos-only-note').classList.remove('hidden');
+  }());
+</script>
+</body>
+</html>

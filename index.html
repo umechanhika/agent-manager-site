@@ -6,10 +6,13 @@
   <title>AgentManager — Claude Code session monitor for macOS</title>
   <meta name="description" content="A floating macOS window for every Claude Code session. Surfaces the moment Claude needs your input. Free to use.">
   <link rel="canonical" href="https://agentmgr.app/">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/ja.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://agentmgr.app/">
   <meta property="og:site_name" content="AgentManager">
-  <meta property="og:title" content="AgentManager">
+  <meta property="og:title" content="AgentManager — Claude Code session monitor for macOS">
   <meta property="og:description" content="Never miss a Claude Code prompt. A floating macOS window for your sessions. Free to use.">
   <meta property="og:image" content="https://agentmgr.app/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -18,7 +21,7 @@
   <meta property="og:locale" content="en">
   <meta property="og:locale:alternate" content="ja">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AgentManager">
+  <meta name="twitter:title" content="AgentManager — Claude Code session monitor for macOS">
   <meta name="twitter:description" content="Never miss a Claude Code prompt. A floating macOS window for your sessions. Free to use.">
   <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
   <link rel="icon" href="favicon.ico" sizes="48x48">
@@ -715,9 +718,9 @@
 
   <!-- LEFT: copy -->
   <div>
-    <h1 data-en="Your Claude sessions,<br><em>always in view.</em>"
-        data-ja="全セッションが、<br><em>常に視界に。</em>">
-      Your Claude sessions,<br><em>always in view.</em>
+    <h1 data-en="Your Claude Code sessions,<br><em>always in view.</em>"
+        data-ja="Claude Code の全セッションが、<br><em>常に視界に。</em>">
+      Your Claude Code sessions,<br><em>always in view.</em>
     </h1>
 
     <p class="hero-sub"
@@ -1329,27 +1332,23 @@
     if (e.key === 'Escape') setNavOpen(false);
   });
 
+  // 言語は静的ページで分離している（EN: index.html, JA: ja.html）。
+  // 属性の innerHTML 差し替えでは日本語テキストが検索エンジンに載らないため、
+  // 切替はページ遷移で行う。ja.html は tools/gen-ja.py で index.html から生成する。
+  var IS_JA = document.documentElement.lang === 'ja';
   function setLang(lang) {
-    document.documentElement.lang = lang;
-    document.querySelectorAll('[data-' + lang + ']').forEach(function(el) {
-      el.innerHTML = el.getAttribute('data-' + lang);
-    });
-    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-    document.getElementById('btn-ja').classList.toggle('active', lang === 'ja');
-    document.querySelectorAll('.ja-only').forEach(function(el) {
-      el.style.display = lang === 'ja' ? 'inline' : 'none';
-    });
     try { localStorage.setItem('am-lang', lang); } catch(e) {}
+    if (lang === 'ja' && !IS_JA) location.href = 'ja.html';
+    if (lang === 'en' && IS_JA) location.href = './';
   }
 
   (function() {
+    if (IS_JA) return;
     var saved = '';
     try { saved = localStorage.getItem('am-lang') || ''; } catch(e) {}
-    if (!saved) {
-      var nav = (navigator.language || '').toLowerCase();
-      if (nav.startsWith('ja')) saved = 'ja';
-    }
-    if (saved === 'ja') setLang('ja');
+    if (saved === 'en') return;
+    var nav = (navigator.language || '').toLowerCase();
+    if (saved === 'ja' || (!saved && nav.startsWith('ja'))) location.replace('ja.html');
   }());
 
   // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
