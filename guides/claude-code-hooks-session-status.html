@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tracking Claude Code Session Status with Hooks</title>
+  <title>Tracking Claude Code Session Status with Hooks — AgentManager</title>
   <meta name="description" content="How to use Claude Code's hook events to derive real session state — waiting, running, done — including the event-to-state mapping and the edge cases (subagents, approvals) that break naive implementations.">
   <link rel="canonical" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
@@ -141,13 +141,53 @@
     <tr><td><code>Stop</code></td><td>done</td><td>Turn complete</td></tr>
     <tr><td><code>SessionEnd</code></td><td>(remove)</td><td>Session is gone</td></tr>
   </table></div>
+  <h3>A minimal working implementation</h3>
   <p>
-    A minimal implementation is a single script registered for all of these events that writes
-    one small JSON file per <code>session_id</code> — then anything (a status bar widget, a tmux
-    segment, a dashboard) can render the directory. Two implementation notes: write
-    <strong>atomically</strong> (write to a temp file, then <code>mv</code>) so readers never see
-    half a file, and key files by <code>session_id</code>, not working directory — two sessions
-    can share a cwd.
+    One script, registered for a handful of events, writing one small JSON file per
+    <code>session_id</code> — then anything (a status bar widget, a tmux segment, a dashboard)
+    can render the directory. In <code>~/.claude/settings.json</code>:
+  </p>
+  <pre><code>{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh running" } ] }
+    ],
+    "Notification": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh waiting" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh done" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh ended" } ] }
+    ]
+  }
+}</code></pre>
+  <p>And <code>~/.claude/track-status.sh</code> (needs <a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a>; make it executable with <code>chmod +x</code>):</p>
+  <pre><code>#!/bin/bash
+# Reads the hook payload on stdin, keeps one status file per session.
+STATE="$1"
+DIR="$HOME/.claude/session-status"
+mkdir -p "$DIR"
+
+PAYLOAD=$(cat)
+SESSION_ID=$(echo "$PAYLOAD" | jq -r '.session_id')
+CWD=$(echo "$PAYLOAD" | jq -r '.cwd')
+
+if [ "$STATE" = "ended" ]; then
+  rm -f "$DIR/$SESSION_ID.json"
+else
+  # Write atomically (temp file + mv) so readers never see half a file.
+  jq -n --arg state "$STATE" --arg cwd "$CWD" \
+    '{state: $state, cwd: $cwd, updated: now | todate}' \
+    &gt; "$DIR/$SESSION_ID.json.tmp" &amp;&amp; mv "$DIR/$SESSION_ID.json.tmp" "$DIR/$SESSION_ID.json"
+fi</code></pre>
+  <p>
+    Now <code>cat ~/.claude/session-status/*.json</code> shows the live state of every session.
+    Two design notes baked in above: files are keyed by <code>session_id</code>, not working
+    directory — two sessions can share a cwd — and writes are atomic. This four-event version
+    skips the finer <em>waiting</em> rows of the mapping (<code>AskUserQuestion</code>,
+    <code>ExitPlanMode</code>, <code>idle_prompt</code>); add them once the basics work.
   </p>
 
   <h2>The edge cases that break the naive version</h2>

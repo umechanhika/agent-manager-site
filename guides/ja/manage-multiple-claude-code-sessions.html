@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Code の複数セッションを見失わずに管理する方法</title>
+  <title>Claude Code の複数セッションを見失わずに管理する方法 — AgentManager</title>
   <meta name="description" content="Claude Code を並列で複数セッション動かすための実践ガイド。git worktree による作業の分離、tmux やターミナルのレイアウト、そして「どのセッションが入力待ちか」を一目で把握する方法まで。">
   <link rel="canonical" href="https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
@@ -144,6 +144,13 @@ tmux split-window -h</code></pre>
     タブや分割ペインでも同じことができます。1 ペイン 1 セッション、名前はタスク名に。
     VS Code や Cursor なら、エディタウィンドウごとに統合ターミナルで 1 セッションを動かす
     構成が定番で、コードとセッションが常に並びます。
+  </p>
+  <p>
+    どのレイアウトでも効く習慣が 2 つあります。タブ名をタスク名に変えること（tmux なら
+    <code>tmux rename-window fix-auth</code>）、そして各セッションに
+    <a href="https://code.claude.com/docs/en/statusline" target="_blank" rel="noopener">ステータスライン</a>を
+    付けること。<code>/statusline</code> コマンドでプロンプト下にカスタム行（モデル・git ブランチ・
+    コンテキスト使用量）を設定でき、どのセッションに飛び込んでも自己紹介してくれます。
   </p>
 
   <h2>Step 3: 本当の問題 — 「誰が自分を待っているか」</h2>

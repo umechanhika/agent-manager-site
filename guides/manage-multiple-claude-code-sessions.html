@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How to Manage Multiple Claude Code Sessions Without Losing Track</title>
+  <title>How to Manage Multiple Claude Code Sessions Without Losing Track — AgentManager</title>
   <meta name="description" content="Practical ways to run several Claude Code sessions in parallel — git worktrees, tmux and terminal layouts — and how to know instantly which session needs your input.">
   <link rel="canonical" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
@@ -140,6 +140,13 @@ tmux split-window -h</code></pre>
     Tabs or split panes work the same way: one session per pane, named after the task.
     VS Code and Cursor users often run one Claude Code session per editor window, scoped to
     that window's workspace — the integrated terminal keeps session and code side by side.
+  </p>
+  <p>
+    Two habits make any layout easier to navigate: rename tabs after the task (in tmux,
+    <code>tmux rename-window fix-auth</code>), and give each session a
+    <a href="https://code.claude.com/docs/en/statusline" target="_blank" rel="noopener">status line</a> —
+    the <code>/statusline</code> command sets up a custom line under the prompt (model, git branch,
+    context usage), so every session is self-describing when you land in it.
   </p>
 
   <h2>Step 3: The real problem — knowing who needs you</h2>
