@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Manage Multiple Claude Code Sessions — AgentManager</title>
+  <meta name="description" content="A practical guide to running Claude Code sessions in parallel: git worktrees, terminal layout, notifications, and how to always know which session needs you.">
+  <link rel="canonical" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.ja.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="How to Manage Multiple Claude Code Sessions">
+  <meta property="og:description" content="Run Claude Code sessions in parallel without losing track: git worktrees, terminal layout, notifications, and session monitoring.">
+  <meta property="og:image" content="https://agentmgr.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en">
+  <meta property="og:locale:alternate" content="ja">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Manage Multiple Claude Code Sessions">
+  <meta name="twitter:description" content="Run Claude Code sessions in parallel without losing track: git worktrees, terminal layout, notifications, and session monitoring.">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="guide.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "How to Manage Multiple Claude Code Sessions",
+    "description": "A practical guide to running Claude Code sessions in parallel: git worktrees, terminal layout, notifications, and how to always know which session needs you.",
+    "url": "https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html",
+    "inLanguage": "en",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <nav class="lang-toggle" aria-label="Language">
+      <a class="lang-btn active" href="manage-multiple-claude-code-sessions.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="manage-multiple-claude-code-sessions.ja.html" lang="ja" hreflang="ja">JA</a>
+    </nav>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="guide-wrap">
+
+  <nav class="guide-crumb"><a href="/">AgentManager</a> / Guides</nav>
+
+  <h1>How to manage multiple Claude Code sessions</h1>
+  <span class="guide-meta">Updated August 26, 2026</span>
+
+  <p class="guide-lead">
+    Claude Code can work on a task for minutes at a time — which makes it natural to open a second
+    session, then a third, and keep them all busy in parallel. The hard part isn't starting the
+    sessions. It's <strong>keeping track of them</strong>: which one is still running, which one
+    finished, and which one has been silently waiting for your permission for the last ten minutes.
+    This guide covers a practical setup for parallel Claude Code work.
+  </p>
+
+  <h2>Why run more than one session at all?</h2>
+  <p>
+    A single Claude Code session is often <em>your</em> bottleneck in reverse: Claude works, you wait.
+    Typical reasons to parallelize:
+  </p>
+  <ul>
+    <li><strong>Independent tasks</strong> — a bug fix in one repo, a refactor in another, a doc update in a third.</li>
+    <li><strong>Long-running work</strong> — while one session runs a migration or a large test suite, another can review a PR.</li>
+    <li><strong>Exploration vs. execution</strong> — one session investigates a design question while another implements something already decided.</li>
+  </ul>
+  <p>
+    The trade-off: every extra session multiplies the chances that one of them is blocked on you
+    without you noticing. Claude Code stops and waits whenever it needs a permission decision
+    (running a command, editing a file), an answer to a question, or approval of a plan. A waiting
+    session makes no sound and steals no focus — it just sits there.
+  </p>
+
+  <h2>1. Give each session its own working copy (git worktrees)</h2>
+  <p>
+    Running two sessions in the same checkout is asking for trouble: both edit the same files, and
+    one session's <code>git status</code> becomes noise for the other. If your parallel tasks touch
+    the same repository, give each session its own
+    <a href="https://git-scm.com/docs/git-worktree" rel="noopener">git worktree</a>:
+  </p>
+  <pre><code>cd ~/code/myapp
+git worktree add ../myapp-fix-login fix/login-timeout
+git worktree add ../myapp-refactor refactor/db-layer
+
+# terminal tab 1
+cd ../myapp-fix-login && claude
+
+# terminal tab 2
+cd ../myapp-refactor && claude</code></pre>
+  <p>
+    Each worktree is a full checkout on its own branch sharing one <code>.git</code> store, so it's
+    cheap, and sessions can never step on each other's uncommitted changes. When a task is done,
+    <code>git worktree remove</code> cleans up.
+  </p>
+
+  <h2>2. Make sessions identifiable in your terminal</h2>
+  <p>
+    With three or more sessions, "which tab was the API refactor?" becomes a real question. A few
+    habits help:
+  </p>
+  <ul>
+    <li><strong>One tab (or tmux window) per session</strong>, named after the task — most terminals let you rename tabs; in tmux it's <code>tmux rename-window api-refactor</code>.</li>
+    <li><strong>A consistent order</strong> — e.g. leftmost tab is always the "main" task.</li>
+    <li><strong>A status line inside Claude Code</strong> — the <code>/statusline</code> command sets up a custom status line (model, git branch, context usage) so each session is self-describing. It can also be configured manually via the <code>statusLine</code> setting in <code>~/.claude/settings.json</code>.</li>
+  </ul>
+
+  <h2>3. Get notified when a session needs you</h2>
+  <p>
+    Naming tabs solves "which one is which", but not "which one needs me <em>right now</em>".
+    Claude Code has several built-in ways to surface that moment:
+  </p>
+  <ul>
+    <li><strong>Native terminal notifications</strong> — in Ghostty, Kitty, and iTerm2, Claude Code can post desktop notifications when it's waiting (iTerm2 requires enabling notifications in Settings &rarr; Profiles &rarr; Terminal).</li>
+    <li><strong>Terminal bell</strong> — set <code>"preferredNotifChannel": "terminal_bell"</code> in <code>~/.claude/settings.json</code>, and most terminals will mark the tab that rang.</li>
+    <li><strong>Hooks</strong> — the <code>Notification</code> hook event fires when Claude is waiting for input or permission, and can run any command, such as posting a macOS notification.</li>
+  </ul>
+  <p>
+    We cover both approaches in detail in the companion guides:
+    <a href="claude-code-notifications-macos.html">Claude Code notifications on macOS</a> and
+    <a href="claude-code-hooks-session-status.html">tracking session status with hooks</a>.
+  </p>
+
+  <h2>Where this setup breaks down</h2>
+  <p>
+    Notifications tell you <em>that</em> something happened, once. With several sessions running,
+    that's not quite the same as knowing the state of your fleet:
+  </p>
+  <ul>
+    <li>A macOS banner disappears after a few seconds. If you were mid-thought in another session, it's gone.</li>
+    <li>Two notifications in a row don't tell you which sessions are <em>still</em> waiting versus already handled.</li>
+    <li>You can't tell what kind of attention is needed — a quick yes/no permission, a plan to review, or a finished task — without switching to the tab and looking.</li>
+    <li>The mental overhead grows with every session: you end up polling your own terminal tabs like a human cron job.</li>
+  </ul>
+  <p>
+    What actually scales is a persistent, glanceable view of every session's status — the thing an
+    IDE gives you for build tasks, but for your Claude Code sessions.
+  </p>
+
+  <div class="guide-cta">
+    <h2>A dedicated monitor for your Claude Code sessions</h2>
+    <p>
+      <strong>AgentManager</strong> is a macOS app built for exactly this. It shows every Claude Code
+      session in one floating window — which is running, which is done, and which is waiting, with
+      the <em>reason</em> it's waiting (permission, question, or plan review). The window surfaces
+      the moment any session needs input and hides when everything is clear, and clicking a row
+      jumps you to the exact terminal pane, tab, or IDE window that session lives in.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="guide_cta_lp">See how it works →</a>
+    </div>
+    <div class="cta-note">Free to use — no account or credit card required · macOS 13+</div>
+  </div>
+
+  <section class="guide-related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="claude-code-notifications-macos.html">Claude Code notifications on macOS: never miss a prompt</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Using Claude Code hooks to track session status</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（LP と同じ cta_click イベント / cta_location 区分）
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+</script>
+</body>
+</html>

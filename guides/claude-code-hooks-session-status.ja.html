@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code の hooks でセッション状態を把握する — AgentManager</title>
+  <meta name="description" content="Claude Code の hooks の仕組みと、Notification・Stop などのイベントで各セッションの状態を追跡する方法を、動く settings.json の設定例つきで解説します。">
+  <link rel="canonical" href="https://agentmgr.app/guides/claude-code-hooks-session-status.ja.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/claude-code-hooks-session-status.ja.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/claude-code-hooks-session-status.ja.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code の hooks でセッション状態を把握する">
+  <meta property="og:description" content="Notification・Stop をはじめとするフックイベントの解説と、セッション状態を追跡する settings.json の実例。">
+  <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja">
+  <meta property="og:locale:alternate" content="en">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code の hooks でセッション状態を把握する">
+  <meta name="twitter:description" content="Notification・Stop をはじめとするフックイベントの解説と、セッション状態を追跡する settings.json の実例。">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="guide.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code の hooks でセッション状態を把握する",
+    "description": "Claude Code の hooks の仕組みと、Notification・Stop などのイベントで各セッションの状態を追跡する方法を、動く settings.json の設定例つきで解説します。",
+    "url": "https://agentmgr.app/guides/claude-code-hooks-session-status.ja.html",
+    "inLanguage": "ja",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <nav class="lang-toggle" aria-label="Language">
+      <a class="lang-btn" href="claude-code-hooks-session-status.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="claude-code-hooks-session-status.ja.html" aria-current="page">JA</a>
+    </nav>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="guide-wrap">
+
+  <nav class="guide-crumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
+
+  <h1>Claude Code の hooks でセッション状態を把握する</h1>
+  <span class="guide-meta">更新日: 2026年8月26日</span>
+
+  <p class="guide-lead">
+    Claude Code の hooks は、セッションのライフサイクル上の決まったタイミング — ツール実行の前後、
+    応答の完了、入力待ちへの移行など — で自作のシェルコマンドを実行できる仕組みです。
+    「待ちになったら知らせる」という小さな用途から、セッション状態ダッシュボードの構築まで、
+    すべての土台になります。この記事では hooks のモデルを説明し、動く設定例を順に組み立てます。
+  </p>
+
+  <h2>hooks の仕組み</h2>
+  <p>
+    hooks は設定ファイルの <code>"hooks"</code> キーで構成します。全プロジェクト共通なら
+    <code>~/.claude/settings.json</code>、リポジトリ単位ならリポジトリ内の
+    <code>.claude/settings.json</code> です。各エントリは<strong>ライフサイクルイベント</strong>に
+    1 つ以上のコマンドを対応付けます。
+  </p>
+  <pre><code>{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          { "type": "command", "command": "実行したいコマンド" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <p>
+    イベントが発火すると、Claude Code はコマンドを実行し、stdin に JSON ペイロードを渡します。
+    ペイロードには必ずセッションを特定する情報 — <code>session_id</code>・<code>cwd</code>・
+    <code>transcript_path</code>・<code>hook_event_name</code> — が含まれ、さらにイベント固有の
+    フィールドが付きます。ツール系イベントなら <code>tool_name</code> と <code>tool_input</code>、
+    <code>Notification</code> なら人間向けの <code>message</code> です。ツール系イベントは
+    <code>matcher</code> でツール名によるフィルタもできます。
+  </p>
+
+  <h2>セッション状態の把握に効くイベント</h2>
+  <p>
+    Claude Code には多数のフックイベントがありますが、セッションの状態追跡という目的では
+    次が中心になります。
+  </p>
+  <table>
+    <tr><th>イベント</th><td>発火タイミング</td></tr>
+    <tr><th><code>SessionStart</code></th><td>セッションの開始・再開 — 一覧に行が「現れる」瞬間。</td></tr>
+    <tr><th><code>UserPromptSubmit</code></th><td>プロンプトの送信 — セッションが「実行中」になる。</td></tr>
+    <tr><th><code>PreToolUse</code> / <code>PostToolUse</code></th><td>各ツール実行の前後 — 「今なにをしているか」の細粒度シグナル。</td></tr>
+    <tr><th><code>Notification</code></th><td>Claude が待ちに入った — 許可の判断待ち、または入力待ち。</td></tr>
+    <tr><th><code>Stop</code></th><td>Claude が応答を終えた — タスク完了。</td></tr>
+    <tr><th><code>SubagentStop</code></th><td>サブエージェントが作業を終えた。</td></tr>
+    <tr><th><code>SessionEnd</code></th><td>セッションの終了 — 行が「消える」瞬間。</td></tr>
+  </table>
+
+  <h2>例 1: 待ちになったら macOS 通知を出す</h2>
+  <p>
+    定番の QoL フックです。<code>~/.claude/settings.json</code> に:
+  </p>
+  <pre><code>{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"入力を待っています\" with title \"Claude Code\" sound name \"Glass\"'"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <p>
+    macOS 向けの他のバリエーション（ターミナルベル、iTerm2/Ghostty のネイティブ通知、
+    <code>Stop</code> でのサウンド再生など）は
+    「<a href="claude-code-notifications-macos.ja.html">Claude Code の通知を macOS で受け取る</a>」
+    にまとめています。
+  </p>
+
+  <h2>例 2: 各セッションの状態をファイルに書き出す</h2>
+  <p>
+    通知は一瞬で消えますが、ステータス<em>ファイル</em>ならいつでも読めます — シェルプロンプトからも、
+    tmux のステータスバーからも、自作スクリプトからも。次の構成は
+    <code>~/.claude/session-status/</code> にセッションごとの JSON ファイルを保ち、状態が変わるたびに
+    更新します。
+  </p>
+  <pre><code>{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "~/.claude/track-status.sh running" } ] }
+    ],
+    "Notification": [
+      { "hooks": [ { "type": "command", "command": "~/.claude/track-status.sh waiting" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "~/.claude/track-status.sh done" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "~/.claude/track-status.sh ended" } ] }
+    ]
+  }
+}</code></pre>
+  <p>そして <code>~/.claude/track-status.sh</code>（<code>chmod +x</code> で実行権限を付与）:</p>
+  <pre><code>#!/bin/bash
+# stdin のフックペイロードを読み、セッションごとのステータスファイルを書く。
+STATE="$1"
+DIR="$HOME/.claude/session-status"
+mkdir -p "$DIR"
+
+PAYLOAD=$(cat)
+SESSION_ID=$(echo "$PAYLOAD" | jq -r '.session_id')
+CWD=$(echo "$PAYLOAD" | jq -r '.cwd')
+
+if [ "$STATE" = "ended" ]; then
+  rm -f "$DIR/$SESSION_ID.json"
+else
+  jq -n --arg state "$STATE" --arg cwd "$CWD" \
+    '{state: $state, cwd: $cwd, updated: now | todate}' \
+    &gt; "$DIR/$SESSION_ID.json"
+fi</code></pre>
+  <p>
+    これで <code>cat ~/.claude/session-status/*.json</code> が全セッションのライブ状態を返すように
+    なり、ファイルを読めるものなら何でも — tmux のセグメントでも、メニューバー用スクリプトでも —
+    それを表示できます。
+  </p>
+
+  <h2>hooks を「本物のモニター」にするために必要なもの</h2>
+  <p>
+    ステータスファイル方式は実際に機能しますし、ライフサイクルを理解するには最良の教材です。
+    ただし「ディスク上のファイル」を「ひと目で信頼できる何か」にするには、地味な作業が
+    長く続きます。
+  </p>
+  <ul>
+    <li><strong>待ちの理由の分類</strong> — 許可プロンプト・質問・プランレビューでは緊急度が違います。ペイロードが与えてくれるのは素材であって、分類ではありません。</li>
+    <li><strong>古い状態の掃除</strong> — <code>Ctrl-C</code> で殺されたセッションや閉じられたターミナルでは <code>SessionEnd</code> が発火しないことがあり、ファイルが残り続けます。</li>
+    <li><strong>実際に目に入る UI</strong> — tmux からファイルをポーリングする方式は、tmux にいない日には機能しません。モニターは「必要な瞬間に視界にある」ことで初めて役に立ちます。</li>
+    <li><strong>戻る導線</strong> — セッション <code>abc123</code> が待ちだと分かっても、該当のターミナルタブや IDE ウィンドウを探す作業は残ります。</li>
+  </ul>
+
+  <div class="guide-cta">
+    <h2>すでに出来上がったモニターを使う選択肢</h2>
+    <p>
+      <strong>AgentManager</strong> はこれを最初から最後までやってくれる macOS アプリです。
+      全 Claude Code セッションが 1 つのフローティングウィンドウに並び、実行中・完了・確認待ちの
+      状態が、確認待ちの<em>理由</em>付きで表示されます。どれかのセッションが入力を必要とした瞬間に
+      ウィンドウが自動で現れ、全て解消すると引っ込みます。行をクリックすれば該当のターミナルの
+      ペイン・タブや IDE ウィンドウへ直接ジャンプ。メンテすべきスクリプトはありません。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る →</a>
+    </div>
+    <div class="cta-note">無料で使えます — アカウント登録・クレジットカード不要 · macOS 13+</div>
+  </div>
+
+  <section class="guide-related">
+    <h2>関連ガイド</h2>
+    <ul>
+      <li><a href="claude-code-notifications-macos.ja.html">Claude Code の通知を macOS で受け取る — 完了・確認待ちに気づく方法</a></li>
+      <li><a href="manage-multiple-claude-code-sessions.ja.html">Claude Code の複数セッションを管理する方法</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（LP と同じ cta_click イベント / cta_location 区分）
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+</script>
+</body>
+</html>

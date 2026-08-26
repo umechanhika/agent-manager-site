@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code の複数セッションを管理する方法 — AgentManager</title>
+  <meta name="description" content="Claude Code を並列で走らせるための実践ガイド。git worktree・ターミナル整理・通知設定、そして「どのセッションが自分を待っているか」を常に把握する方法を解説します。">
+  <link rel="canonical" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.ja.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.ja.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.ja.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code の複数セッションを管理する方法">
+  <meta property="og:description" content="git worktree・ターミナル整理・通知設定・セッション監視 — Claude Code を並列で走らせても状況を見失わないための実践ガイド。">
+  <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja">
+  <meta property="og:locale:alternate" content="en">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code の複数セッションを管理する方法">
+  <meta name="twitter:description" content="git worktree・ターミナル整理・通知設定・セッション監視 — Claude Code を並列で走らせても状況を見失わないための実践ガイド。">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="guide.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code の複数セッションを管理する方法",
+    "description": "Claude Code を並列で走らせるための実践ガイド。git worktree・ターミナル整理・通知設定、そして「どのセッションが自分を待っているか」を常に把握する方法を解説します。",
+    "url": "https://agentmgr.app/guides/manage-multiple-claude-code-sessions.ja.html",
+    "inLanguage": "ja",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <nav class="lang-toggle" aria-label="Language">
+      <a class="lang-btn" href="manage-multiple-claude-code-sessions.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="manage-multiple-claude-code-sessions.ja.html" aria-current="page">JA</a>
+    </nav>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="guide-wrap">
+
+  <nav class="guide-crumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
+
+  <h1>Claude Code の複数セッションを管理する方法</h1>
+  <span class="guide-meta">更新日: 2026年8月26日</span>
+
+  <p class="guide-lead">
+    Claude Code は数分単位で自律的に作業を進めてくれます。だからこそ 2 つ目、3 つ目のセッションを
+    開いて並列で走らせたくなる — ここまでは自然な流れです。難しいのはセッションを起動することでは
+    なく、<strong>全セッションの状況を把握し続けること</strong>。どれがまだ実行中で、どれが完了して、
+    どれが 10 分前から黙って許可待ちになっているのか。この記事では、Claude Code を並列運用するための
+    実践的なセットアップを紹介します。
+  </p>
+
+  <h2>そもそも、なぜ複数セッションを走らせるのか</h2>
+  <p>
+    1 セッションだけの運用では、Claude が作業している間こちらが待つだけの時間が生まれます。
+    並列化する典型的な動機は次の通りです。
+  </p>
+  <ul>
+    <li><strong>独立したタスクの同時進行</strong> — あるリポジトリのバグ修正、別リポジトリのリファクタ、ドキュメント更新など。</li>
+    <li><strong>長時間タスクの裏で別作業</strong> — マイグレーションや大きなテストスイートを流している間に、別セッションで PR レビューを進める。</li>
+    <li><strong>調査と実装の分離</strong> — 1 つのセッションで設計の検討をさせつつ、決定済みの実装をもう 1 つで進める。</li>
+  </ul>
+  <p>
+    トレードオフは明確で、セッションを増やすほど「自分がボトルネックになっているのに気づかない」
+    確率が上がります。Claude Code はコマンド実行やファイル編集の許可、質問への回答、プランの承認が
+    必要になると停止して待ちます。待ち状態のセッションは音も出さずフォーカスも奪いません —
+    ただ静かに止まっているだけです。
+  </p>
+
+  <h2>1. セッションごとに作業コピーを分ける（git worktree）</h2>
+  <p>
+    同じチェックアウトで 2 セッションを走らせると、互いのファイル編集が衝突し、
+    <code>git status</code> もノイズだらけになります。同一リポジトリで並列作業をするなら、
+    セッションごとに <a href="https://git-scm.com/docs/git-worktree" rel="noopener">git worktree</a>
+    を切るのが定石です。
+  </p>
+  <pre><code>cd ~/code/myapp
+git worktree add ../myapp-fix-login fix/login-timeout
+git worktree add ../myapp-refactor refactor/db-layer
+
+# ターミナルのタブ 1
+cd ../myapp-fix-login && claude
+
+# ターミナルのタブ 2
+cd ../myapp-refactor && claude</code></pre>
+  <p>
+    worktree はブランチごとの完全なチェックアウトですが <code>.git</code> の実体は共有されるため
+    軽量です。セッション同士が未コミットの変更を踏み合うことは構造的に起きません。
+    作業が終わったら <code>git worktree remove</code> で片付けられます。
+  </p>
+
+  <h2>2. どのセッションがどれか、ターミナル上で識別できるようにする</h2>
+  <p>
+    セッションが 3 つを超えると「API リファクタはどのタブだっけ？」が現実の問題になります。
+    効くのは次のような習慣です。
+  </p>
+  <ul>
+    <li><strong>1 タスク = 1 タブ（または tmux ウィンドウ）</strong>にして、タスク名を付ける。多くのターミナルはタブ名を変更でき、tmux なら <code>tmux rename-window api-refactor</code>。</li>
+    <li><strong>並び順を固定する</strong> — 例: いちばん左のタブは常に「メイン」のタスク。</li>
+    <li><strong>Claude Code のステータスラインを設定する</strong> — <code>/statusline</code> コマンドでカスタムのステータスライン（モデル名・git ブランチ・コンテキスト使用量など）を設定でき、各セッションが自己説明的になります。<code>~/.claude/settings.json</code> の <code>statusLine</code> 設定で手動構成も可能です。</li>
+  </ul>
+
+  <h2>3. セッションが自分を必要とした瞬間に通知を受け取る</h2>
+  <p>
+    タブに名前を付ければ「どれがどれか」は解決しますが、「どれが<em>今</em>自分を待っているか」は
+    分かりません。Claude Code にはその瞬間を知らせる仕組みが複数あります。
+  </p>
+  <ul>
+    <li><strong>ターミナルのネイティブ通知</strong> — Ghostty・Kitty・iTerm2 では、Claude Code の入力待ちを macOS のデスクトップ通知として受け取れます（iTerm2 は Settings &rarr; Profiles &rarr; Terminal で通知を有効化）。</li>
+    <li><strong>ターミナルベル</strong> — <code>~/.claude/settings.json</code> に <code>"preferredNotifChannel": "terminal_bell"</code> を設定すると、多くのターミナルがベルの鳴ったタブに印を付けてくれます。</li>
+    <li><strong>hooks</strong> — <code>Notification</code> フックイベントは Claude が入力や許可を待ち始めたときに発火し、macOS 通知の送信など任意のコマンドを実行できます。</li>
+  </ul>
+  <p>
+    それぞれの詳しい手順は姉妹記事
+    「<a href="claude-code-notifications-macos.ja.html">Claude Code の通知を macOS で受け取る</a>」と
+    「<a href="claude-code-hooks-session-status.ja.html">hooks でセッション状態を把握する</a>」で
+    解説しています。
+  </p>
+
+  <h2>このセットアップの限界</h2>
+  <p>
+    通知が教えてくれるのは「何かが起きた」という一度きりの事実です。複数セッションを走らせて
+    いると、それは「全体の状況が分かる」こととは別物だと気づきます。
+  </p>
+  <ul>
+    <li>macOS のバナーは数秒で消えます。別セッションの作業に集中していたら、それで終わりです。</li>
+    <li>通知が 2 連続で届いても、どのセッションが<em>まだ</em>待っていて、どれが対応済みなのかは分かりません。</li>
+    <li>必要なアクションの種類 — 一瞬で済む許可なのか、レビューすべきプランなのか、完了報告なのか — は、タブを切り替えて見るまで分かりません。</li>
+    <li>セッションが増えるほど頭のオーバーヘッドも増え、結局は人間 cron のようにタブを巡回することになります。</li>
+  </ul>
+  <p>
+    スケールするのは、全セッションの状態を常に一覧できる持続的なビューです。IDE がビルドタスクに
+    対して提供しているようなものを、Claude Code のセッションに対して持つイメージです。
+  </p>
+
+  <div class="guide-cta">
+    <h2>Claude Code セッション専用のモニターという選択肢</h2>
+    <p>
+      <strong>AgentManager</strong> はまさにこの用途のための macOS アプリです。全 Claude Code
+      セッションを 1 つのフローティングウィンドウに表示し、実行中・完了・確認待ちの状態を、
+      確認待ちの<em>理由</em>（許可・質問・プランレビュー）付きで一覧できます。ウィンドウは
+      どれかのセッションが入力を必要とした瞬間に自動で現れ、全て解消すると引っ込みます。行を
+      クリックすれば、そのセッションのあるターミナルのペイン・タブや IDE のウィンドウへ直接
+      ジャンプします。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る →</a>
+    </div>
+    <div class="cta-note">無料で使えます — アカウント登録・クレジットカード不要 · macOS 13+</div>
+  </div>
+
+  <section class="guide-related">
+    <h2>関連ガイド</h2>
+    <ul>
+      <li><a href="claude-code-notifications-macos.ja.html">Claude Code の通知を macOS で受け取る — 完了・確認待ちに気づく方法</a></li>
+      <li><a href="claude-code-hooks-session-status.ja.html">Claude Code の hooks でセッション状態を把握する</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（LP と同じ cta_click イベント / cta_location 区分）
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+</script>
+</body>
+</html>
