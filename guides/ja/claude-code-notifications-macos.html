@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</title>
-  <meta name="description" content="Claude Code の応答完了や許可待ちを見逃さないための macOS 通知設定。hooks を使ったコピペで動く設定例と、各アプローチのトレードオフ、通知だけでは足りなくなったときの選択肢まで。">
+  <title>Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド — AgentManager</title>
+  <meta name="description" content="Claude Code の応答完了や許可待ちを見逃さないための macOS 通知設定。Ghostty/Kitty/iTerm2 のネイティブ通知・ターミナルベル・hooks + osascript まで、コピペで動く設定例つきで解説。">
   <link rel="canonical" href="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
   <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
@@ -13,7 +13,7 @@
   <meta property="og:url" content="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
   <meta property="og:site_name" content="AgentManager">
   <meta property="og:title" content="Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド">
-  <meta property="og:description" content="hooks で macOS 通知を設定して、Claude Code の応答完了・許可待ちの瞬間に気づく。コピペで動く設定例つき。">
+  <meta property="og:description" content="ネイティブ通知・ターミナルベル・hooks — Claude Code の応答完了・許可待ちに macOS で気づく全手段。コピペで動く設定例つき。">
   <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -21,7 +21,7 @@
   <meta property="og:locale:alternate" content="en">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド">
-  <meta name="twitter:description" content="hooks で macOS 通知を設定して、Claude Code の応答完了・許可待ちの瞬間に気づく。コピペで動く設定例つき。">
+  <meta name="twitter:description" content="ネイティブ通知・ターミナルベル・hooks — Claude Code の応答完了・許可待ちに macOS で気づく全手段。コピペで動く設定例つき。">
   <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -51,9 +51,11 @@
     "@context": "https://schema.org",
     "@type": "TechArticle",
     "headline": "Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド",
-    "description": "Claude Code の応答完了や許可待ちを見逃さないための macOS 通知設定。hooks を使ったコピペで動く設定例と、各アプローチのトレードオフまで。",
+    "description": "Claude Code の応答完了や許可待ちを見逃さないための macOS 通知設定。Ghostty/Kitty/iTerm2 のネイティブ通知・ターミナルベル・hooks + osascript まで、コピペで動く設定例つきで解説。",
     "url": "https://agentmgr.app/guides/ja/claude-code-notifications-macos.html",
     "inLanguage": "ja",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
     "image": "https://agentmgr.app/og-image-ja.png",
     "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
     "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
@@ -80,10 +82,11 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
 
   <h1>Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</h1>
+  <p class="article-meta">最終更新: 2026年8月26日</p>
   <p class="article-lede">
     タスクを投げて Slack に切り替え、10 分後に戻ったら Claude Code は 9 分前に終わっていた——
     もっと悪いと、許可ダイアログを出したままずっと止まっていた。そんな見逃しをなくすための
-    通知設定を、2 分で終わる hooks の設定から常駐の状態モニターまで順に紹介します。
+    通知設定を、1 行の設定から hooks でのカスタマイズ、常駐の状態モニターまで順に紹介します。
   </p>
 
   <h2>気づくべき 2 つの瞬間</h2>
@@ -95,15 +98,43 @@
     <li><strong>応答が完了した</strong> — ターンが終わり、次のプロンプトはあなたの番。
       緊急ではないものの、戻ってレビューする合図です。</li>
   </ul>
+  <p>Claude Code はこの 2 つの瞬間を、複数の方法で知らせてくれます。手軽な順に紹介します。</p>
+
+  <h2>方法 1: ターミナルのネイティブ通知</h2>
   <p>
-    どちらも <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Claude Code hooks</a>
-    で拾えます。<code>Notification</code> イベントは Claude が入力を必要とするときに発火し
-    （許可ダイアログの場合は表示から数秒間未応答のときに発火するので、即答した分で通知が
-    溢れることはありません）、<code>Stop</code> イベントは応答完了時に発火します。
+    対応ターミナルを使っているなら、これが最も手軽です。Claude Code は入力待ちになると
+    <strong>Ghostty</strong>・<strong>Kitty</strong>・<strong>iTerm2</strong> 経由で
+    macOS のデスクトップ通知を送れます。
+  </p>
+  <ul>
+    <li><strong>Ghostty / Kitty</strong> — 追加設定なしで動作します。macOS が通知の許可を求めてきたら許可するだけです。</li>
+    <li><strong>iTerm2</strong> — 事前に有効化が必要です。Settings &rarr; Profiles &rarr; Terminal で「Send Notification Center alerts」を有効にし、macOS のシステム設定で iTerm2 の通知を許可します。</li>
+  </ul>
+  <p>それ以外のターミナル（macOS 標準の Terminal.app を含む）では、次のベルか hooks を使ってください。</p>
+
+  <h2>方法 2: ターミナルベル</h2>
+  <p>
+    Claude Code は注意が必要なタイミングでターミナルベルを鳴らせます。
+    <code>~/.claude/settings.json</code> に次を設定します。
+  </p>
+  <pre><code>{
+  "preferredNotifChannel": "terminal_bell"
+}</code></pre>
+  <p>
+    多くのターミナルはベルを視覚化してくれます。Terminal.app はタブにバッジを表示し、iTerm2 は
+    ベルを通知に変換でき、tmux はウィンドウにベルインジケーターを付けます。素朴な仕組みですが、
+    どの環境でも動き、スクリプトも不要です。
   </p>
 
-  <h2>設定手順: hooks で macOS 標準の通知を出す</h2>
-  <p>追加ツールは不要です。macOS 標準の <code>osascript</code> で通知センターに通知を出せます。</p>
+  <h2>方法 3: hooks — 通知を自由にカスタマイズする</h2>
+  <p>
+    完全に制御したいなら <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Claude Code hooks</a>
+    です。ライフサイクルイベントで任意のコマンドを実行できます。<code>Notification</code>
+    イベントは Claude が入力を必要とするときに発火し（許可ダイアログの場合は表示から数秒間
+    未応答のときに発火するので、即答した分で通知が溢れることはありません）、<code>Stop</code>
+    イベントは応答完了時に発火します。追加ツールは不要で、macOS 標準の <code>osascript</code>
+    で通知センターに通知を出せます。
+  </p>
 
   <h3>1. 小さなスクリプトを 2 つ作る</h3>
   <pre><code>mkdir -p ~/.claude/scripts
@@ -170,8 +201,8 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
       許可されているか。集中モード中はバナーが抑制される点にも注意です。</li>
   </ul>
 
-  <h2>通知バナーの構造的な限界</h2>
-  <p>この設定は本当に便利で、全員に勧めています。ただ、使い込むほどバナー特有の限界に当たります:</p>
+  <h2>単発通知の構造的な限界</h2>
+  <p>3 つの方法はどれも「何かが起きた瞬間の単発の合図」という同じ形をしています。それ自体は本当に便利ですが、使い込むほど構造的な限界に当たります:</p>
   <ul>
     <li><strong>バナーはイベントであって状態ではない。</strong>数秒で消えるため、
       「<em>今この瞬間</em>、何か自分を待っているものはあるか？」には答えられません。

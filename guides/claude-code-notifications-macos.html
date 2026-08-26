@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How to Get Claude Code Notifications on macOS</title>
-  <meta name="description" content="Stop missing the moment Claude Code finishes or asks for permission. Set up macOS notifications with hooks (copy-paste scripts included), plus the trade-offs of each approach.">
+  <title>How to Get Claude Code Notifications on macOS — AgentManager</title>
+  <meta name="description" content="Every way to get notified when Claude Code finishes or needs input on macOS: native Ghostty/Kitty/iTerm2 notifications, the terminal bell, and Notification hooks with osascript — copy-paste setup included.">
   <link rel="canonical" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
   <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
@@ -13,7 +13,7 @@
   <meta property="og:url" content="https://agentmgr.app/guides/claude-code-notifications-macos.html">
   <meta property="og:site_name" content="AgentManager">
   <meta property="og:title" content="How to Get Claude Code Notifications on macOS">
-  <meta property="og:description" content="Set up macOS notifications for Claude Code with hooks — know the moment a session finishes or needs your approval.">
+  <meta property="og:description" content="Native terminal notifications, the terminal bell, and hooks — every way to know when Claude Code needs you on macOS.">
   <meta property="og:image" content="https://agentmgr.app/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -21,7 +21,7 @@
   <meta property="og:locale:alternate" content="ja">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="How to Get Claude Code Notifications on macOS">
-  <meta name="twitter:description" content="Set up macOS notifications for Claude Code with hooks — know the moment a session finishes or needs your approval.">
+  <meta name="twitter:description" content="Native terminal notifications, the terminal bell, and hooks — every way to know when Claude Code needs you on macOS.">
   <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -51,9 +51,11 @@
     "@context": "https://schema.org",
     "@type": "TechArticle",
     "headline": "How to Get Claude Code Notifications on macOS",
-    "description": "Stop missing the moment Claude Code finishes or asks for permission. Set up macOS notifications with hooks, plus the trade-offs of each approach.",
+    "description": "Every way to get notified when Claude Code finishes or needs input on macOS: native Ghostty/Kitty/iTerm2 notifications, the terminal bell, and Notification hooks with osascript.",
     "url": "https://agentmgr.app/guides/claude-code-notifications-macos.html",
     "inLanguage": "en",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
     "image": "https://agentmgr.app/og-image.png",
     "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
     "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
@@ -80,11 +82,12 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / Guides</nav>
 
   <h1>How to Get Claude Code Notifications on macOS</h1>
+  <p class="article-meta">Updated August 26, 2026</p>
   <p class="article-lede">
     You kick off a task, switch to Slack, and come back ten minutes later to find Claude Code
     finished nine minutes ago — or worse, that it's been sitting on a permission dialog the
-    whole time. Here's how to get notified the moment a session needs you, from a two-minute
-    hook setup to a full status monitor.
+    whole time. Here's how to get notified the moment a session needs you — from a one-line
+    setting, to custom hooks, to a full status monitor.
   </p>
 
   <h2>The two moments that matter</h2>
@@ -96,15 +99,43 @@
     <li><strong>Finished responding</strong> — the turn is done and the next prompt is yours.
       Less urgent, but it's the signal to come back and review.</li>
   </ul>
+  <p>Claude Code can surface both moments in several ways. From simplest to most flexible:</p>
+
+  <h2>Option 1: native notifications from your terminal</h2>
   <p>
-    Both are exposed through <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Claude Code hooks</a>:
-    the <code>Notification</code> event fires when Claude needs your attention (for permission
-    prompts, shortly after the dialog appears unanswered — quick approvals don't spam you), and
-    the <code>Stop</code> event fires when Claude finishes a response.
+    The easiest path, if you use a supported terminal: Claude Code posts macOS desktop
+    notifications through <strong>Ghostty</strong>, <strong>Kitty</strong>, and
+    <strong>iTerm2</strong> when it's waiting for you.
+  </p>
+  <ul>
+    <li><strong>Ghostty / Kitty</strong> — works out of the box; just allow notifications for the app when macOS asks.</li>
+    <li><strong>iTerm2</strong> — enable it first: Settings &rarr; Profiles &rarr; Terminal &rarr; check "Send Notification Center alerts", and allow iTerm2 notifications in macOS System Settings.</li>
+  </ul>
+  <p>In other terminals — Apple's stock Terminal.app included — use the bell or the hooks below.</p>
+
+  <h2>Option 2: the terminal bell</h2>
+  <p>
+    Claude Code can ring the terminal bell when it needs attention. In
+    <code>~/.claude/settings.json</code>:
+  </p>
+  <pre><code>{
+  "preferredNotifChannel": "terminal_bell"
+}</code></pre>
+  <p>
+    Most terminals turn the bell into something visible: Terminal.app badges the tab, iTerm2 can
+    post a notification for it, and tmux marks the window with a bell indicator. Crude, but it
+    works everywhere and needs no scripts.
   </p>
 
-  <h2>Setup: native macOS notifications via hooks</h2>
-  <p>No extra tools needed — macOS's built-in <code>osascript</code> can post to Notification Center.</p>
+  <h2>Option 3: hooks — fully custom notifications</h2>
+  <p>
+    For full control, <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Claude Code hooks</a>
+    run any command at lifecycle events: the <code>Notification</code> event fires when Claude
+    needs your attention (for permission prompts, shortly after the dialog appears unanswered —
+    quick approvals don't spam you), and the <code>Stop</code> event fires when Claude finishes
+    a response. No extra tools needed — macOS's built-in <code>osascript</code> can post to
+    Notification Center.
+  </p>
 
   <h3>1. Create two small scripts</h3>
   <pre><code>mkdir -p ~/.claude/scripts
@@ -171,7 +202,7 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
   </ul>
 
   <h2>Where notifications fall short</h2>
-  <p>This setup is genuinely useful — we recommend it to everyone. But banners have structural limits you'll hit as usage grows:</p>
+  <p>All three options share one shape: a one-shot ping at the moment something happens. That's genuinely useful — and it has structural limits you'll hit as usage grows:</p>
   <ul>
     <li><strong>They're events, not state.</strong> A banner slides away after a few seconds.
       "Is anything waiting on me <em>right now</em>?" has no answer — you're back to checking terminals.</li>

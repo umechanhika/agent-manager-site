@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Code の複数セッションを見失わずに管理する方法</title>
+  <title>Claude Code の複数セッションを見失わずに管理する方法 — AgentManager</title>
   <meta name="description" content="Claude Code を並列で複数セッション動かすための実践ガイド。git worktree による作業の分離、tmux やターミナルのレイアウト、そして「どのセッションが入力待ちか」を一目で把握する方法まで。">
   <link rel="canonical" href="https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
@@ -54,6 +54,8 @@
     "description": "Claude Code を並列で複数セッション動かすための実践ガイド。git worktree による作業の分離、tmux やターミナルのレイアウト、どのセッションが入力待ちかを一目で把握する方法まで。",
     "url": "https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html",
     "inLanguage": "ja",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
     "image": "https://agentmgr.app/og-image-ja.png",
     "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
     "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
@@ -80,6 +82,7 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
 
   <h1>Claude Code の複数セッションを見失わずに管理する方法</h1>
+  <p class="article-meta">最終更新: 2026年8月26日</p>
   <p class="article-lede">
     Claude Code の作業時間の大半は、こちらが見ていなくても進みます。となると自然な次の一歩は、
     2 つ、3 つ、5 つとセッションを並列で走らせることです。難しいのは起動そのものではなく、
@@ -141,6 +144,13 @@ tmux split-window -h</code></pre>
     タブや分割ペインでも同じことができます。1 ペイン 1 セッション、名前はタスク名に。
     VS Code や Cursor なら、エディタウィンドウごとに統合ターミナルで 1 セッションを動かす
     構成が定番で、コードとセッションが常に並びます。
+  </p>
+  <p>
+    どのレイアウトでも効く習慣が 2 つあります。タブ名をタスク名に変えること（tmux なら
+    <code>tmux rename-window fix-auth</code>）、そして各セッションに
+    <a href="https://code.claude.com/docs/en/statusline" target="_blank" rel="noopener">ステータスライン</a>を
+    付けること。<code>/statusline</code> コマンドでプロンプト下にカスタム行（モデル・git ブランチ・
+    コンテキスト使用量）を設定でき、どのセッションに飛び込んでも自己紹介してくれます。
   </p>
 
   <h2>Step 3: 本当の問題 — 「誰が自分を待っているか」</h2>

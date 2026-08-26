@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Code hooks でセッション状態を追跡する</title>
+  <title>Claude Code hooks でセッション状態を追跡する — AgentManager</title>
   <meta name="description" content="Claude Code の hook イベントから「確認待ち・処理中・完了」というセッション状態を導出する方法。イベントと状態の対応表と、素朴な実装が壊れるエッジケース（サブエージェント・許可応答の非検知）まで解説。">
   <link rel="canonical" href="https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html">
   <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
@@ -54,6 +54,8 @@
     "description": "Claude Code の hook イベントから「確認待ち・処理中・完了」というセッション状態を導出する方法。イベントと状態の対応表と、素朴な実装が壊れるエッジケースまで。",
     "url": "https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html",
     "inLanguage": "ja",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
     "image": "https://agentmgr.app/og-image-ja.png",
     "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
     "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
@@ -80,6 +82,7 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
 
   <h1>Claude Code hooks でセッション状態を追跡する</h1>
+  <p class="article-meta">最終更新: 2026年8月26日</p>
   <p class="article-lede">
     Claude Code の hooks は「このツールをブロックする」「編集に lint をかける」といった
     ポリシー制御の文脈で語られがちですが、実は<em>セッションが今何をしているか</em>——
@@ -139,13 +142,53 @@
     <tr><td><code>Stop</code></td><td>完了</td><td>ターン完了</td></tr>
     <tr><td><code>SessionEnd</code></td><td>（削除）</td><td>セッション消滅</td></tr>
   </table></div>
+  <h3>動く最小実装</h3>
   <p>
-    最小の実装は、上記全イベントに同じスクリプトを登録し、<code>session_id</code> ごとに
-    小さな JSON ファイルを 1 つ書くことです。あとはステータスバーウィジェットでも tmux の
-    セグメントでもダッシュボードでも、そのディレクトリを描画すればいい。実装上の注意は 2 つ:
-    書き込みは<strong>アトミックに</strong>（一時ファイルに書いて <code>mv</code>。読み手に
-    書きかけを見せない）、ファイルのキーは作業ディレクトリではなく <code>session_id</code> に
-    （同じディレクトリで複数セッションは普通に起きる）。
+    1 つのスクリプトをいくつかのイベントに登録し、<code>session_id</code> ごとに小さな
+    JSON ファイルを 1 つ書きます。あとはステータスバーウィジェットでも tmux のセグメントでも
+    ダッシュボードでも、そのディレクトリを描画すればいい。<code>~/.claude/settings.json</code>:
+  </p>
+  <pre><code>{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh running" } ] }
+    ],
+    "Notification": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh waiting" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh done" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh ended" } ] }
+    ]
+  }
+}</code></pre>
+  <p><code>~/.claude/track-status.sh</code> はこう書きます（<a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a> が必要。<code>chmod +x</code> を忘れずに）:</p>
+  <pre><code>#!/bin/bash
+# stdin の hook ペイロードを読み、セッションごとの状態ファイルを保つ。
+STATE="$1"
+DIR="$HOME/.claude/session-status"
+mkdir -p "$DIR"
+
+PAYLOAD=$(cat)
+SESSION_ID=$(echo "$PAYLOAD" | jq -r '.session_id')
+CWD=$(echo "$PAYLOAD" | jq -r '.cwd')
+
+if [ "$STATE" = "ended" ]; then
+  rm -f "$DIR/$SESSION_ID.json"
+else
+  # アトミックに書く（一時ファイル + mv）。読み手に書きかけを見せない。
+  jq -n --arg state "$STATE" --arg cwd "$CWD" \
+    '{state: $state, cwd: $cwd, updated: now | todate}' \
+    &gt; "$DIR/$SESSION_ID.json.tmp" &amp;&amp; mv "$DIR/$SESSION_ID.json.tmp" "$DIR/$SESSION_ID.json"
+fi</code></pre>
+  <p>
+    これで <code>cat ~/.claude/session-status/*.json</code> が全セッションのライブな状態を返します。
+    設計上の注意は 2 つ、上のコードに織り込み済みです: ファイルのキーは作業ディレクトリではなく
+    <code>session_id</code>（同じディレクトリで複数セッションは普通に起きる）、書き込みはアトミックに。
+    この 4 イベント版は対応表の細かい確認待ち（<code>AskUserQuestion</code>・<code>ExitPlanMode</code>・
+    <code>idle_prompt</code>）を省いているので、動いたら足してください。
   </p>
 
   <h2>素朴な実装が壊れるエッジケース</h2>
