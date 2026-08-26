@@ -58,12 +58,6 @@ PAGES = {
     ),
 }
 
-LABELS = {
-    "en": ("Waiting", "Running", "Done"),
-    "ja": ("確認待ち", "処理中", "完了"),
-}
-
-
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--chromium", default=None,
@@ -81,14 +75,10 @@ def main() -> None:
         page = browser.new_page(viewport={"width": 1200, "height": 630})
 
         for slug, (lang, title_html, size) in PAGES.items():
-            waiting, running, done = LABELS[lang]
             html = (template
                     .replace("{{LANG}}", lang)
                     .replace("{{TITLE_HTML}}", title_html)
-                    .replace("{{TITLE_SIZE}}", str(size))
-                    .replace("{{LABEL_WAITING}}", waiting)
-                    .replace("{{LABEL_RUNNING}}", running)
-                    .replace("{{LABEL_DONE}}", done))
+                    .replace("{{TITLE_SIZE}}", str(size)))
             # ../logo-dark.svg の相対参照を効かせるため tools/ 配下に一時ファイルを置く
             with tempfile.NamedTemporaryFile(
                     "w", suffix=".html", dir=TEMPLATE.parent,
