@@ -7,7 +7,7 @@ Playwright (Chromium) のスクリーンショットで guides/og/ に PNG を�
 
     python3 tools/gen-guide-og.py [--chromium /path/to/chromium]
 
-依存: playwright (pip install playwright)。--chromium 未指定時は
+依存: playwright (pip install playwright) とネットワーク接続 (Google Fonts)。--chromium 未指定時は
 Playwright 管理の Chromium を使う (playwright install chromium)。
 
 注意: chromium 単体の --headless --screenshot は viewport の解釈が
@@ -97,7 +97,8 @@ def main() -> None:
                 tmp = Path(f.name)
             out = OUT_DIR / f"{slug}.png"
             try:
-                page.goto(tmp.as_uri())
+                page.goto(tmp.as_uri(), wait_until="networkidle")
+                page.evaluate("document.fonts.ready")
                 page.screenshot(path=out)
             finally:
                 tmp.unlink()

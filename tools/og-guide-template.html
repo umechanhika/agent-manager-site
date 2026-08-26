@@ -2,6 +2,8 @@
 <html lang="{{LANG}}">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Noto+Sans+JP:wght@700;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
   /*
    * ガイドページ用 OGP 画像テンプレート (1200x630)
@@ -15,7 +17,7 @@
       radial-gradient(900px 500px at 88% -10%, rgba(94,158,214,.13), transparent 70%),
       radial-gradient(900px 560px at 5% -6%, rgba(245,166,35,.08), transparent 70%),
       #0B0D10;
-    font-family: 'Noto Sans CJK JP', 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+    font-family: 'Inter', 'Noto Sans JP', 'Hiragino Sans', sans-serif;
     color: #E8EBF0;
   }
   .frame {
@@ -28,7 +30,7 @@
   .top { display: flex; align-items: center; justify-content: space-between; }
   .logo { height: 30px; width: auto; display: block; }
   .kind {
-    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     font-weight: 700; font-size: 22px; letter-spacing: .22em;
     color: #F5A623;
     padding: 10px 24px; border-radius: 999px;
@@ -38,8 +40,9 @@
 
   h1 {
     position: absolute; left: 0; right: 0; top: 128px;
-    font-weight: 900; font-size: {{TITLE_SIZE}}px; line-height: 1.32; letter-spacing: .005em;
+    font-weight: 800; font-size: {{TITLE_SIZE}}px; line-height: 1.32; letter-spacing: .005em;
   }
+  :lang(ja) h1 { font-weight: 900; }
   h1 .accent {
     color: #F5A623;
     text-shadow: 0 0 34px rgba(245,166,35,.5), 0 0 80px rgba(245,166,35,.25);
@@ -58,7 +61,7 @@
   }
   .dot { width: 11px; height: 11px; border-radius: 50%; }
   .url {
-    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     font-weight: 700; font-size: 22px; letter-spacing: .04em;
     color: #646C7A;
   }
