@@ -297,6 +297,18 @@ fi</code></pre>
     if (!cta || typeof gtag !== 'function') return;
     gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
   });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
 </script>
 </body>
 </html>

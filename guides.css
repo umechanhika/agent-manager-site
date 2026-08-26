@@ -32,6 +32,7 @@
 }
 
 html { scroll-behavior: smooth; }
+.hidden { display: none !important; }
 body {
   background:
     radial-gradient(720px 420px at 85% -80px, rgba(94,158,214,.09), transparent 70%),
@@ -147,6 +148,10 @@ header {
 .article-wrap li > ul, .article-wrap li > ol { margin-top: 6px; }
 .article-wrap a { color: var(--link); }
 .article-wrap a:hover { text-decoration: underline; }
+/* ボタンは .article-wrap a のリンク色を継がない（詳細度で上書き） */
+.article-wrap .btn-primary { color: #1A1207; }
+.article-wrap .btn-ghost { color: var(--text); }
+.article-wrap .btn:hover { text-decoration: none; }
 .article-wrap strong { color: var(--text); }
 
 .article-wrap code {
