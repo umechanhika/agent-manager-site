@@ -221,8 +221,8 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
     rather than events that interrupt you. It's a macOS menu bar app that keeps a small
     always-on-top window listing every Claude Code session with a status lamp —
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> waiting,
-    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4E8BC8"/></svg> running,
-    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#3BAD52"/></svg> done,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> running,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> done,
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle:
   </p>
   <ul>
@@ -230,7 +230,8 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
       cat meow instead of a banner sound) and hides when everything's clear — no Notification Center involved.</li>
     <li>Waiting rows show <strong>what kind of answer</strong> is needed — approval, plan review, or a choice.</li>
     <li><strong>Clicking a row jumps</strong> to the exact terminal pane — tmux, iTerm2, Terminal.app, VS Code-family.</li>
-    <li>Approvals are detected, so stale "waiting" lamps clear themselves within seconds.</li>
+    <li>Approvals are detected — it reads Claude Code's session registry alongside hooks — so a
+      stale "waiting" lamp clears the moment you answer.</li>
   </ul>
   <p>
     Setup is one click (it registers its hooks for you, and they're cleanly removable). It also

@@ -222,8 +222,8 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
     「一目で見える状態」として解きます。すべての Claude Code セッションを状態ランプ付きで
     一覧する、常時最前面の小さなウィンドウを持つ macOS メニューバーアプリです —
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> 確認待ち、
-    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4E8BC8"/></svg> 処理中、
-    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#3BAD52"/></svg> 完了、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 処理中、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機:
   </p>
   <ul>
@@ -231,7 +231,8 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
       （バナー音の代わりに猫の鳴き声も選べます）、すべて解消すると引っ込みます。通知センターは使いません。</li>
     <li>確認待ちの行には<strong>返答の形</strong>が出ます — 許可の Yes/No か、プランレビューか、選択式か。</li>
     <li><strong>行をクリックすると該当ペインへジャンプ</strong> — tmux・iTerm2・Terminal.app・VS Code 系に対応。</li>
-    <li>許可への応答も検知するため、残留した「確認待ち」ランプは数秒以内に自動で消えます。</li>
+    <li>許可への応答も検知します。hooks に加えて Claude Code のセッションレジストリを参照して
+      いるため、承認した瞬間に「確認待ち」ランプは即時に消え、残留しません。</li>
   </ul>
   <p>
     セットアップはワンクリックです（hooks の登録は自動、解除もきれいにできます）。上の

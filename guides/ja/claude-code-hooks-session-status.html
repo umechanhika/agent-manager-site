@@ -250,10 +250,11 @@ fi</code></pre>
     状態ランプ付きで描画します —
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> 確認待ち
     （<em>返答の形</em>つき: 許可／プラン／選択）、
-    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4E8BC8"/></svg> 処理中、
-    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#3BAD52"/></svg> 完了、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 処理中、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機。
-    上のエッジケースはすべて対応済みで、許可承認後の「確認待ち」残留も数秒で自動解消します。
+    上のエッジケースはすべて対応済みです。hooks に加えて Claude Code のセッションレジストリも
+    参照しているため、イベントからの推測に頼らず、許可を承認した瞬間に「確認待ち」は即時に消えます。
     さらに hook スクリプトには収まらない部分——確認待ち発生時のウィンドウ自動表示、
     クリックで該当ターミナルペインへのジャンプ——も含みます。hooks の登録はワンクリックで、
     きれいに解除でき、自作の hooks とも共存します。

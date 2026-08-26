@@ -121,8 +121,8 @@ header {
 }
 .article-meta {
   font-family: var(--mono); font-size: 11px;
-  color: var(--dim); letter-spacing: .04em;
-  margin-bottom: 18px;
+  color: var(--dim); letter-spacing: .06em; text-transform: uppercase;
+  margin-bottom: 22px;
 }
 .article-lede {
   font-size: 17px; color: var(--muted); line-height: 1.7;
