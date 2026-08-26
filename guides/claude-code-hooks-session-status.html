@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracking Claude Code Session Status with Hooks</title>
+  <meta name="description" content="How to use Claude Code's hook events to derive real session state — waiting, running, done — including the event-to-state mapping and the edge cases (subagents, approvals) that break naive implementations.">
+  <link rel="canonical" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Tracking Claude Code Session Status with Hooks">
+  <meta property="og:description" content="The hook event-to-state mapping for Claude Code sessions, and the edge cases that break naive implementations.">
+  <meta property="og:image" content="https://agentmgr.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en">
+  <meta property="og:locale:alternate" content="ja">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tracking Claude Code Session Status with Hooks">
+  <meta name="twitter:description" content="The hook event-to-state mapping for Claude Code sessions, and the edge cases that break naive implementations.">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Tracking Claude Code Session Status with Hooks",
+    "description": "How to use Claude Code's hook events to derive real session state — waiting, running, done — including the event-to-state mapping and the edge cases that break naive implementations.",
+    "url": "https://agentmgr.app/guides/claude-code-hooks-session-status.html",
+    "inLanguage": "en",
+    "image": "https://agentmgr.app/og-image.png",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="claude-code-hooks-session-status.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="ja/claude-code-hooks-session-status.html" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / Guides</nav>
+
+  <h1>Tracking Claude Code Session Status with Hooks</h1>
+  <p class="article-lede">
+    Claude Code's hooks are usually pitched for policy — block this tool, lint that edit.
+    But they're also the only public API that tells you <em>what a session is doing</em>:
+    running, finished, or blocked on a question. This guide shows how to turn hook events
+    into reliable session state, and where the naive version breaks. It's the same
+    foundation our app <a href="/">AgentManager</a> is built on.
+  </p>
+
+  <h2>Hooks in one minute</h2>
+  <p>
+    A <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hook</a> is a shell
+    command Claude Code runs at a lifecycle event, with a JSON payload on stdin
+    (<code>session_id</code>, <code>hook_event_name</code>, <code>cwd</code>, and per-event fields).
+    Registration lives in <code>~/.claude/settings.json</code> (global) or a project's
+    <code>.claude/settings.json</code>:
+  </p>
+  <pre><code>{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/on-stop.sh" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <p>For status tracking, these are the events that matter:</p>
+  <div class="table-scroll"><table>
+    <tr><th>Event</th><th>Fires when</th></tr>
+    <tr><td><code>SessionStart</code></td><td>A session starts or resumes</td></tr>
+    <tr><td><code>UserPromptSubmit</code></td><td>You submit a prompt</td></tr>
+    <tr><td><code>PreToolUse</code> / <code>PostToolUse</code></td><td>Before / after each tool call</td></tr>
+    <tr><td><code>Notification</code></td><td>Claude needs your attention (permission prompt, idle reminder…)</td></tr>
+    <tr><td><code>Stop</code></td><td>The main agent finishes its response</td></tr>
+    <tr><td><code>SubagentStop</code></td><td>A subagent (Task) finishes</td></tr>
+    <tr><td><code>SessionEnd</code></td><td>The session terminates</td></tr>
+  </table></div>
+
+  <h2>From events to state</h2>
+  <p>
+    Four states cover what you actually want to know:
+    <strong>waiting</strong> (blocked on you),
+    <strong>running</strong> (working),
+    <strong>done</strong> (turn finished),
+    <strong>idle</strong> (open, nothing happening). A first-pass mapping:
+  </p>
+  <div class="table-scroll"><table>
+    <tr><th>Event</th><th>New state</th><th>Why</th></tr>
+    <tr><td><code>SessionStart</code></td><td>idle</td><td>Nothing asked yet</td></tr>
+    <tr><td><code>UserPromptSubmit</code></td><td>running</td><td>You could type, so no dialog was blocking; a turn begins</td></tr>
+    <tr><td><code>PreToolUse</code>, <code>PostToolUse</code></td><td>running</td><td>Tool activity = work in progress</td></tr>
+    <tr><td><code>PreToolUse</code> for <code>AskUserQuestion</code> / <code>ExitPlanMode</code></td><td><strong>waiting</strong></td><td>These tools immediately block on your answer (a choice / a plan approval)</td></tr>
+    <tr><td><code>Notification</code>, type <code>permission_prompt</code></td><td><strong>waiting</strong></td><td>A tool-permission dialog is sitting unanswered</td></tr>
+    <tr><td><code>Notification</code>, type <code>idle_prompt</code></td><td>done</td><td>Idle reminder after a finished turn — <em>not</em> a new question</td></tr>
+    <tr><td><code>Stop</code></td><td>done</td><td>Turn complete</td></tr>
+    <tr><td><code>SessionEnd</code></td><td>(remove)</td><td>Session is gone</td></tr>
+  </table></div>
+  <p>
+    A minimal implementation is a single script registered for all of these events that writes
+    one small JSON file per <code>session_id</code> — then anything (a status bar widget, a tmux
+    segment, a dashboard) can render the directory. Two implementation notes: write
+    <strong>atomically</strong> (write to a temp file, then <code>mv</code>) so readers never see
+    half a file, and key files by <code>session_id</code>, not working directory — two sessions
+    can share a cwd.
+  </p>
+
+  <h2>The edge cases that break the naive version</h2>
+  <p>These are the ones that cost real debugging time. Knowing them up front is most of the value of this guide.</p>
+
+  <h3>1. Approving a permission prompt fires no event</h3>
+  <p>
+    Hooks tell you when a permission dialog <em>appears</em> (<code>Notification</code>) but not
+    when you <em>answer</em> it. The next event arrives only when the approved tool completes
+    (<code>PostToolUse</code>) or the turn ends (<code>Stop</code>). Approve a long build and your
+    tracker shows "waiting" for the whole build. Design for it: treat <em>waiting</em> as
+    "cleared by the next lifecycle event", and accept that clearing lags — the error is at least
+    on the safe side (a stale "waiting", never a missed one).
+  </p>
+
+  <h3>2. <code>Stop</code> doesn't mean everything stopped</h3>
+  <p>
+    Background subagents keep running after the main agent's <code>Stop</code>. If you flip to
+    <em>done</em> on <code>Stop</code> while a subagent is mid-task, your state lies. Track
+    subagent lifecycles and only settle to <em>done</em> when the main agent has stopped
+    <em>and</em> no subagents remain. Also reset that bookkeeping on <code>SessionStart</code> —
+    it fires on resume too, and stale subagent IDs otherwise pin the state at "running" forever.
+  </p>
+
+  <h3>3. Ordering: don't let <code>Stop</code> trample <em>waiting</em></h3>
+  <p>
+    A background subagent hits a permission prompt → <code>Notification</code> says waiting →
+    the main agent finishes → <code>Stop</code> says done. Pure last-event-wins now hides a
+    session that is genuinely blocked. The fix is to track <em>why</em> you're waiting (main
+    agent vs. subagent) and let only the matching resolution clear it, rather than letting any
+    later event overwrite the flag. The same applies to <code>idle_prompt</code>, which
+    re-fires periodically while a session sits unattended.
+  </p>
+
+  <h3>4. Escaped and killed sessions leak files</h3>
+  <p>
+    <code>SessionEnd</code> is not guaranteed — crashes and force-kills skip it, and interrupting
+    a subagent with ESC skips its <code>SubagentStop</code>. Anything long-lived needs garbage
+    collection (e.g. drop state files whose owning process is gone).
+  </p>
+
+  <div class="note">
+    <strong>Why so much care?</strong> The failure directions aren't symmetric. A stale
+    "waiting" wastes a glance; a missed "waiting" wastes the whole stall — the exact thing
+    you built the tracker to prevent. When in doubt, err toward showing waiting.
+  </div>
+
+  <h2>Build vs. install</h2>
+  <p>
+    Everything above is buildable in an afternoon — for one consumer, in one format, plus the
+    edge-case hardening as you hit each case. That's a fine afternoon if you enjoy it
+    (we clearly did). The alternative:
+  </p>
+  <p>
+    <a href="/">AgentManager</a> is this pipeline, productized for macOS: its hooks write
+    per-session state files, and a small always-on-top window renders every session with a
+    status lamp — <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> waiting
+    (tagged with <em>what kind</em> of answer: approval / plan / choice),
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4E8BC8"/></svg> running,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#3BAD52"/></svg> done,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle.
+    All the edge cases above are handled — including clearing approved permission prompts within
+    seconds — plus the parts that don't fit in a hook script: auto-surfacing the window when a
+    session starts waiting, and click-to-jump to the exact terminal pane. Hook registration is
+    one click and cleanly reversible, and it composes with your own hooks.
+  </p>
+
+  <div class="guide-cta">
+    <h2>Session status, already built</h2>
+    <p>
+      AgentManager turns Claude Code's hook events into a live status board for every
+      session — free to use, no account required.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="guide_cta_lp">See how it works</a>
+    </div>
+    <div class="cta-note">macOS 13+ — free plan shows up to 2 sessions at once</div>
+  </div>
+
+  <nav class="related" aria-label="Related guides">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">How to Manage Multiple Claude Code Sessions Without Losing Track</a></li>
+      <li><a href="claude-code-notifications-macos.html">How to Get Claude Code Notifications on macOS</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+</script>
+</body>
+</html>
