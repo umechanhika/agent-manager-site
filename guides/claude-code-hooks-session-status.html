@@ -249,9 +249,8 @@ fi</code></pre>
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> running,
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> done,
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle.
-    All the edge cases above are handled — approved permission prompts clear immediately,
-    because it reads Claude Code's session registry alongside hooks instead of inferring from
-    events alone — plus the parts that don't fit in a hook script: auto-surfacing the window when a
+    All the edge cases above are handled — including clearing approved permission prompts the
+    moment you answer — plus the parts that don't fit in a hook script: auto-surfacing the window when a
     session starts waiting, and click-to-jump to the exact terminal pane. Hook registration is
     one click and cleanly reversible, and it composes with your own hooks.
   </p>

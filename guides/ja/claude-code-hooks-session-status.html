@@ -253,8 +253,7 @@ fi</code></pre>
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 処理中、
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機。
-    上のエッジケースはすべて対応済みです。hooks に加えて Claude Code のセッションレジストリも
-    参照しているため、イベントからの推測に頼らず、許可を承認した瞬間に「確認待ち」は即時に消えます。
+    上のエッジケースはすべて対応済みで、許可を承認した瞬間に「確認待ち」は即時に消え、残留しません。
     さらに hook スクリプトには収まらない部分——確認待ち発生時のウィンドウ自動表示、
     クリックで該当ターミナルペインへのジャンプ——も含みます。hooks の登録はワンクリックで、
     きれいに解除でき、自作の hooks とも共存します。
