@@ -1018,6 +1018,7 @@
           <li data-en="No time limit"                  data-ja="期間制限なし">No time limit</li>
         </ul>
         <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+           id="price-download-btn"
            class="price-cta price-cta-dark" data-cta="pricing_free_download"
            data-en="↓ Free download" data-ja="↓ 無料ダウンロード">↓ Free download</a>
       </div>
@@ -1388,6 +1389,7 @@
     if (isMac) return;
     document.getElementById('download-btn').classList.add('hidden');
     document.getElementById('hdr-cta').classList.add('hidden');
+    document.getElementById('price-download-btn').classList.add('hidden');
     document.getElementById('nonmac-cta').classList.remove('hidden');
 
     // 非Macでは行き止まりにせず、後で Mac から戻れる導線（メール送信 / リンクコピー）を出す。
