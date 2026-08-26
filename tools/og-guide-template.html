@@ -16,6 +16,7 @@
     background:
       radial-gradient(900px 500px at 88% -10%, rgba(94,158,214,.13), transparent 70%),
       radial-gradient(900px 560px at 5% -6%, rgba(245,166,35,.08), transparent 70%),
+      radial-gradient(760px 340px at 82% 112%, rgba(245,166,35,.07), transparent 70%),
       #0B0D10;
     font-family: 'Inter', 'Noto Sans JP', 'Hiragino Sans', sans-serif;
     color: #E8EBF0;
@@ -38,14 +39,24 @@
     background: rgba(245,166,35,.08);
   }
 
+  .title-area {
+    position: absolute; left: 0; right: 0; top: 90px; bottom: 40px;
+    display: flex; align-items: center;
+  }
   h1 {
-    position: absolute; left: 0; right: 0; top: 128px;
     font-weight: 800; font-size: {{TITLE_SIZE}}px; line-height: 1.32; letter-spacing: .005em;
   }
   :lang(ja) h1 { font-weight: 900; }
   h1 .accent {
     color: #F5A623;
     text-shadow: 0 0 34px rgba(245,166,35,.5), 0 0 80px rgba(245,166,35,.25);
+  }
+  /* 下部の装飾: セッションランプ3色 (amber/sky/grass) のアクセントバー */
+  .accent-bar {
+    position: absolute; left: 0; bottom: 0;
+    width: 260px; height: 6px; border-radius: 3px;
+    background: linear-gradient(90deg, #F5A623, #5E9ED6 55%, #4EC46A);
+    box-shadow: 0 0 26px rgba(245,166,35,.4);
   }
 
 </style>
@@ -57,7 +68,8 @@
       <img class="logo" src="../logo-dark.svg" alt="">
       <div class="kind">GUIDE</div>
     </div>
-    <h1>{{TITLE_HTML}}</h1>
+    <div class="title-area"><h1>{{TITLE_HTML}}</h1></div>
+    <div class="accent-bar"></div>
   </div>
 </body>
 </html>
