@@ -1,15 +1,13 @@
 /*
- * guide.css — AgentManager ガイド（検索流入用コンテンツページ）共通スタイル
- * guides/*.html から読み込む
- *
- * デザインシステムは index.html の DARK PRO-TOOL トークンと同一:
- *   近黒背景 (#0B0D10)・1px ヘアラインボーダー・アンバー (#F5A623) がブランドアクセント。
+ * Guide pages — shared stylesheet.
+ * Tokens and component styles are extracted from index.html's inline
+ * DARK PRO-TOOL DESIGN SYSTEM so guides match the LP. If the LP palette
+ * changes, mirror the change here.
  */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Palette — index.html と同一 */
   --bg:       #0B0D10;
   --surf:     #12151B;
   --surf2:    #191E26;
@@ -22,8 +20,11 @@
   --amber:  #F5A623;
   --grass:  #4EC46A;
   --sky:    #5E9ED6;
+  --gray:   #9B9B9B;
 
   --link: #74A9E0;
+
+  --r: 12px;
 
   --mono: ui-monospace, 'SF Mono', Menlo, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
@@ -70,12 +71,12 @@ header {
 .lang-btn {
   font-family: var(--mono); font-size: 11px; font-weight: 700;
   letter-spacing: .08em; padding: 4px 9px;
-  color: var(--dim); text-decoration: none;
-  border-radius: 5px;
-  transition: background .12s, color .12s;
+  border-radius: 5px; border: none;
+  color: var(--dim); text-decoration: none; display: inline-block;
+  cursor: pointer; transition: background .12s, color .12s;
 }
+.lang-btn:hover { color: var(--text); }
 .lang-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
-.lang-btn:hover:not(.active) { color: var(--muted); }
 
 .hdr-cta {
   font-size: 13px; font-weight: 600;
@@ -96,154 +97,133 @@ header {
 }
 
 /* ── ARTICLE ────────────────────────────────────────────── */
-.guide-wrap {
+.article-wrap {
   max-width: 760px;
   margin: 0 auto;
-  padding: 56px 32px 80px;
+  padding: 56px 28px 72px;
 }
-@media (max-width: 600px) {
-  .guide-wrap { padding: 36px 20px 64px; }
+@media (max-width: 540px) {
+  .article-wrap { padding: 36px 20px 56px; }
 }
 
-.guide-crumb {
+.crumbs {
   font-family: var(--mono); font-size: 11px;
-  letter-spacing: .06em; text-transform: uppercase;
-  margin-bottom: 26px;
+  color: var(--dim); letter-spacing: .04em;
+  margin-bottom: 22px;
 }
-.guide-crumb a { color: var(--dim); text-decoration: none; }
-.guide-crumb a:hover { color: var(--muted); }
+.crumbs a { color: var(--muted); text-decoration: none; }
+.crumbs a:hover { color: var(--text); text-decoration: underline; }
 
-.guide-wrap h1 {
+.article-wrap h1 {
   font-size: clamp(26px, 4.5vw, 38px);
   font-weight: 800; letter-spacing: -.02em; line-height: 1.2;
   margin-bottom: 14px;
 }
-
-.guide-meta {
+.article-meta {
   font-family: var(--mono); font-size: 11px;
   color: var(--dim); letter-spacing: .06em; text-transform: uppercase;
-  display: block; margin-bottom: 36px;
+  display: block; margin-bottom: 22px;
+}
+.article-lede {
+  font-size: 17px; color: var(--muted); line-height: 1.7;
+  margin-bottom: 40px;
 }
 
-.guide-lead {
-  font-size: 17px; color: var(--muted); line-height: 1.75;
-  margin-bottom: 8px;
-}
-
-.guide-wrap h2 {
-  font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.35;
-  margin-top: 52px; margin-bottom: 14px;
-  padding-top: 28px;
+.article-wrap h2 {
+  font-size: 22px; font-weight: 700; letter-spacing: -.01em;
+  line-height: 1.3;
+  margin: 44px 0 14px;
+  padding-top: 20px;
   border-top: 1px solid var(--border);
 }
-
-.guide-wrap h3 {
+.article-wrap h3 {
   font-size: 17px; font-weight: 700;
-  margin-top: 32px; margin-bottom: 10px;
+  margin: 28px 0 10px;
 }
+.article-wrap p { margin-bottom: 14px; }
+.article-wrap p, .article-wrap li { color: var(--text); }
+.article-wrap ul, .article-wrap ol { margin: 0 0 14px 24px; }
+.article-wrap li { margin-bottom: 6px; }
+.article-wrap li > ul, .article-wrap li > ol { margin-top: 6px; }
+.article-wrap a { color: var(--link); }
+.article-wrap a:hover { text-decoration: underline; }
+.article-wrap strong { color: var(--text); }
 
-.guide-wrap p {
-  font-size: 15.5px; color: var(--muted);
-  line-height: 1.8; margin-bottom: 16px;
-}
-.guide-wrap strong { color: var(--text); font-weight: 600; }
-
-.guide-wrap a { color: var(--link); text-decoration: none; }
-.guide-wrap a:hover { text-decoration: underline; }
-
-.guide-wrap ul, .guide-wrap ol {
-  margin: 0 0 16px; padding: 0;
-  list-style: none;
-}
-.guide-wrap li {
-  font-size: 15.5px; color: var(--muted); line-height: 1.75;
-  position: relative; padding-left: 22px; margin-bottom: 8px;
-}
-.guide-wrap ul li::before {
-  content: '';
-  position: absolute; left: 2px; top: 11px;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--amber);
-}
-.guide-wrap ol { counter-reset: guide-ol; }
-.guide-wrap ol li::before {
-  counter-increment: guide-ol;
-  content: counter(guide-ol);
-  position: absolute; left: 0; top: 2px;
-  font-family: var(--mono); font-size: 12px; font-weight: 700;
-  color: var(--amber);
-}
-
-.guide-wrap code {
-  font-family: var(--mono); font-size: .88em;
-  color: var(--text);
-  background: rgba(255,255,255,.07);
+.article-wrap code {
+  font-family: var(--mono); font-size: 13.5px;
+  background: var(--surf2);
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 1px 6px;
   white-space: nowrap;
 }
-.guide-wrap pre {
-  background: #0D1015;
-  border: 1px solid var(--border-2);
-  border-radius: 10px;
+.article-wrap pre {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 16px 18px;
-  margin: 0 0 16px;
+  margin: 0 0 18px;
   overflow-x: auto;
 }
-.guide-wrap pre code {
-  background: transparent; border: none; padding: 0;
-  font-size: 13px; line-height: 1.6; white-space: pre;
-  color: var(--text);
+.article-wrap pre code {
+  background: none; border: none; padding: 0;
+  white-space: pre; display: block;
+  font-size: 13px; line-height: 1.6;
 }
 
-.guide-note {
-  margin: 20px 0 24px;
-  padding: 14px 18px;
-  background: var(--surf);
-  border: 1px solid var(--border-2);
-  border-left: 3px solid var(--amber);
-  border-radius: 10px;
-  font-size: 14px; color: var(--muted); line-height: 1.7;
+.article-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 18px;
+  font-size: 14.5px;
 }
-.guide-note p { font-size: 14px; margin-bottom: 0; }
-.guide-note p + p { margin-top: 8px; }
-
-.guide-wrap table {
-  width: 100%; border-collapse: collapse;
-  margin: 0 0 20px;
-  font-size: 14px; line-height: 1.6;
-}
-.guide-wrap th, .guide-wrap td {
-  text-align: left; vertical-align: top;
+.article-wrap th, .article-wrap td {
+  text-align: left;
   padding: 9px 12px;
   border: 1px solid var(--border);
+  vertical-align: top;
+}
+.article-wrap th {
+  background: var(--surf);
+  font-weight: 600; color: var(--muted);
+  font-size: 13px;
+}
+.table-scroll { overflow-x: auto; margin-bottom: 18px; }
+.table-scroll table { margin-bottom: 0; min-width: 480px; }
+
+.note {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 0 0 18px;
+  font-size: 14.5px;
   color: var(--muted);
 }
-.guide-wrap th {
-  color: var(--text); font-weight: 600;
-  background: var(--surf);
-  white-space: nowrap;
-}
+.note strong { color: var(--text); }
 
-/* ── CTA CARD ───────────────────────────────────────────── */
+/* Status lamp dots (same hues as the app) */
+.px-sq { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; display: inline-block; vertical-align: baseline; }
+
+/* ── CTA PANEL ──────────────────────────────────────────── */
 .guide-cta {
-  margin-top: 56px;
-  padding: 28px;
+  margin: 48px 0 0;
   background: var(--surf);
-  border: 1px solid rgba(245,166,35,.35);
-  border-radius: 12px;
-  box-shadow: 0 0 40px -12px rgba(245,166,35,.25);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  padding: 28px 28px 26px;
+  box-shadow: 0 0 40px rgba(245,166,35,.07);
 }
 .guide-cta h2 {
-  border-top: none; padding-top: 0; margin-top: 0;
-  font-size: 20px; margin-bottom: 10px;
+  border-top: none; padding-top: 0; margin: 0 0 8px;
+  font-size: 20px;
 }
-.guide-cta p { margin-bottom: 20px; }
+.guide-cta p { color: var(--muted); margin-bottom: 18px; font-size: 15px; }
 
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 20px;
+  padding: 13px 22px;
   font-size: 15px; font-weight: 600; font-family: var(--sans);
   text-decoration: none; cursor: pointer;
   border: 1px solid transparent;
@@ -255,39 +235,45 @@ header {
   background: var(--amber); color: #1A1207;
   box-shadow: 0 4px 24px rgba(245,166,35,.2);
 }
-.guide-cta .btn-primary { color: #1A1207; }
 .btn-primary:hover {
   filter: brightness(1.08);
   box-shadow: 0 4px 32px rgba(245,166,35,.4);
   transform: translateY(-1px);
-  text-decoration: none;
 }
 .btn-ghost {
-  background: var(--surf2); color: var(--text);
+  background: var(--surf); color: var(--text);
   border-color: var(--border-2);
 }
-.guide-cta .btn-ghost { color: var(--text); }
-.btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); text-decoration: none; }
-.cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.cta-note {
+.btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); }
+.guide-cta .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.guide-cta .cta-note {
   font-family: var(--mono); font-size: 11px;
-  color: var(--dim); letter-spacing: .03em;
+  color: var(--dim); letter-spacing: .04em;
+  margin-top: 12px;
 }
 
 /* ── RELATED GUIDES ─────────────────────────────────────── */
-.guide-related { margin-top: 48px; }
-.guide-related h2 {
-  font-size: 16px; margin-top: 0; margin-bottom: 12px;
-  padding-top: 24px;
+.related {
+  margin-top: 40px;
+  font-size: 14.5px;
 }
-.guide-related ul { margin-bottom: 0; }
+.related h2 {
+  font-size: 13px; font-weight: 600;
+  font-family: var(--mono); letter-spacing: .08em;
+  color: var(--dim); text-transform: uppercase;
+  border-top: 1px solid var(--border);
+  padding-top: 20px; margin: 0 0 10px;
+}
+.related ul { list-style: none; margin: 0; }
+.related li { margin-bottom: 6px; }
+.related a { color: var(--link); text-decoration: none; }
+.related a:hover { text-decoration: underline; }
 
 /* ── FOOTER ─────────────────────────────────────────────── */
 footer {
   border-top: 1px solid var(--border);
-  background: var(--bg); color: var(--muted);
-  padding: 28px 24px; text-align: center;
-  margin-top: 40px;
+  padding: 32px 28px 40px;
+  text-align: center;
 }
 footer p {
   font-family: var(--mono); font-size: 11px;

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code hooks でセッション状態を追跡する</title>
+  <meta name="description" content="Claude Code の hook イベントから「確認待ち・処理中・完了」というセッション状態を導出する方法。イベントと状態の対応表と、素朴な実装が壊れるエッジケース（サブエージェント・許可応答の非検知）まで解説。">
+  <link rel="canonical" href="https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-hooks-session-status.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code hooks でセッション状態を追跡する">
+  <meta property="og:description" content="hook イベントとセッション状態の対応表、そして素朴な実装が壊れるエッジケースまで。">
+  <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja">
+  <meta property="og:locale:alternate" content="en">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code hooks でセッション状態を追跡する">
+  <meta name="twitter:description" content="hook イベントとセッション状態の対応表、そして素朴な実装が壊れるエッジケースまで。">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code hooks でセッション状態を追跡する",
+    "description": "Claude Code の hook イベントから「確認待ち・処理中・完了」というセッション状態を導出する方法。イベントと状態の対応表と、素朴な実装が壊れるエッジケースまで。",
+    "url": "https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html",
+    "inLanguage": "ja",
+    "image": "https://agentmgr.app/og-image-ja.png",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn" href="../claude-code-hooks-session-status.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="claude-code-hooks-session-status.html" aria-current="page">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
+
+  <h1>Claude Code hooks でセッション状態を追跡する</h1>
+  <span class="article-meta">更新日: 2026年8月26日</span>
+  <p class="article-lede">
+    Claude Code の hooks は「このツールをブロックする」「編集に lint をかける」といった
+    ポリシー制御の文脈で語られがちですが、実は<em>セッションが今何をしているか</em>——
+    処理中か、完了したか、質問でブロックしているか——を教えてくれる唯一の公開 API でもあります。
+    このガイドでは hook イベントから信頼できるセッション状態を導出する方法と、素朴な実装が
+    壊れるポイントを解説します。私たちのアプリ <a href="/ja.html">AgentManager</a> も
+    この土台の上に作られています。
+  </p>
+
+  <h2>hooks を 1 分で</h2>
+  <p>
+    <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hook</a> は、
+    Claude Code がライフサイクルイベントのたびに実行するシェルコマンドです。stdin から
+    JSON ペイロード（<code>session_id</code>・<code>hook_event_name</code>・<code>cwd</code> と
+    イベント固有のフィールド）を受け取ります。登録先は <code>~/.claude/settings.json</code>
+    （全プロジェクト共通）またはプロジェクトの <code>.claude/settings.json</code>:
+  </p>
+  <pre><code>{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/on-stop.sh" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <p>状態追跡に関係するイベントは次のとおりです:</p>
+  <div class="table-scroll"><table>
+    <tr><th>イベント</th><th>発火タイミング</th></tr>
+    <tr><td><code>SessionStart</code></td><td>セッションの開始・再開</td></tr>
+    <tr><td><code>UserPromptSubmit</code></td><td>プロンプトの送信</td></tr>
+    <tr><td><code>PreToolUse</code> / <code>PostToolUse</code></td><td>各ツール呼び出しの前後</td></tr>
+    <tr><td><code>Notification</code></td><td>Claude が入力を必要とするとき（許可ダイアログ、放置リマインダー等）</td></tr>
+    <tr><td><code>Stop</code></td><td>メインエージェントの応答完了</td></tr>
+    <tr><td><code>SubagentStop</code></td><td>サブエージェント（Task）の完了</td></tr>
+    <tr><td><code>SessionEnd</code></td><td>セッションの終了</td></tr>
+  </table></div>
+
+  <h2>イベントから状態へ</h2>
+  <p>
+    知りたいことは 4 状態に集約できます:
+    <strong>確認待ち</strong>（あなたでブロック中）、
+    <strong>処理中</strong>（作業中）、
+    <strong>完了</strong>（ターン終了）、
+    <strong>待機</strong>（開いているが何も起きていない）。まずは素朴な対応表から:
+  </p>
+  <div class="table-scroll"><table>
+    <tr><th>イベント</th><th>新しい状態</th><th>理由</th></tr>
+    <tr><td><code>SessionStart</code></td><td>待機</td><td>まだ何も頼まれていない</td></tr>
+    <tr><td><code>UserPromptSubmit</code></td><td>処理中</td><td>入力できた＝ダイアログは残っていない。ターン開始</td></tr>
+    <tr><td><code>PreToolUse</code>・<code>PostToolUse</code></td><td>処理中</td><td>ツール活動＝作業進行中</td></tr>
+    <tr><td><code>AskUserQuestion</code> / <code>ExitPlanMode</code> の <code>PreToolUse</code></td><td><strong>確認待ち</strong></td><td>これらのツールは即座にあなたの回答（選択／プラン承認）でブロックする</td></tr>
+    <tr><td><code>Notification</code>（<code>permission_prompt</code>）</td><td><strong>確認待ち</strong></td><td>許可ダイアログが未応答のまま表示されている</td></tr>
+    <tr><td><code>Notification</code>（<code>idle_prompt</code>）</td><td>完了</td><td>ターン終了後の放置リマインダーであって新しい質問ではない</td></tr>
+    <tr><td><code>Stop</code></td><td>完了</td><td>ターン完了</td></tr>
+    <tr><td><code>SessionEnd</code></td><td>（削除）</td><td>セッション消滅</td></tr>
+  </table></div>
+  <p>
+    最小の実装は、上記全イベントに同じスクリプトを登録し、<code>session_id</code> ごとに
+    小さな JSON ファイルを 1 つ書くことです。あとはステータスバーウィジェットでも tmux の
+    セグメントでもダッシュボードでも、そのディレクトリを描画すればいい。実装上の注意は 2 つ:
+    書き込みは<strong>アトミックに</strong>（一時ファイルに書いて <code>mv</code>。読み手に
+    書きかけを見せない）、ファイルのキーは作業ディレクトリではなく <code>session_id</code> に
+    （同じディレクトリで複数セッションは普通に起きる）。
+  </p>
+
+  <h2>素朴な実装が壊れるエッジケース</h2>
+  <p>ここからが本題です。実際にデバッグ時間を溶かすのはこの 4 つで、先に知っておくことにこのガイドの価値の大半があります。</p>
+
+  <h3>1. 許可ダイアログへの「応答」はイベントを発火しない</h3>
+  <p>
+    hook が教えてくれるのは許可ダイアログが<em>出た</em>こと（<code>Notification</code>）までで、
+    あなたが<em>答えた</em>ことは分かりません。次のイベントが来るのは、承認したツールが完了したとき
+    （<code>PostToolUse</code>）かターンが終わったとき（<code>Stop</code>）。長いビルドを承認すると、
+    ビルド中ずっと「確認待ち」表示が残ります。これは設計で受け止めるしかありません:
+    確認待ちは「次のライフサイクルイベントで解除される」ものとして扱い、解除の遅れは許容する。
+    誤りは少なくとも安全側です（「確認待ちの残留」であって「確認待ちの見逃し」ではない）。
+  </p>
+
+  <h3>2. <code>Stop</code> は「全部止まった」を意味しない</h3>
+  <p>
+    バックグラウンドのサブエージェントは、メインエージェントの <code>Stop</code> 後も動き続けます。
+    サブエージェントの作業中に <code>Stop</code> で「完了」に倒すと、状態が嘘をつきます。
+    サブエージェントのライフサイクルを追跡し、「メインが停止済み<em>かつ</em>サブエージェントが
+    残っていない」ときだけ完了に倒してください。さらにその記録は <code>SessionStart</code> で
+    リセットすること——resume でも発火するので、リセットしないと消えたサブエージェントの ID の
+    せいで永遠に「処理中」に固定されます。
+  </p>
+
+  <h3>3. 順序の罠: <code>Stop</code> に「確認待ち」を踏み潰させない</h3>
+  <p>
+    バックグラウンドのサブエージェントが許可待ちでブロック → <code>Notification</code> が
+    確認待ちを告げる → メインエージェントが終了 → <code>Stop</code> が完了を告げる。
+    純粋な「最後のイベント勝ち」では、本当にブロックしているセッションが隠れてしまいます。
+    対策は、確認待ちの<em>理由</em>（メイン由来かサブエージェント由来か）を追跡し、
+    対応する解除信号だけがフラグを降ろせるようにすること。放置中に定期的に再発火する
+    <code>idle_prompt</code> にも同じ配慮が必要です。
+  </p>
+
+  <h3>4. 異常終了はファイルを残す</h3>
+  <p>
+    <code>SessionEnd</code> は保証されません。クラッシュや強制 kill では発火せず、
+    サブエージェントを ESC で中断すると <code>SubagentStop</code> も発火しません。
+    長期運用するならガベージコレクションが要ります（例: 所有プロセスが消えた状態ファイルは破棄）。
+  </p>
+
+  <div class="note">
+    <strong>なぜここまで気を使うのか？</strong> 失敗の向きが対称ではないからです。
+    「確認待ちの残留」は一瞥を無駄にするだけですが、「確認待ちの見逃し」は停止時間を
+    まるごと無駄にします——それはこのトラッカーを作った理由そのものです。迷ったら
+    確認待ち表示に倒してください。
+  </div>
+
+  <h2>自作するか、インストールするか</h2>
+  <p>
+    ここまでの内容は、1 つの用途・1 つの表示形式に絞れば半日で作れます。エッジケースの
+    対応は実際に踏むたびに固めていけばいい。それが楽しいなら良い半日です
+    （私たちは明らかに楽しみました）。もう一つの選択肢:
+  </p>
+  <p>
+    <a href="/ja.html">AgentManager</a> はこのパイプラインを macOS 向けに製品化したものです。
+    hook がセッションごとの状態ファイルを書き、常時最前面の小さなウィンドウが全セッションを
+    状態ランプ付きで描画します —
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> 確認待ち
+    （<em>返答の形</em>つき: 許可／プラン／選択）、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 処理中、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機。
+    上のエッジケースはすべて対応済みです。hooks に加えて Claude Code のセッションレジストリも
+    参照しているため、イベントからの推測に頼らず、許可を承認した瞬間に「確認待ち」は即時に消えます。
+    さらに hook スクリプトには収まらない部分——確認待ち発生時のウィンドウ自動表示、
+    クリックで該当ターミナルペインへのジャンプ——も含みます。hooks の登録はワンクリックで、
+    きれいに解除でき、自作の hooks とも共存します。
+  </p>
+
+  <div class="guide-cta">
+    <h2>セッション状態、作らずに使う</h2>
+    <p>
+      AgentManager は Claude Code の hook イベントを全セッションのライブな
+      ステータスボードに変えます。無料で使えます — アカウント登録不要。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る</a>
+    </div>
+    <div class="cta-note">macOS 13+ — フリープランは同時表示 2 セッションまで</div>
+  </div>
+
+  <nav class="related" aria-label="関連ガイド">
+    <h2>関連ガイド</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">Claude Code の複数セッションを見失わずに管理する方法</a></li>
+      <li><a href="claude-code-notifications-macos.html">Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+</script>
+</body>
+</html>

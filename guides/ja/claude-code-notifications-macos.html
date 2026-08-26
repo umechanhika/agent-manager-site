@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</title>
+  <meta name="description" content="Claude Code の応答完了や許可待ちを見逃さないための macOS 通知設定。hooks を使ったコピペで動く設定例と、各アプローチのトレードオフ、通知だけでは足りなくなったときの選択肢まで。">
+  <link rel="canonical" href="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド">
+  <meta property="og:description" content="hooks で macOS 通知を設定して、Claude Code の応答完了・許可待ちの瞬間に気づく。コピペで動く設定例つき。">
+  <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja">
+  <meta property="og:locale:alternate" content="en">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド">
+  <meta name="twitter:description" content="hooks で macOS 通知を設定して、Claude Code の応答完了・許可待ちの瞬間に気づく。コピペで動く設定例つき。">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド",
+    "description": "Claude Code の応答完了や許可待ちを見逃さないための macOS 通知設定。hooks を使ったコピペで動く設定例と、各アプローチのトレードオフまで。",
+    "url": "https://agentmgr.app/guides/ja/claude-code-notifications-macos.html",
+    "inLanguage": "ja",
+    "image": "https://agentmgr.app/og-image-ja.png",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn" href="../claude-code-notifications-macos.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="claude-code-notifications-macos.html" aria-current="page">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
+
+  <h1>Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</h1>
+  <span class="article-meta">更新日: 2026年8月26日</span>
+  <p class="article-lede">
+    タスクを投げて Slack に切り替え、10 分後に戻ったら Claude Code は 9 分前に終わっていた——
+    もっと悪いと、許可ダイアログを出したままずっと止まっていた。そんな見逃しをなくすための
+    通知設定を、1 行で終わる設定からカスタム hooks、常駐の状態モニターまで順に紹介します。
+  </p>
+
+  <h2>気づくべき 2 つの瞬間</h2>
+  <p>Claude Code があなたを待つ状況は 2 種類あり、緊急度が違います:</p>
+  <ul>
+    <li><strong>作業の途中で入力待ち</strong> — ツールの実行許可（「このコマンドを実行していい？」）、
+      プランの承認待ち、選択肢つきの確認の質問。答えるまでセッションは完全に停止していて、
+      気づかない 1 分がまるごと損失になります。</li>
+    <li><strong>応答が完了した</strong> — ターンが終わり、次のプロンプトはあなたの番。
+      緊急ではないものの、戻ってレビューする合図です。</li>
+  </ul>
+  <p>
+    どちらも <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Claude Code hooks</a>
+    で拾えます。<code>Notification</code> イベントは Claude が入力を必要とするときに発火し
+    （許可ダイアログの場合は表示から数秒間未応答のときに発火するので、即答した分で通知が
+    溢れることはありません）、<code>Stop</code> イベントは応答完了時に発火します。
+  </p>
+
+  <h2>方法 1: ターミナルのネイティブ通知</h2>
+  <p>
+    スクリプトを書く前に、使っているターミナルを確認してください。Claude Code は
+    <strong>Ghostty</strong>・<strong>Kitty</strong>・<strong>iTerm2</strong> 経由で、
+    入力待ちのときに macOS のデスクトップ通知を出せます。
+  </p>
+  <ul>
+    <li><strong>Ghostty / Kitty</strong> — 追加設定なしで動きます。macOS が通知の許可を求めてきたら許可するだけです。</li>
+    <li><strong>iTerm2</strong> — 事前に有効化が必要です。Settings &rarr; Profiles &rarr; Terminal で「Send Notification Center alerts」にチェックを入れ、macOS のシステム設定で iTerm2 の通知を許可します。</li>
+  </ul>
+  <p>
+    macOS 標準の Terminal.app にはこの連携がないため、次のベルか hooks を使ってください。
+  </p>
+
+  <h2>方法 2: ターミナルベル</h2>
+  <p>
+    Claude Code は注意が必要なタイミングでターミナルベルを鳴らせます。
+    <code>~/.claude/settings.json</code> に 1 行:
+  </p>
+  <pre><code>{
+  "preferredNotifChannel": "terminal_bell"
+}</code></pre>
+  <p>
+    多くのターミナルはベルを視覚化してくれます。Terminal.app はタブにバッジを表示し、
+    iTerm2 はベルを通知に変換でき、tmux はウィンドウにベルインジケーターを付けます。
+    素朴な仕組みですが、どの環境でも動き、スクリプトも不要です。
+  </p>
+
+  <h2>方法 3: hooks でカスタムの macOS 通知を出す</h2>
+  <p>追加ツールは不要です。macOS 標準の <code>osascript</code> で通知センターに通知を出せます。</p>
+
+  <h3>1. 小さなスクリプトを 2 つ作る</h3>
+  <pre><code>mkdir -p ~/.claude/scripts
+
+cat &gt; ~/.claude/scripts/notify-waiting.sh &lt;&lt;'EOF'
+#!/bin/bash
+# Claude Code の "Notification" hook: セッションが入力待ち。
+osascript -e 'display notification "セッションが入力を待っています" with title "Claude Code" sound name "Glass"'
+EOF
+
+cat &gt; ~/.claude/scripts/notify-done.sh &lt;&lt;'EOF'
+#!/bin/bash
+# Claude Code の "Stop" hook: セッションの応答が完了。
+osascript -e 'display notification "応答が完了しました" with title "Claude Code"'
+EOF
+
+chmod +x ~/.claude/scripts/notify-waiting.sh ~/.claude/scripts/notify-done.sh</code></pre>
+
+  <h3>2. <code>~/.claude/settings.json</code> に登録する</h3>
+  <p>
+    <code>hooks</code> セクションを追加します（既にあればマージ）。この場所に書くと全プロジェクトに
+    適用されます。特定プロジェクトだけに絞るなら、そのプロジェクトの
+    <code>.claude/settings.json</code> に書いてください。
+  </p>
+  <pre><code>{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/notify-waiting.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/notify-done.sh" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <p>
+    新しい Claude Code セッションを起動し（hooks は起動時に読み込まれます）、許可リストに
+    入れていないツールを使うタスクを頼んで、許可ダイアログを数秒放置してみてください。
+    通知が出れば成功です。
+  </p>
+
+  <h3>発展形</h3>
+  <ul>
+    <li><strong>実際のメッセージを表示する。</strong>hook は stdin から JSON ペイロードを受け取り、
+      <code>message</code> フィールドに Claude が何を求めているかが入っています。
+      <a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a> が入っているなら:
+      <pre><code>#!/bin/bash
+msg=$(jq -r '.message // "入力が必要です"')
+osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\""</code></pre></li>
+    <li><strong>プロジェクト名を入れる。</strong>ペイロードの <code>cwd</code> フィールドで
+      どのリポジトリのセッションか分かります。複数セッションを走らせ始めると必須になります
+      （<a href="manage-multiple-claude-code-sessions.html">複数セッション管理ガイド</a>参照）。</li>
+    <li><strong>リッチな通知にする。</strong>Homebrew の <code>terminal-notifier</code> なら
+      カスタムアイコンやクリックアクションが使えます。</li>
+    <li><strong>通知が出ないときは通知センターの設定を確認。</strong>システム設定 → 通知で、
+      ターミナル（<code>osascript</code> の通知はスクリプトエディタ名義のことも）の通知が
+      許可されているか。集中モード中はバナーが抑制される点にも注意です。</li>
+  </ul>
+
+  <h2>通知バナーの構造的な限界</h2>
+  <p>この設定は本当に便利で、全員に勧めています。ただ、使い込むほどバナー特有の限界に当たります:</p>
+  <ul>
+    <li><strong>バナーはイベントであって状態ではない。</strong>数秒で消えるため、
+      「<em>今この瞬間</em>、何か自分を待っているものはあるか？」には答えられません。
+      結局ターミナルを見に行くことになります。</li>
+    <li><strong>セッション数に対してスケールしない。</strong>3 並列で走らせると同じ見た目の
+      バナーが流れてきます。どのセッション？どのプロジェクト？さっきのはもう対応した？</li>
+    <li><strong>返答への導線がない。</strong>バナーは正しいターミナルペインに連れて行って
+      くれません。タブ探しは残ります。</li>
+    <li><strong>許可への応答は検知できない。</strong>hook はダイアログが出た瞬間に発火しますが、
+      あなたが答えた瞬間には発火しません。通知の上に状態を組むと「確認待ち」表示が残留します
+      （詳しくは <a href="claude-code-hooks-session-status.html">hooks 状態追跡ガイド</a>）。</li>
+  </ul>
+
+  <h2>もう一つの選択肢: 常駐のステータスウィンドウ</h2>
+  <p>
+    <a href="/ja.html">AgentManager</a> は同じ問題を「割り込んでくるイベント」ではなく
+    「一目で見える状態」として解きます。すべての Claude Code セッションを状態ランプ付きで
+    一覧する、常時最前面の小さなウィンドウを持つ macOS メニューバーアプリです —
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> 確認待ち、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 処理中、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機:
+  </p>
+  <ul>
+    <li>どれかが確認待ちになるとウィンドウが<strong>自動で前面に出て</strong>
+      （バナー音の代わりに猫の鳴き声も選べます）、すべて解消すると引っ込みます。通知センターは使いません。</li>
+    <li>確認待ちの行には<strong>返答の形</strong>が出ます — 許可の Yes/No か、プランレビューか、選択式か。</li>
+    <li><strong>行をクリックすると該当ペインへジャンプ</strong> — tmux・iTerm2・Terminal.app・VS Code 系に対応。</li>
+    <li>許可への応答も検知します。hooks に加えて Claude Code のセッションレジストリを参照して
+      いるため、承認した瞬間に「確認待ち」ランプは即時に消え、残留しません。</li>
+  </ul>
+  <p>
+    セットアップはワンクリックです（hooks の登録は自動、解除もきれいにできます）。上の
+    osascript 設定とも共存できます。hooks は複数登録できるので、<code>Stop</code> のバナーは
+    残しつつ、確認待ちの管理はウィンドウに任せる構成も可能です。
+  </p>
+
+  <div class="guide-cta">
+    <h2>確認待ちをもう見逃さない</h2>
+    <p>
+      AgentManager は、どの Claude Code セッションが入力待ちになっても
+      その瞬間に前面へ出します。無料で使えます — アカウント登録不要。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る</a>
+    </div>
+    <div class="cta-note">macOS 13+ — フリープランは同時表示 2 セッションまで</div>
+  </div>
+
+  <nav class="related" aria-label="関連ガイド">
+    <h2>関連ガイド</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">Claude Code の複数セッションを見失わずに管理する方法</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Claude Code hooks でセッション状態を追跡する</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+</script>
+</body>
+</html>
