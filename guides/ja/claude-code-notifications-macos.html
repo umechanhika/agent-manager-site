@@ -231,7 +231,7 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
     <li>どれかが確認待ちになるとウィンドウが<strong>自動で前面に出て</strong>
       （バナー音の代わりに猫の鳴き声も選べます）、すべて解消すると引っ込みます。通知センターは使いません。</li>
     <li>確認待ちの行には<strong>返答の形</strong>が出ます — 許可の Yes/No か、プランレビューか、選択式か。</li>
-    <li><strong>行をクリックすると該当ペインへジャンプ</strong> — tmux・iTerm2・Terminal.app・VS Code 系に対応。</li>
+    <li><strong>行をクリックすると該当ペインへジャンプ</strong> — iTerm2・Terminal.app・Ghostty・VS Code 系に対応（tmux は状態表示のみ。ペインへのジャンプは現状非対応）。</li>
     <li>許可への応答も検知するため、承認した瞬間に「確認待ち」ランプは即時に消え、残留しません。</li>
   </ul>
   <p>

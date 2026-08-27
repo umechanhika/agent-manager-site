@@ -180,9 +180,12 @@ setw -g monitor-bell on</code></pre>
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> done,
     <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle.
     Waiting rows say what kind of answer is needed — a yes/no approval, a plan review, or a
-    multiple-choice question — and clicking a row jumps straight to the tmux pane running that
-    session, switching window and pane for you. The floating window surfaces when a session
-    starts waiting and hides when everything is clear, so the status bar flags become optional.
+    multiple-choice question. One honest caveat: click-to-jump, which switches you straight to
+    the right pane in iTerm2, Terminal.app, Ghostty, and VS Code-family editors, doesn't support
+    tmux panes yet — tmux sessions are detected and tracked, but you still switch to them with
+    tmux's own keys. The difference is that you now switch knowing exactly which window needs
+    you and why. The floating window surfaces when a session starts waiting and hides when
+    everything is clear, so the status bar flags become optional.
   </p>
 
   <h2>A minimal agent-friendly .tmux.conf</h2>
@@ -201,8 +204,8 @@ setw -g automatic-rename off     # keep your task names; don't auto-rename</code
     <h2>Know which window needs you</h2>
     <p>
       AgentManager puts a status lamp on every Claude Code session — across tmux windows,
-      panes, and plain terminal tabs — and jumps you to the right pane in one click.
-      Free to use, no account required.
+      panes, and plain terminal tabs — and surfaces the one that needs you, so you stop
+      cycling through windows to check. Free to use, no account required.
     </p>
     <div class="cta-row">
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"

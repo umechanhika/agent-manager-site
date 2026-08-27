@@ -199,7 +199,7 @@ tmux split-window -h</code></pre>
       <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle.</li>
     <li>Waiting rows say <em>what kind</em> of answer is needed — a yes/no approval, a plan review, or a multiple-choice question — so you can triage before switching.</li>
     <li>The window surfaces automatically when a session starts waiting, and hides when everything is clear.</li>
-    <li>Clicking a row jumps to the exact terminal pane running that session — tmux panes, iTerm2, Terminal.app, and VS Code-family editors included.</li>
+    <li>Clicking a row jumps to the exact terminal pane running that session — iTerm2, Terminal.app, Ghostty, and VS Code-family editors (tmux sessions are tracked with full status, but pane jumping isn't supported for tmux yet).</li>
   </ul>
   <p>
     It works via the same public hooks API described above (setup is one click, and the hooks
