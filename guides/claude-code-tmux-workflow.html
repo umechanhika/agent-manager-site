@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Practical tmux Workflow for Claude Code — AgentManager</title>
+  <meta name="description" content="How to run Claude Code inside tmux — named windows per session, panes vs windows, surviving SSH disconnects, activity monitoring, and how to know which window actually needs your input.">
+  <link rel="canonical" href="https://agentmgr.app/guides/claude-code-tmux-workflow.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-tmux-workflow.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-tmux-workflow.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-tmux-workflow.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/claude-code-tmux-workflow.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="A Practical tmux Workflow for Claude Code">
+  <meta property="og:description" content="Named windows, sane splits, SSH persistence — a tmux setup that scales to several Claude Code sessions.">
+  <meta property="og:image" content="https://agentmgr.app/guides/og/claude-code-tmux-workflow.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A Practical tmux Workflow for Claude Code">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="A Practical tmux Workflow for Claude Code">
+  <meta name="twitter:description" content="Named windows, sane splits, SSH persistence — a tmux setup that scales to several Claude Code sessions.">
+  <meta name="twitter:image" content="https://agentmgr.app/guides/og/claude-code-tmux-workflow.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "A Practical tmux Workflow for Claude Code",
+    "description": "How to run Claude Code inside tmux — named windows per session, panes vs windows, surviving SSH disconnects, activity monitoring, and how to know which window actually needs your input.",
+    "url": "https://agentmgr.app/guides/claude-code-tmux-workflow.html",
+    "inLanguage": "en",
+    "image": "https://agentmgr.app/guides/og/claude-code-tmux-workflow.png",
+    "datePublished": "2026-08-27",
+    "dateModified": "2026-08-27",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="claude-code-tmux-workflow.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="ja/claude-code-tmux-workflow.html" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / Guides</nav>
+
+  <h1>A Practical tmux Workflow for Claude Code</h1>
+  <span class="article-meta">Updated August 27, 2026</span>
+  <p class="article-lede">
+    tmux and Claude Code fit together unusually well: long-running agent turns want a terminal
+    that survives disconnects, and parallel sessions want named, stable places to live.
+    This guide is a minimal tmux setup for agent work — the naming, layout, and monitoring
+    habits that keep four sessions manageable, and an honest look at what tmux alone
+    can't tell you.
+  </p>
+
+  <h2>Why tmux for agent sessions</h2>
+  <ul>
+    <li><strong>Sessions survive you.</strong> Close the terminal app, drop the SSH connection, reboot
+      your laptop while a remote box keeps working — <code>tmux attach</code> puts you back in front
+      of a Claude Code session that never noticed you left.</li>
+    <li><strong>Named windows are a free session list.</strong> The status bar shows every window's
+      name at all times — the closest thing a terminal has to a dashboard.</li>
+    <li><strong>Scriptable layout.</strong> One shell function can create a window, cd to the right
+      directory, and start <code>claude</code> — the same shape every time.</li>
+  </ul>
+
+  <h2>The layout: one window per session</h2>
+  <p>
+    The setup that scales best is boring: <strong>one tmux window per Claude Code session</strong>,
+    named after the task, all inside one tmux session per machine or project.
+  </p>
+  <pre><code># A window per task, named so the status bar reads like a task list
+tmux new-window -n fix-auth   -c ~/code/myapp-fix-auth
+tmux new-window -n onboarding -c ~/code/myapp-new-onboarding
+
+# Start claude in each (or script it):
+tmux send-keys -t fix-auth 'claude' Enter</code></pre>
+  <p>
+    Prefer windows over panes for the sessions themselves. Panes shrink each session's output to
+    a fraction of the screen, and Claude Code's prompts, diffs, and plan output want the full
+    width. Where panes shine is <em>within</em> a task: split a window to keep the session on one
+    side and a shell for manual testing on the other (<code>tmux split-window -h</code>).
+  </p>
+  <p>
+    Two habits carry most of the weight. Rename the window when the task changes
+    (<code>tmux rename-window review-pr</code>) — a status bar full of <code>zsh</code>,
+    <code>zsh</code>, <code>zsh</code> tells you nothing. And if your windows are per-worktree
+    (our <a href="claude-code-git-worktrees.html">git worktrees guide</a> covers that setup),
+    let the worktree's directory name double as the window name so every list agrees.
+  </p>
+
+  <h2>Remote machines: where tmux earns its keep</h2>
+  <p>
+    Running Claude Code on a remote box over plain SSH means one dropped connection kills the
+    session mid-task. Inside tmux, the session keeps running; you reattach and scroll back
+    through what happened while you were gone:
+  </p>
+  <pre><code>ssh devbox
+tmux new -A -s agents   # attach if it exists, create if not
+# ... start claude sessions in named windows ...
+# connection drops, laptop sleeps, whatever —
+ssh devbox
+tmux attach -t agents   # everything still running</code></pre>
+  <p>
+    <code>new -A</code> makes the command idempotent — the same line works for first connect and
+    every reconnect, which makes it a good SSH alias.
+  </p>
+
+  <h2>What tmux can tell you — and what it can't</h2>
+  <p>
+    With several windows running, the question becomes: <em>which one needs me?</em> tmux has two
+    built-in signals, and both are weaker than they look:
+  </p>
+  <pre><code># Flag windows with new output (the flag shows as # in the status bar)
+setw -g monitor-activity on
+set  -g visual-activity  off   # flag quietly; no message popup
+
+# Or highlight on the terminal bell
+setw -g monitor-bell on</code></pre>
+  <p>
+    <code>monitor-activity</code> fires on <em>any</em> output — a progress spinner counts —
+    so with an active agent it's mostly noise. The bell is closer: Claude Code can ring the
+    terminal bell when it finishes or needs attention (see <code>/config</code>), and tmux
+    will mark the window. But a flag in the status bar still only says <em>something happened</em>.
+    It doesn't say whether the session is blocked on a permission prompt, waiting on a plan
+    approval, asking you a question — or just done. You still switch windows to find out.
+  </p>
+
+  <h2>Real state, not activity flags</h2>
+  <p>
+    For push-style signal, Claude Code's
+    <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hooks</a> fire on
+    lifecycle events — <code>Notification</code> (Claude needs input) and <code>Stop</code>
+    (Claude finished) — and can trigger a real
+    <a href="claude-code-notifications-macos.html">macOS notification</a> regardless of which
+    tmux window is visible. For the aggregate view, we built <a href="/">AgentManager</a>:
+    a macOS menu bar app that shows every Claude Code session — every tmux window included —
+    as a row with a status lamp:
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> waiting for input,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> running,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> done,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle.
+    Waiting rows say what kind of answer is needed — a yes/no approval, a plan review, or a
+    multiple-choice question — and clicking a row jumps straight to the tmux pane running that
+    session, switching window and pane for you. The floating window surfaces when a session
+    starts waiting and hides when everything is clear, so the status bar flags become optional.
+  </p>
+
+  <h2>A minimal agent-friendly .tmux.conf</h2>
+  <pre><code># ~/.tmux.conf — the agent-relevant parts only
+set  -g history-limit 100000     # agent turns produce a lot of scrollback
+setw -g monitor-bell on          # mark windows on bell
+set  -g visual-activity off      # no popups; flags in the status bar only
+set  -g renumber-windows on      # closed windows don't leave gaps
+setw -g automatic-rename off     # keep your task names; don't auto-rename</code></pre>
+  <p>
+    Nothing exotic — the point is scrollback deep enough to review what an agent did, and
+    window names that stay what you set them to.
+  </p>
+
+  <div class="guide-cta">
+    <h2>Know which window needs you</h2>
+    <p>
+      AgentManager puts a status lamp on every Claude Code session — across tmux windows,
+      panes, and plain terminal tabs — and jumps you to the right pane in one click.
+      Free to use, no account required.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="guide_cta_lp">See how it works</a>
+    </div>
+    <div class="cta-note">macOS 13+ — free plan shows up to 2 sessions at once</div>
+  </div>
+
+  <nav class="related" aria-label="Related guides">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">How to Manage Multiple Claude Code Sessions Without Losing Track</a></li>
+      <li><a href="claude-code-git-worktrees.html">Running Claude Code in Parallel with Git Worktrees</a></li>
+      <li><a href="claude-code-notifications-macos.html">How to Get Claude Code Notifications on macOS</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Tracking Claude Code Session Status with Hooks</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>

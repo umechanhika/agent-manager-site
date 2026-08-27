@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Running Claude Code in Parallel with Git Worktrees — AgentManager</title>
+  <meta name="description" content="A practical setup for running several Claude Code sessions on one repository with git worktrees — creating and naming worktrees, handling untracked files, cleanup, and the gotchas that bite in practice.">
+  <link rel="canonical" href="https://agentmgr.app/guides/claude-code-git-worktrees.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-git-worktrees.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-git-worktrees.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-git-worktrees.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/claude-code-git-worktrees.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Running Claude Code in Parallel with Git Worktrees">
+  <meta property="og:description" content="One clone, one branch per session, zero collisions — how to isolate parallel Claude Code sessions with git worktrees.">
+  <meta property="og:image" content="https://agentmgr.app/guides/og/claude-code-git-worktrees.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Running Claude Code in Parallel with Git Worktrees">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Running Claude Code in Parallel with Git Worktrees">
+  <meta name="twitter:description" content="One clone, one branch per session, zero collisions — how to isolate parallel Claude Code sessions with git worktrees.">
+  <meta name="twitter:image" content="https://agentmgr.app/guides/og/claude-code-git-worktrees.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Running Claude Code in Parallel with Git Worktrees",
+    "description": "A practical setup for running several Claude Code sessions on one repository with git worktrees — creating and naming worktrees, handling untracked files, cleanup, and the gotchas that bite in practice.",
+    "url": "https://agentmgr.app/guides/claude-code-git-worktrees.html",
+    "inLanguage": "en",
+    "image": "https://agentmgr.app/guides/og/claude-code-git-worktrees.png",
+    "datePublished": "2026-08-27",
+    "dateModified": "2026-08-27",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="claude-code-git-worktrees.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="ja/claude-code-git-worktrees.html" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / Guides</nav>
+
+  <h1>Running Claude Code in Parallel with Git Worktrees</h1>
+  <span class="article-meta">Updated August 27, 2026</span>
+  <p class="article-lede">
+    The moment you run two Claude Code sessions against the same checkout, they start stepping
+    on each other: mixed <code>git status</code>, builds picking up half-finished edits from the
+    other task, commits that bundle unrelated changes. <a href="https://git-scm.com/docs/git-worktree"
+    target="_blank" rel="noopener">git worktree</a> fixes this with one clone and one working
+    directory per session. This guide is the worktree setup we actually use — including the
+    parts that only bite after a week of daily use.
+  </p>
+
+  <h2>Why worktrees beat the alternatives</h2>
+  <p>There are three ways to give parallel sessions their own files, and two of them have real costs:</p>
+  <ul>
+    <li><strong>Same checkout, "be careful"</strong> — fails immediately. Both sessions see each other's
+      uncommitted edits, and a <code>git checkout</code> in one silently rewrites the files the other is reading.</li>
+    <li><strong>Multiple clones</strong> — works, but each clone duplicates the entire object store,
+      re-fetches independently, and drifts out of sync with your remotes and local branches.</li>
+    <li><strong>Worktrees</strong> — one repository, one shared object store and remote config,
+      any number of working directories, each pinned to its own branch. Creating one takes about a second.</li>
+  </ul>
+
+  <h2>The basic setup</h2>
+  <pre><code># From your main checkout
+git worktree add ../myapp-fix-auth       -b fix-auth
+git worktree add ../myapp-new-onboarding -b new-onboarding
+
+# One Claude Code session per worktree
+cd ../myapp-fix-auth        &amp;&amp; claude   # terminal tab 1
+cd ../myapp-new-onboarding  &amp;&amp; claude   # terminal tab 2</code></pre>
+  <p>
+    <code>git worktree add &lt;path&gt; -b &lt;branch&gt;</code> creates the directory, creates the
+    branch, and checks it out in one step. Each session now has a clean tree and its own build
+    artifacts, and commits made in one worktree are instantly visible to the others — same
+    repository, so no pushing or pulling between them.
+  </p>
+  <p>
+    Name the directory after the task, not the repo: <code>myapp-fix-auth</code> beats
+    <code>myapp-2</code>. Every session list you look at — terminal tabs, <code>git worktree
+    list</code>, a status board — shows the directory name, so this one habit keeps every list readable.
+    Keeping worktrees as siblings of the main checkout (<code>../myapp-*</code>) makes them easy
+    to find and easy to exclude from backup and file-watcher configs.
+  </p>
+
+  <h2>What worktrees share — and what they don't</h2>
+  <p>
+    Worktrees share the object store, branches, remotes, stashes, and repository config. They do
+    <strong>not</strong> share anything git doesn't track — and that's the list that catches people:
+  </p>
+  <ul>
+    <li><strong><code>.env</code> and local secrets</strong> — untracked by design, so a fresh worktree
+      starts without them. Copy what the task needs: <code>cp ../myapp/.env .</code></li>
+    <li><strong>Installed dependencies</strong> — <code>node_modules/</code>, virtualenvs, and friends
+      are per-directory. Run your install step once per worktree, or the first build fails confusingly.</li>
+    <li><strong>Build caches</strong> — each worktree builds from scratch the first time. That's the
+      price of isolation; incremental builds are fast after that.</li>
+  </ul>
+  <p>
+    Tracked files need no such care, which is exactly why a per-repo
+    <code>CLAUDE.md</code> works so well with worktrees: every new worktree, and therefore every
+    new Claude Code session, starts with the same build commands, test commands, and conventions
+    without re-explaining. A branch can only be checked out in one worktree at a time — git
+    refuses the second checkout. That's a feature: it makes "which session owns this branch"
+    unambiguous.
+  </p>
+
+  <h2>The lifecycle: merge, remove, prune</h2>
+  <p>Worktrees are cheap enough to be disposable. When the branch merges:</p>
+  <pre><code>git worktree remove ../myapp-fix-auth   # deletes the directory
+git branch -d fix-auth                  # deletes the merged branch
+git worktree prune                      # cleans up records for manually deleted dirs</code></pre>
+  <p>
+    Treat a worktree like a session, not a home: create it when the task starts, remove it when
+    the branch merges. Long-lived worktrees drift behind the default branch and greet you with
+    conflicts; if one must live for weeks, rebase or merge regularly like any long-lived branch.
+    Ending the Claude Code session when its worktree goes away keeps every session list truthful.
+  </p>
+
+  <h2>The part worktrees don't solve: who needs you now</h2>
+  <p>
+    Worktrees isolate the <em>files</em>. They do nothing about <em>attention</em>. Each parallel
+    session still blocks at unpredictable moments — a permission prompt for an edit or shell
+    command, a plan waiting for approval, a clarifying question, or plain completion — and with
+    three or four worktree sessions running, one of them is usually stalled behind the others'
+    output while you watch the wrong tab.
+  </p>
+  <p>
+    Claude Code's <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hooks</a>
+    can push each of those moments to you as a
+    <a href="claude-code-notifications-macos.html">macOS notification</a>. For the aggregate view —
+    "which of my worktrees is blocked <em>right now</em>?" — we built
+    <a href="/">AgentManager</a>: a macOS menu bar app that lists every Claude Code session as a row
+    with a status lamp —
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> waiting for input,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> running,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> done,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle.
+    Rows are labeled with the working directory's name — which is why task-named worktrees like
+    <code>myapp-fix-auth</code> pay off twice — and clicking a row jumps to the exact terminal
+    pane running that session. The window surfaces on its own when a session starts waiting, and
+    hides when everything is clear.
+  </p>
+
+  <h2>A worktree session checklist</h2>
+  <ul>
+    <li><strong>One worktree, one branch, one session.</strong> The 1:1:1 mapping is what makes parallel work reviewable.</li>
+    <li><strong>Name worktree directories after tasks.</strong> Every list you'll ever scan shows that name.</li>
+    <li><strong>Script the setup.</strong> A five-line <code>new-task.sh</code> that runs <code>git worktree add</code>, copies <code>.env</code>, and installs dependencies removes the friction that tempts you back into a shared checkout.</li>
+    <li><strong>Match worktree count to review bandwidth.</strong> Each session produces diffs you must read; two to four parallel tasks is the sweet spot for most people.</li>
+    <li><strong>Remove worktrees when branches merge.</strong> Stale worktrees turn every list into archaeology.</li>
+  </ul>
+
+  <div class="guide-cta">
+    <h2>One status lamp per worktree</h2>
+    <p>
+      AgentManager shows every Claude Code session — across all your worktrees — in one floating
+      window, and surfaces the one that needs you. Free to use, no account required.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="guide_cta_lp">See how it works</a>
+    </div>
+    <div class="cta-note">macOS 13+ — free plan shows up to 2 sessions at once</div>
+  </div>
+
+  <nav class="related" aria-label="Related guides">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">How to Manage Multiple Claude Code Sessions Without Losing Track</a></li>
+      <li><a href="claude-code-tmux-workflow.html">A Practical tmux Workflow for Claude Code</a></li>
+      <li><a href="claude-code-notifications-macos.html">How to Get Claude Code Notifications on macOS</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Tracking Claude Code Session Status with Hooks</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>

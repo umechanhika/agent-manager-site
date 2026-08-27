@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>git worktree で Claude Code を並列で走らせる方法 — AgentManager</title>
+  <meta name="description" content="1 つのリポジトリで複数の Claude Code セッションを並列で動かすための git worktree 実践ガイド。worktree の作成と命名、未追跡ファイルの扱い、後片付け、そして実運用で引っかかる落とし穴まで。">
+  <link rel="canonical" href="https://agentmgr.app/guides/ja/claude-code-git-worktrees.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-git-worktrees.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-git-worktrees.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-git-worktrees.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/ja/claude-code-git-worktrees.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="git worktree で Claude Code を並列で走らせる方法">
+  <meta property="og:description" content="clone は 1 つ、セッションごとにブランチと作業ディレクトリ — git worktree で並列 Claude Code セッションを衝突ゼロで分離する。">
+  <meta property="og:image" content="https://agentmgr.app/guides/og/claude-code-git-worktrees.ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="git worktree で Claude Code を並列で走らせる方法">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="git worktree で Claude Code を並列で走らせる方法">
+  <meta name="twitter:description" content="clone は 1 つ、セッションごとにブランチと作業ディレクトリ — git worktree で並列 Claude Code セッションを衝突ゼロで分離する。">
+  <meta name="twitter:image" content="https://agentmgr.app/guides/og/claude-code-git-worktrees.ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "git worktree で Claude Code を並列で走らせる方法",
+    "description": "1 つのリポジトリで複数の Claude Code セッションを並列で動かすための git worktree 実践ガイド。worktree の作成と命名、未追跡ファイルの扱い、後片付け、そして実運用で引っかかる落とし穴まで。",
+    "url": "https://agentmgr.app/guides/ja/claude-code-git-worktrees.html",
+    "inLanguage": "ja",
+    "image": "https://agentmgr.app/guides/og/claude-code-git-worktrees.ja.png",
+    "datePublished": "2026-08-27",
+    "dateModified": "2026-08-27",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn" href="../claude-code-git-worktrees.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="claude-code-git-worktrees.html" aria-current="page">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
+
+  <h1>git worktree で Claude Code を並列で走らせる方法</h1>
+  <span class="article-meta">更新日: 2026年8月27日</span>
+  <p class="article-lede">
+    同じチェックアウトに対して Claude Code セッションを 2 つ走らせた瞬間から、互いの作業の
+    踏み荒らしが始まります。<code>git status</code> は混ざり、ビルドは相手タスクの書きかけの
+    編集を拾い、コミットには無関係な変更が紛れ込む。これを解決するのが
+    <a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener">git worktree</a> です。
+    clone は 1 つのまま、セッションごとに専用の作業ディレクトリを持てます。このガイドは
+    私たちが実際に使っている worktree 運用を、毎日使って 1 週間後に初めて引っかかる
+    落とし穴まで含めてまとめたものです。
+  </p>
+
+  <h2>なぜ worktree が他の方法より良いのか</h2>
+  <p>並列セッションに専用のファイル群を与える方法は 3 つあり、うち 2 つには実コストがあります:</p>
+  <ul>
+    <li><strong>同じチェックアウトで「気をつけて使う」</strong> — 即座に破綻します。両セッションが互いの
+      未コミット編集を見てしまい、片方の <code>git checkout</code> がもう片方の読んでいるファイルを黙って書き換えます。</li>
+    <li><strong>複数 clone</strong> — 動きはしますが、clone ごとにオブジェクトストアが丸ごと複製され、
+      fetch も個別に必要で、リモートやローカルブランチの状態が clone 間でずれていきます。</li>
+    <li><strong>worktree</strong> — リポジトリは 1 つ、オブジェクトストアとリモート設定は共有のまま、
+      作業ディレクトリを好きな数だけ持てて、それぞれが専用ブランチに固定されます。作成は 1 秒程度です。</li>
+  </ul>
+
+  <h2>基本のセットアップ</h2>
+  <pre><code># メインのチェックアウトから
+git worktree add ../myapp-fix-auth       -b fix-auth
+git worktree add ../myapp-new-onboarding -b new-onboarding
+
+# worktree ごとに 1 つの Claude Code セッション
+cd ../myapp-fix-auth        &amp;&amp; claude   # ターミナルタブ 1
+cd ../myapp-new-onboarding  &amp;&amp; claude   # ターミナルタブ 2</code></pre>
+  <p>
+    <code>git worktree add &lt;path&gt; -b &lt;branch&gt;</code> は、ディレクトリ作成・ブランチ作成・
+    チェックアウトを一度に行います。これで各セッションはクリーンなツリーと専用のビルド成果物を持ち、
+    ある worktree でのコミットは他の worktree からも即座に見えます — 同じリポジトリなので、
+    worktree 間で push / pull は不要です。
+  </p>
+  <p>
+    ディレクトリ名はリポジトリ名ではなく<strong>タスク名</strong>で付けます。<code>myapp-fix-auth</code> は
+    <code>myapp-2</code> より明らかに読みやすい。ターミナルのタブ・<code>git worktree list</code>・
+    ステータスボード — あなたが目にするすべての一覧にはこのディレクトリ名が表示されるので、
+    この習慣 1 つで全部の一覧が読めるようになります。worktree をメインのチェックアウトの隣
+    （<code>../myapp-*</code>）に置くと、見つけやすく、バックアップやファイル監視の除外設定もしやすくなります。
+  </p>
+
+  <h2>worktree が共有するもの・しないもの</h2>
+  <p>
+    worktree はオブジェクトストア・ブランチ・リモート・stash・リポジトリ設定を共有します。
+    一方、git が追跡していないものは<strong>一切</strong>共有されません — そして引っかかるのはこちらのリストです:
+  </p>
+  <ul>
+    <li><strong><code>.env</code> などのローカルシークレット</strong> — 意図的に未追跡なので、新しい worktree には
+      存在しません。タスクに必要なものをコピーします: <code>cp ../myapp/.env .</code></li>
+    <li><strong>インストール済み依存関係</strong> — <code>node_modules/</code> や virtualenv の類は
+      ディレクトリ単位です。worktree ごとにインストールを 1 回実行しないと、初回ビルドが分かりにくく失敗します。</li>
+    <li><strong>ビルドキャッシュ</strong> — 各 worktree の初回ビルドはゼロからです。これは分離の対価で、
+      以降のインクリメンタルビルドは速くなります。</li>
+  </ul>
+  <p>
+    追跡済みファイルにはこの手当てが不要です。リポジトリ直下の <code>CLAUDE.md</code> が worktree と
+    相性抜群なのはまさにこのためで、新しい worktree — つまり新しい Claude Code セッション — が毎回、
+    同じビルドコマンド・テストコマンド・規約を説明し直しなしで持った状態から始まります。
+    なお、同じブランチを複数の worktree で同時にチェックアウトすることはできず、git が 2 つ目を
+    拒否します。これは利点です。「このブランチはどのセッションのものか」が常に一意になります。
+  </p>
+
+  <h2>ライフサイクル: マージ → remove → prune</h2>
+  <p>worktree は使い捨てにできる程度に軽い存在です。ブランチがマージされたら:</p>
+  <pre><code>git worktree remove ../myapp-fix-auth   # ディレクトリを削除
+git branch -d fix-auth                  # マージ済みブランチを削除
+git worktree prune                      # 手で消したディレクトリの管理情報を掃除</code></pre>
+  <p>
+    worktree は住居ではなくセッションとして扱います。タスク開始時に作り、ブランチがマージされたら
+    消す。長生きした worktree はデフォルトブランチから取り残されて、開くたびにコンフリクトで
+    出迎えてくれます。数週間生かす必要があるなら、普通の長寿命ブランチと同じく定期的に
+    rebase / merge してください。worktree を消すときに対応する Claude Code セッションも終了しておくと、
+    どの一覧を見ても実態と一致した状態が保てます。
+  </p>
+
+  <h2>worktree が解決しないもの: 「今、誰があなたを待っているか」</h2>
+  <p>
+    worktree が分離するのは<em>ファイル</em>です。<em>注意（アテンション）</em>には何もしてくれません。
+    並列の各セッションは予測できないタイミングでブロックします — 編集やシェルコマンドの許可待ち、
+    プランの承認待ち、選択肢つきの確認質問、あるいは単なる完了。worktree セッションを 3〜4 個
+    走らせていると、あなたが別のタブを眺めている間に、どれか 1 つは他の出力の陰で止まっています。
+  </p>
+  <p>
+    Claude Code の <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hooks</a> を使えば、
+    そうした瞬間を <a href="claude-code-notifications-macos.html">macOS 通知</a>としてプッシュできます。
+    そして「どの worktree が<em>今</em>ブロックしているか」という集約ビューのために作ったのが
+    <a href="/ja.html">AgentManager</a> です。macOS のメニューバーアプリで、マシン上の全 Claude Code
+    セッションをステータスランプつきの行として一覧します —
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> 入力待ち、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 実行中、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> アイドル。
+    行のラベルは作業ディレクトリ名なので、<code>myapp-fix-auth</code> のようなタスク名 worktree の
+    効果が二重に効きます。行をクリックすればそのセッションが動いているターミナルペインへ直接
+    ジャンプ。入力待ちのセッションが発生するとウィンドウが自動で現れ、全て解消すると引っ込みます。
+  </p>
+
+  <h2>worktree セッションのチェックリスト</h2>
+  <ul>
+    <li><strong>1 worktree・1 ブランチ・1 セッション。</strong> この 1:1:1 対応が、並列作業をレビュー可能にします。</li>
+    <li><strong>worktree ディレクトリはタスク名で。</strong> あなたが見るすべての一覧にその名前が表示されます。</li>
+    <li><strong>セットアップはスクリプト化する。</strong> <code>git worktree add</code>・<code>.env</code> コピー・依存インストールをやる 5 行の <code>new-task.sh</code> があれば、共有チェックアウトに戻りたくなる摩擦が消えます。</li>
+    <li><strong>worktree の数はレビュー帯域に合わせる。</strong> 各セッションはあなたが読むべき diff を生みます。多くの人にとって 2〜4 並列が適正です。</li>
+    <li><strong>ブランチがマージされたら worktree を消す。</strong> 放置された worktree は、すべての一覧を遺跡調査に変えます。</li>
+  </ul>
+
+  <div class="guide-cta">
+    <h2>worktree ごとにステータスランプを</h2>
+    <p>
+      AgentManager は全 worktree の Claude Code セッションを 1 つのフローティングウィンドウに
+      まとめ、あなたを待っているセッションを浮かび上がらせます。無料で使えます。アカウント不要。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">機能を見る</a>
+    </div>
+    <div class="cta-note">macOS 13+ — 無料プランは同時 2 セッションまで表示</div>
+  </div>
+
+  <nav class="related" aria-label="関連ガイド">
+    <h2>関連ガイド</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">Claude Code の複数セッションを見失わずに管理する方法</a></li>
+      <li><a href="claude-code-tmux-workflow.html">Claude Code のための実践 tmux ワークフロー</a></li>
+      <li><a href="claude-code-notifications-macos.html">Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Claude Code hooks でセッション状態を追跡する</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>

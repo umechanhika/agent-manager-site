@@ -2,35 +2,51 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://agentmgr.app/</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/ja.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/guides/claude-code-notifications-macos.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/guides/ja/claude-code-notifications-macos.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/guides/claude-code-hooks-session-status.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/guides/ja/claude-code-hooks-session-status.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
+  </url>
+  <url>
+    <loc>https://agentmgr.app/guides/claude-code-git-worktrees.html</loc>
+    <lastmod>2026-08-27</lastmod>
+  </url>
+  <url>
+    <loc>https://agentmgr.app/guides/ja/claude-code-git-worktrees.html</loc>
+    <lastmod>2026-08-27</lastmod>
+  </url>
+  <url>
+    <loc>https://agentmgr.app/guides/claude-code-tmux-workflow.html</loc>
+    <lastmod>2026-08-27</lastmod>
+  </url>
+  <url>
+    <loc>https://agentmgr.app/guides/ja/claude-code-tmux-workflow.html</loc>
+    <lastmod>2026-08-27</lastmod>
   </url>
   <url>
     <loc>https://agentmgr.app/privacy.html</loc>
