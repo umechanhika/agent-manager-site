@@ -56,6 +56,26 @@ PAGES = {
         'Claude Code hooks で<br>セッション状態を<span class="accent">追跡する</span>',
         58,
     ),
+    "claude-code-git-worktrees": (
+        "en",
+        'Running Claude Code<br>in parallel with<br><span class="accent">git worktrees.</span>',
+        60,
+    ),
+    "claude-code-git-worktrees.ja": (
+        "ja",
+        'git worktree で<br>Claude Code を<br><span class="accent">並列で走らせる</span>',
+        58,
+    ),
+    "claude-code-tmux-workflow": (
+        "en",
+        'A practical<br><span class="accent">tmux workflow</span><br>for Claude Code.',
+        60,
+    ),
+    "claude-code-tmux-workflow.ja": (
+        "ja",
+        'Claude Code のための<br><span class="accent">実践 tmux</span><br>ワークフロー',
+        56,
+    ),
 }
 
 def main() -> None:

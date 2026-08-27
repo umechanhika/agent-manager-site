@@ -18,8 +18,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Claude Code の複数セッションを見失わずに管理する方法">
-  <meta property="og:locale" content="ja">
-  <meta property="og:locale:alternate" content="en">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Claude Code の複数セッションを見失わずに管理する方法">
   <meta name="twitter:description" content="git worktree・tmux レイアウト・状態監視 — Claude Code を並列で動かすための実践的なセットアップ。">
@@ -203,7 +203,7 @@ tmux split-window -h</code></pre>
       <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機。</li>
     <li>確認待ちの行には<em>返答の形</em>が表示される — Yes/No の許可、プランのレビュー、選択式の質問 — 切り替える前に優先順位を判断できます。</li>
     <li>どれかが確認待ちになるとウィンドウが自動で前面に出て、すべて解消すると引っ込みます。</li>
-    <li>行をクリックすると、そのセッションが動いているターミナルペインへ直接ジャンプ — tmux ペイン、iTerm2、Terminal.app、VS Code 系エディタに対応。</li>
+    <li>行をクリックすると、そのセッションが動いているターミナルペインへ直接ジャンプ — iTerm2、Terminal.app、Ghostty、VS Code 系エディタに対応（tmux のセッションも状態表示は対応しますが、tmux ペインへのジャンプは現状非対応）。</li>
   </ul>
   <p>
     仕組みは上で説明したのと同じ公開 hooks API です（セットアップはワンクリック、hooks は
@@ -239,6 +239,8 @@ tmux split-window -h</code></pre>
     <ul>
       <li><a href="claude-code-notifications-macos.html">Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</a></li>
       <li><a href="claude-code-hooks-session-status.html">Claude Code hooks でセッション状態を追跡する</a></li>
+      <li><a href="claude-code-git-worktrees.html">git worktree で Claude Code を並列で走らせる方法</a></li>
+      <li><a href="claude-code-tmux-workflow.html">Claude Code のための実践 tmux ワークフロー</a></li>
     </ul>
   </nav>
 </main>

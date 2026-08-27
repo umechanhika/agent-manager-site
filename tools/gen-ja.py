@@ -74,8 +74,8 @@ def main() -> None:
         "og:description": OG_DESCRIPTION,
         "og:image": OG_IMAGE,
         "og:image:alt": OG_IMAGE_ALT,
-        "og:locale": "ja",
-        "og:locale:alternate": "en",
+        "og:locale": "ja_JP",
+        "og:locale:alternate": "en_US",
     }
     for prop, value in og.items():
         find_one(soup, "meta", attrs={"property": prop})["content"] = value
