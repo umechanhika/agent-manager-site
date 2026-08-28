@@ -261,6 +261,31 @@
       letter-spacing: .03em;
     }
 
+    /* Hero: Homebrew one-liner under the download button (Mac only) */
+    .brew-line {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-top: 12px;
+      font-family: var(--mono); font-size: 12px; color: var(--dim);
+      letter-spacing: .02em;
+    }
+    .brew-cmd {
+      padding: 6px 10px;
+      background: var(--surf); color: var(--text);
+      border: 1px solid var(--border-2); border-radius: 7px;
+      font-family: var(--mono); font-size: 12px;
+      user-select: all; -webkit-user-select: all;
+      overflow-x: auto; max-width: 100%;
+    }
+    .brew-copy {
+      padding: 6px 10px;
+      background: transparent; color: var(--dim);
+      border: 1px solid var(--border-2); border-radius: 7px;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .03em;
+      cursor: pointer; white-space: nowrap;
+      transition: color .12s, border-color .12s, background .12s;
+    }
+    .brew-copy:hover { color: var(--text); background: var(--surf2); border-color: rgba(255,255,255,.26); }
+
     .nonmac-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
     .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
@@ -738,6 +763,12 @@
            id="download-btn"
            class="btn btn-primary" data-cta="hero_download"
            data-en="↓ Free Download" data-ja="↓ 無料ダウンロード">↓ Free Download</a>
+        <div id="brew-line" class="brew-line">
+          <span data-en="or via Homebrew:" data-ja="または Homebrew で:">or via Homebrew:</span>
+          <code class="brew-cmd" id="brew-cmd">brew install --cask umechanhika/tap/agent-manager</code>
+          <button type="button" id="brew-copy" class="brew-copy" data-cta="hero_brew_copy"
+                  data-en="⧉ Copy" data-ja="⧉ コピー">⧉ Copy</button>
+        </div>
         <div id="nonmac-cta" class="nonmac-cta hidden">
           <span class="macos-note"
                 data-en="Available on macOS — save the link and open it on your Mac"
@@ -1106,9 +1137,9 @@
       <span class="step-n">01</span>
       <div class="step-body">
         <strong data-en="Download the app" data-ja="アプリをダウンロード">Download the app</strong>
-        <span data-en='Free — no account or credit card. Open the DMG and drag AgentManager to Applications.'
-              data-ja='無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするだけ。'
-        >Free — no account or credit card. Open the DMG and drag AgentManager to Applications.</span>
+        <span data-en='Free — no account or credit card. Open the DMG and drag AgentManager to Applications, or run <code>brew install --cask umechanhika/tap/agent-manager</code>.'
+              data-ja='無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするか、<code>brew install --cask umechanhika/tap/agent-manager</code> を実行。'
+        >Free — no account or credit card. Open the DMG and drag AgentManager to Applications, or run <code>brew install --cask umechanhika/tap/agent-manager</code>.</span>
       </div>
     </li>
     <li class="step">
@@ -1371,6 +1402,19 @@
   });
 
   (function() {
+    // Homebrew コマンドのコピー。失敗は握り潰さずボタン文言で明示する。
+    var brewCopy = document.getElementById('brew-copy');
+    brewCopy.addEventListener('click', function() {
+      var cmd = document.getElementById('brew-cmd').textContent;
+      navigator.clipboard.writeText(cmd).then(function() {
+        brewCopy.textContent = IS_JA ? '✓ コピーしました' : '✓ Copied';
+      }, function() {
+        brewCopy.textContent = IS_JA ? 'コピーできませんでした' : 'Copy failed';
+      });
+    });
+  }());
+
+  (function() {
     // iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
     // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
     // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
@@ -1378,6 +1422,7 @@
     var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
     if (isMac) return;
     document.getElementById('download-btn').classList.add('hidden');
+    document.getElementById('brew-line').classList.add('hidden');
     document.getElementById('hdr-cta').classList.add('hidden');
     document.getElementById('nonmac-cta').classList.remove('hidden');
 
