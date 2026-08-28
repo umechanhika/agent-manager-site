@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { width: 1200px; height: 630px; position: relative; overflow: hidden; background: #0a0c0f; }
   .base { position: absolute; inset: 0; width: 1200px; height: 630px; }
-  /* 英語テキスト部分を覆うパッチ（背景はほぼ均一 #0a0c0f、四隅の実測値に合わせた微グラデ） */
+  /* 既存テキスト部分を覆うパッチ（背景はほぼ均一 #0a0c0f、四隅の実測値に合わせた微グラデ） */
   .patch {
     position: absolute; left: 60px; top: 150px; width: 615px; height: 410px;
     background: linear-gradient(115deg, #0d0e10 0%, #0a0c0f 45%, #090b0d 100%);
   }
   .copy {
     position: absolute; left: 85px; top: 190px; width: 610px;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: 'Inter', sans-serif;
   }
   h1 {
-    font-weight: 900; font-size: 68px; line-height: 1.34; letter-spacing: 0.01em;
+    font-weight: 800; font-size: 68px; line-height: 1.22; letter-spacing: -0.01em;
     color: #E8EBF0;
   }
   h1 .accent {
@@ -26,7 +26,7 @@
     text-shadow: 0 0 34px rgba(245, 166, 35, 0.5), 0 0 80px rgba(245, 166, 35, 0.25);
   }
   .sub {
-    margin-top: 26px; font-weight: 700; font-size: 25px; letter-spacing: 0.02em;
+    margin-top: 26px; font-weight: 700; font-size: 25px; letter-spacing: 0.01em;
     color: #8b949e;
   }
   .chips { margin-top: 38px; display: flex; gap: 22px; }
@@ -43,12 +43,12 @@
   <img class="base" src="../og-image.png">
   <div class="patch"></div>
   <div class="copy">
-    <h1>Claude を、<br><span class="accent">待たせない。</span></h1>
-    <div class="sub">Claude Code セッション監視ツール for macOS</div>
+    <h1>Stop keeping<br><span class="accent">Claude waiting.</span></h1>
+    <div class="sub">Claude Code session monitor for macOS</div>
     <div class="chips">
-      <div class="chip"><span class="dot" style="background:#F5A623"></span>確認待ち</div>
-      <div class="chip"><span class="dot" style="background:#4E8BC8"></span>処理中</div>
-      <div class="chip"><span class="dot" style="background:#3BAD52"></span>完了</div>
+      <div class="chip"><span class="dot" style="background:#F5A623"></span>Waiting</div>
+      <div class="chip"><span class="dot" style="background:#4E8BC8"></span>Processing</div>
+      <div class="chip"><span class="dot" style="background:#3BAD52"></span>Done</div>
     </div>
   </div>
 </body>
