@@ -141,6 +141,66 @@
       />
     </item>
 
+
+    <item>
+      <title>Version 2.4.0</title>
+      <pubDate>Tue, 25 Aug 2026 13:08:28 +0000</pubDate>
+      <sparkle:version>391</sparkle:version>
+      <sparkle:shortVersionString>2.4.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/umechanhika/agent-manager-site/releases/download/v2.4.0/AgentManager-2.4.0.dmg"
+        sparkle:edSignature="rDF4BexlXMX9UvTwzbqxuw6yp3x2pRaUb5j+C/Gd3k2X4tapl5q9xubudDtYauydZpfXs8gvn2A0dhs0S37vBg=="
+        length="2641387"
+        type="application/octet-stream"
+      />
+    </item>
+
+
+    <item>
+      <title>Version 2.4.1</title>
+      <pubDate>Thu, 27 Aug 2026 11:43:21 +0000</pubDate>
+      <sparkle:version>400</sparkle:version>
+      <sparkle:shortVersionString>2.4.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/umechanhika/agent-manager-site/releases/download/v2.4.1/AgentManager-2.4.1.dmg"
+        sparkle:edSignature="/iLK/zImaHLQHOVmc1N8umkVPCxsNCpeKZF6m6SGiFpbQwcEi8JxoLZnKc8ChxmBhpshWUUgGgWAnDcNkrAvAg=="
+        length="2633073"
+        type="application/octet-stream"
+      />
+    </item>
+
+
+    <item>
+      <title>Version 2.5.0</title>
+      <pubDate>Fri, 28 Aug 2026 04:15:53 +0000</pubDate>
+      <sparkle:version>406</sparkle:version>
+      <sparkle:shortVersionString>2.5.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/umechanhika/agent-manager-site/releases/download/v2.5.0/AgentManager-2.5.0.dmg"
+        sparkle:edSignature="fKDfxb2FfGXyeu9z74P59lUk15mbn6boQooJP6qSsTrrT2JqeSZLnTCwWG4+/Omfhr/p1x7p4H+d7M+R+VGSDQ=="
+        length="2637635"
+        type="application/octet-stream"
+      />
+    </item>
+
+
+    <item>
+      <title>Version 2.5.1</title>
+      <pubDate>Fri, 28 Aug 2026 10:32:20 +0000</pubDate>
+      <sparkle:version>409</sparkle:version>
+      <sparkle:shortVersionString>2.5.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/umechanhika/agent-manager-site/releases/download/v2.5.1/AgentManager-2.5.1.dmg"
+        sparkle:edSignature="QsBIablVXETgWxp01qQgwZbNnzaDy/+028JoxrMfz2dhpquw/8MUmxJ7iINmtMHUbK6DKs/qS1zTsIcXn/rPAA=="
+        length="2637758"
+        type="application/octet-stream"
+      />
+    </item>
+
     <!--
     リリースのたびに <item> を先頭に追加する。
     sign_update コマンドで edSignature と length を取得:

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Get Claude Code Notifications on macOS — AgentManager</title>
+  <meta name="description" content="Every way to get notified when Claude Code finishes or needs input on macOS: native Ghostty/Kitty/iTerm2 notifications, the terminal bell, and Notification hooks with osascript — copy-paste setup included.">
+  <link rel="canonical" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-notifications-macos.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-notifications-macos.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/claude-code-notifications-macos.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="How to Get Claude Code Notifications on macOS">
+  <meta property="og:description" content="Native terminal notifications, the terminal bell, and hooks — every way to know when Claude Code needs you on macOS.">
+  <meta property="og:image" content="https://agentmgr.app/guides/og/claude-code-notifications-macos.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="How to Get Claude Code Notifications on macOS">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Get Claude Code Notifications on macOS">
+  <meta name="twitter:description" content="Native terminal notifications, the terminal bell, and hooks — every way to know when Claude Code needs you on macOS.">
+  <meta name="twitter:image" content="https://agentmgr.app/guides/og/claude-code-notifications-macos.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "How to Get Claude Code Notifications on macOS",
+    "description": "Every way to get notified when Claude Code finishes or needs input on macOS: native Ghostty/Kitty/iTerm2 notifications, the terminal bell, and Notification hooks with osascript.",
+    "url": "https://agentmgr.app/guides/claude-code-notifications-macos.html",
+    "inLanguage": "en",
+    "image": "https://agentmgr.app/guides/og/claude-code-notifications-macos.png",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="claude-code-notifications-macos.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="ja/claude-code-notifications-macos.html" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / Guides</nav>
+
+  <h1>How to Get Claude Code Notifications on macOS</h1>
+  <span class="article-meta">Updated August 26, 2026</span>
+  <p class="article-lede">
+    You kick off a task, switch to Slack, and come back ten minutes later to find Claude Code
+    finished nine minutes ago — or worse, that it's been sitting on a permission dialog the
+    whole time. Here's how to get notified the moment a session needs you, from a one-line
+    setting to custom hooks to a full status monitor.
+  </p>
+
+  <h2>The two moments that matter</h2>
+  <p>Claude Code blocks on you in two distinct situations, and they need different urgency:</p>
+  <ul>
+    <li><strong>Waiting for input mid-task</strong> — a tool-permission prompt ("run this command?"),
+      a plan waiting for approval, or a clarifying question. The session is stalled until you answer;
+      every unnoticed minute is pure loss.</li>
+    <li><strong>Finished responding</strong> — the turn is done and the next prompt is yours.
+      Less urgent, but it's the signal to come back and review.</li>
+  </ul>
+  <p>
+    Both are exposed through <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Claude Code hooks</a>:
+    the <code>Notification</code> event fires when Claude needs your attention (for permission
+    prompts, shortly after the dialog appears unanswered — quick approvals don't spam you), and
+    the <code>Stop</code> event fires when Claude finishes a response.
+  </p>
+
+  <h2>Option 1: native notifications from your terminal</h2>
+  <p>
+    Before writing any scripts, check your terminal — Claude Code can post macOS desktop
+    notifications through <strong>Ghostty</strong>, <strong>Kitty</strong>, and
+    <strong>iTerm2</strong> when it's waiting for you.
+  </p>
+  <ul>
+    <li><strong>Ghostty / Kitty</strong> — works out of the box; just allow notifications for the app when macOS asks.</li>
+    <li><strong>iTerm2</strong> — enable it first: Settings &rarr; Profiles &rarr; Terminal &rarr; check &ldquo;Send Notification Center alerts&rdquo;, and allow iTerm2 notifications in macOS System Settings.</li>
+  </ul>
+  <p>
+    Apple's stock Terminal.app has no such integration — for that, use the bell or hooks below.
+  </p>
+
+  <h2>Option 2: the terminal bell</h2>
+  <p>
+    Claude Code can ring the terminal bell when it needs attention. One line in
+    <code>~/.claude/settings.json</code>:
+  </p>
+  <pre><code>{
+  "preferredNotifChannel": "terminal_bell"
+}</code></pre>
+  <p>
+    Most terminals turn the bell into something visible: Terminal.app badges the tab, iTerm2
+    can post a notification for it, and tmux marks the window with a bell indicator. Crude,
+    but it works everywhere and needs no scripts.
+  </p>
+
+  <h2>Option 3: custom macOS notifications via hooks</h2>
+  <p>No extra tools needed — macOS's built-in <code>osascript</code> can post to Notification Center.</p>
+
+  <h3>1. Create two small scripts</h3>
+  <pre><code>mkdir -p ~/.claude/scripts
+
+cat &gt; ~/.claude/scripts/notify-waiting.sh &lt;&lt;'EOF'
+#!/bin/bash
+# Claude Code "Notification" hook: a session needs your input.
+osascript -e 'display notification "A session is waiting for your input" with title "Claude Code" sound name "Glass"'
+EOF
+
+cat &gt; ~/.claude/scripts/notify-done.sh &lt;&lt;'EOF'
+#!/bin/bash
+# Claude Code "Stop" hook: a session finished responding.
+osascript -e 'display notification "Finished responding" with title "Claude Code"'
+EOF
+
+chmod +x ~/.claude/scripts/notify-waiting.sh ~/.claude/scripts/notify-done.sh</code></pre>
+
+  <h3>2. Register them in <code>~/.claude/settings.json</code></h3>
+  <p>
+    Add a <code>hooks</code> section (or merge into your existing one). This applies to every
+    project; use a project's <code>.claude/settings.json</code> instead to scope it.
+  </p>
+  <pre><code>{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/notify-waiting.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/notify-done.sh" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <p>
+    Start a new Claude Code session (hooks are read at startup), ask for something that runs a
+    tool you haven't allowlisted, and leave the permission dialog unanswered for a few seconds —
+    a notification should appear.
+  </p>
+
+  <h3>Optional refinements</h3>
+  <ul>
+    <li><strong>Show the actual message.</strong> Hooks receive a JSON payload on stdin whose
+      <code>message</code> field describes what Claude wants. If you have
+      <a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a> installed:
+      <pre><code>#!/bin/bash
+msg=$(jq -r '.message // "Needs your input"')
+osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\""</code></pre></li>
+    <li><strong>Include the project.</strong> The payload's <code>cwd</code> field tells you which
+      checkout the session lives in — useful once you run more than one
+      (see <a href="manage-multiple-claude-code-sessions.html">managing multiple sessions</a>).</li>
+    <li><strong>Richer banners.</strong> <code>terminal-notifier</code> (Homebrew) supports custom
+      icons and click actions, if <code>osascript</code>'s plain banners feel too spartan.</li>
+    <li><strong>Check Notification Center settings.</strong> If nothing appears, System Settings →
+      Notifications: your terminal (or Script Editor, which owns <code>osascript</code> banners)
+      must be allowed to notify, and macOS Focus modes silence banners by default.</li>
+  </ul>
+
+  <h2>Where notifications fall short</h2>
+  <p>This setup is genuinely useful — we recommend it to everyone. But banners have structural limits you'll hit as usage grows:</p>
+  <ul>
+    <li><strong>They're events, not state.</strong> A banner slides away after a few seconds.
+      "Is anything waiting on me <em>right now</em>?" has no answer — you're back to checking terminals.</li>
+    <li><strong>They don't scale with session count.</strong> Three parallel sessions produce a
+      stream of look-alike banners. Which session? Which project? Was that one already handled?</li>
+    <li><strong>No answer-and-return path.</strong> The banner doesn't take you to the right
+      terminal pane — you still hunt for the tab.</li>
+    <li><strong>Approval isn't detected.</strong> Hooks fire when the prompt appears, not when you
+      answer it, so a "waiting" you built state on top of goes stale (more on that in the
+      <a href="claude-code-hooks-session-status.html">hooks status guide</a>).</li>
+  </ul>
+
+  <h2>The alternative: a persistent status window</h2>
+  <p>
+    <a href="/">AgentManager</a> approaches the same problem as <em>state you can glance at</em>
+    rather than events that interrupt you. It's a macOS menu bar app that keeps a small
+    always-on-top window listing every Claude Code session with a status lamp —
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> waiting,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> running,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> done,
+    <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> idle:
+  </p>
+  <ul>
+    <li>The window <strong>surfaces by itself</strong> when a session starts waiting (with an optional
+      cat meow instead of a banner sound) and hides when everything's clear — no Notification Center involved.</li>
+    <li>Waiting rows show <strong>what kind of answer</strong> is needed — approval, plan review, or a choice.</li>
+    <li><strong>Clicking a row jumps</strong> to the exact terminal pane — iTerm2, Terminal.app, Ghostty, VS Code-family (tmux: status tracking only, no pane jump yet).</li>
+    <li>Approvals are detected the moment you answer, so "waiting" lamps clear immediately
+      instead of going stale.</li>
+  </ul>
+  <p>
+    Setup is one click (it registers its hooks for you, and they're cleanly removable). It also
+    coexists with the osascript setup above — hooks compose, so you can keep banners for
+    <code>Stop</code> and let the window handle waiting states.
+  </p>
+
+  <div class="guide-cta">
+    <h2>Never miss a waiting session</h2>
+    <p>
+      AgentManager surfaces the moment any Claude Code session needs you —
+      free to use, no account required.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="guide_cta_lp">See how it works</a>
+    </div>
+    <div class="cta-note">macOS 13+ — free plan shows up to 2 sessions at once</div>
+  </div>
+
+  <nav class="related" aria-label="Related guides">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="manage-multiple-claude-code-sessions.html">How to Manage Multiple Claude Code Sessions Without Losing Track</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Tracking Claude Code Session Status with Hooks</a></li>
+      <li><a href="claude-code-git-worktrees.html">Running Claude Code in Parallel with Git Worktrees</a></li>
+      <li><a href="claude-code-tmux-workflow.html">A Practical tmux Workflow for Claude Code</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>

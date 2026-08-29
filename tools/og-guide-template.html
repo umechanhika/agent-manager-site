@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Noto+Sans+JP:wght@700;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  /*
+   * ガイドページ用 OGP 画像テンプレート (1200x630)
+   * tools/gen-guide-og.py が {{...}} を差し替えて Chromium でスクリーンショットする。
+   * デザインは guides.css の DARK PRO-TOOL トークンに合わせる。
+   */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px; position: relative; overflow: hidden;
+    background:
+      radial-gradient(900px 500px at 88% -10%, rgba(94,158,214,.13), transparent 70%),
+      radial-gradient(900px 560px at 5% -6%, rgba(245,166,35,.08), transparent 70%),
+      radial-gradient(760px 340px at 82% 112%, rgba(245,166,35,.07), transparent 70%),
+      #0B0D10;
+    font-family: 'Inter', 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+    color: #E8EBF0;
+  }
+  .frame {
+    position: absolute; inset: 26px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 24px;
+  }
+  .inner { position: absolute; left: 84px; right: 84px; top: 74px; bottom: 70px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo { height: 30px; width: auto; display: block; }
+  .kind {
+    font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-weight: 700; font-size: 22px; letter-spacing: .22em;
+    color: #F5A623;
+    padding: 10px 24px; border-radius: 999px;
+    border: 1px solid rgba(245,166,35,.45);
+    background: rgba(245,166,35,.08);
+  }
+
+  .title-area {
+    position: absolute; left: 0; right: 0; top: 90px; bottom: 40px;
+    display: flex; align-items: center;
+  }
+  h1 {
+    font-weight: 800; font-size: {{TITLE_SIZE}}px; line-height: 1.32; letter-spacing: .005em;
+  }
+  :lang(ja) h1 { font-weight: 900; }
+  h1 .accent {
+    color: #F5A623;
+    text-shadow: 0 0 34px rgba(245,166,35,.5), 0 0 80px rgba(245,166,35,.25);
+  }
+  /* 下部の装飾: セッションランプ3色 (amber/sky/grass) のアクセントバー */
+  .accent-bar {
+    position: absolute; left: 0; bottom: 0;
+    width: 260px; height: 6px; border-radius: 3px;
+    background: linear-gradient(90deg, #F5A623, #5E9ED6 55%, #4EC46A);
+    box-shadow: 0 0 26px rgba(245,166,35,.4);
+  }
+
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+  <div class="inner">
+    <div class="top">
+      <img class="logo" src="../logo-dark.svg" alt="">
+      <div class="kind">GUIDE</div>
+    </div>
+    <div class="title-area"><h1>{{TITLE_HTML}}</h1></div>
+    <div class="accent-bar"></div>
+  </div>
+</body>
+</html>

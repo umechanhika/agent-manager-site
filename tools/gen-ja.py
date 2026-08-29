@@ -24,11 +24,14 @@ DESCRIPTION = (
     "全 Claude Code セッションを監視する macOS 用フローティングウィンドウ。"
     "確認が必要な瞬間に自動で現れ、見逃しを防ぎます。無料で使えます。"
 )
+# og:title / twitter:title はカード用の訴求コピー（title タグはカテゴリ識別のため別建て）
+OG_TITLE = "AgentManager — Claude を、待たせない。"
 OG_DESCRIPTION = (
-    "Claude Code の確認待ちをもう見逃さない。"
-    "全セッションを監視する macOS 用フローティングウィンドウ。無料で使えます。"
+    "あなたが気づくまで、Claude は止まっています。"
+    "全 Claude Code セッションを見張り、必要な瞬間だけ現れる macOS 用フローティングウィンドウ。"
+    "無料で使えます。"
 )
-OG_IMAGE_ALT = "AgentManager — 確認待ちのセッションを見逃さない。"
+OG_IMAGE_ALT = "AgentManager — Claude を待たせない。"
 # 日本語版OG画像。tools/og-image-ja.html を Chromium (1200x630) でスクリーンショットして生成する。
 OG_IMAGE = "https://agentmgr.app/og-image-ja.png"
 JA_URL = "https://agentmgr.app/ja.html"
@@ -70,17 +73,17 @@ def main() -> None:
     find_one(soup, "link", rel="canonical")["href"] = JA_URL
     og = {
         "og:url": JA_URL,
-        "og:title": TITLE,
+        "og:title": OG_TITLE,
         "og:description": OG_DESCRIPTION,
         "og:image": OG_IMAGE,
         "og:image:alt": OG_IMAGE_ALT,
-        "og:locale": "ja",
-        "og:locale:alternate": "en",
+        "og:locale": "ja_JP",
+        "og:locale:alternate": "en_US",
     }
     for prop, value in og.items():
         find_one(soup, "meta", attrs={"property": prop})["content"] = value
     for name, value in {
-        "twitter:title": TITLE,
+        "twitter:title": OG_TITLE,
         "twitter:description": OG_DESCRIPTION,
         "twitter:image": OG_IMAGE,
     }.items():

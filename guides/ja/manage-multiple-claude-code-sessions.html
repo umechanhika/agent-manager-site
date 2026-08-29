@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code の複数セッションを見失わずに管理する方法 — AgentManager</title>
+  <meta name="description" content="Claude Code を並列で複数セッション動かすための実践ガイド。git worktree による作業の分離、tmux やターミナルのレイアウト、そして「どのセッションが入力待ちか」を一目で把握する方法まで。">
+  <link rel="canonical" href="https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code の複数セッションを見失わずに管理する方法">
+  <meta property="og:description" content="git worktree・tmux レイアウト・状態監視 — Claude Code を並列で動かすための実践的なセットアップ。">
+  <meta property="og:image" content="https://agentmgr.app/guides/og/manage-multiple-claude-code-sessions.ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Claude Code の複数セッションを見失わずに管理する方法">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code の複数セッションを見失わずに管理する方法">
+  <meta name="twitter:description" content="git worktree・tmux レイアウト・状態監視 — Claude Code を並列で動かすための実践的なセットアップ。">
+  <meta name="twitter:image" content="https://agentmgr.app/guides/og/manage-multiple-claude-code-sessions.ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code の複数セッションを見失わずに管理する方法",
+    "description": "Claude Code を並列で複数セッション動かすための実践ガイド。git worktree による作業の分離、tmux やターミナルのレイアウト、どのセッションが入力待ちかを一目で把握する方法まで。",
+    "url": "https://agentmgr.app/guides/ja/manage-multiple-claude-code-sessions.html",
+    "inLanguage": "ja",
+    "image": "https://agentmgr.app/guides/og/manage-multiple-claude-code-sessions.ja.png",
+    "datePublished": "2026-08-26",
+    "dateModified": "2026-08-26",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn" href="../manage-multiple-claude-code-sessions.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="manage-multiple-claude-code-sessions.html" aria-current="page">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/ja.html">AgentManager</a> / ガイド</nav>
+
+  <h1>Claude Code の複数セッションを見失わずに管理する方法</h1>
+  <span class="article-meta">更新日: 2026年8月26日</span>
+  <p class="article-lede">
+    Claude Code の作業時間の大半は、こちらが見ていなくても進みます。となると自然な次の一歩は、
+    2 つ、3 つ、5 つとセッションを並列で走らせることです。難しいのは起動そのものではなく、
+    互いの作業を踏み荒らさないよう分離することと、「今どれが自分の入力待ちか」を
+    即座に把握すること。このガイドはその両方を扱います。
+  </p>
+
+  <h2>そもそもなぜ並列で動かすのか</h2>
+  <p>
+    機能実装・テストスイートの実行・複数ファイルにまたがるリファクタリングなど、
+    それなりのタスクなら Claude Code の 1 ターンは数分かかります。それをじっと眺めているなら、
+    遊んでいるのは人間の側です。よくある並列パターン:
+  </p>
+  <ul>
+    <li><strong>同一リポジトリ内の独立タスク</strong> — バグ修正を 1 セッション、ドキュメント更新をもう 1 セッション。</li>
+    <li><strong>別リポジトリ</strong> — API サーバーとフロントエンドをそれぞれのセッションで。</li>
+    <li><strong>調査と実装の分離</strong> — 設計の検討を 1 つが進め、承認済みプランの実装を別の 1 つが実行。</li>
+  </ul>
+
+  <h2>Step 1: 作業を分離する — git worktree</h2>
+  <p>
+    2 つのセッションが同じチェックアウトを編集するのは典型的な事故パターンです。片方の
+    <code>git status</code> がもう片方の書きかけの編集で埋まり、ビルドは混ざった状態を拾います。
+    解決策は <a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener">git worktree</a>。
+    1 つのクローンから複数の作業ディレクトリを作り、それぞれに別ブランチを割り当てます。
+  </p>
+  <pre><code># メインのチェックアウトから
+git worktree add ../myapp-fix-auth  -b fix-auth
+git worktree add ../myapp-new-onboarding -b new-onboarding
+
+# worktree ごとに 1 セッション
+cd ../myapp-fix-auth        &amp;&amp; claude   # ターミナルタブ 1
+cd ../myapp-new-onboarding  &amp;&amp; claude   # ターミナルタブ 2</code></pre>
+  <p>
+    これで各セッションはクリーンなツリー・専用ブランチ・独立したビルド成果物を持ちます。
+    ブランチをマージしたら <code>git worktree remove ../myapp-fix-auth</code> で片付け。
+    worktree はオブジェクトストアを共有するため、クローンを増やすよりディスク消費は
+    はるかに小さく済みます。
+  </p>
+
+  <h2>Step 2: セッションの居場所を決める — ターミナルレイアウト</h2>
+  <p>
+    マルチプレクサでもタブ対応ターミナルでも構いません。重要なのは、各セッションに
+    「いつも同じ、すぐ見つかる場所」があることです。
+  </p>
+  <h3>tmux</h3>
+  <pre><code># セッションごとに名前付きウィンドウ
+tmux new-window -n fix-auth
+tmux new-window -n onboarding
+
+# あるいは 1 ウィンドウをペイン分割
+tmux split-window -h</code></pre>
+  <p>
+    ステータスバーのウィンドウ名は簡易的なセッション一覧を兼ねます。tmux は SSH 切断にも
+    耐えるので、リモートマシンでは事実上の第一候補です。
+  </p>
+  <h3>iTerm2 / Terminal.app / IDE</h3>
+  <p>
+    タブや分割ペインでも同じことができます。1 ペイン 1 セッション、名前はタスク名に。
+    VS Code や Cursor なら、エディタウィンドウごとに統合ターミナルで 1 セッションを動かす
+    構成が定番で、コードとセッションが常に並びます。
+  </p>
+  <p>
+    どのレイアウトでも効く習慣が 2 つあります。タブ名をタスク名に変えること（tmux なら
+    <code>tmux rename-window fix-auth</code>）、そして各セッションに
+    <a href="https://code.claude.com/docs/en/statusline" target="_blank" rel="noopener">ステータスライン</a>を
+    付けること。<code>/statusline</code> コマンドでプロンプト下にカスタム行（モデル・git ブランチ・
+    コンテキスト使用量）を設定でき、どのセッションに飛び込んでも自己紹介してくれます。
+  </p>
+
+  <h2>Step 3: 本当の問題 — 「誰が自分を待っているか」</h2>
+  <p>
+    分離とレイアウトは解決済みの問題です。実際に時間を奪うのは<strong>注意のルーティング</strong>のほう。
+    Claude Code のセッションは、次のような見逃しやすい瞬間にブロックします:
+  </p>
+  <ul>
+    <li><strong>ツールの実行許可</strong>を求めている — ファイル編集、シェルコマンド、ネットワークアクセス。</li>
+    <li><strong>プランの承認待ち</strong> — コードに触る前にプランを提示して止まっている。</li>
+    <li>選択肢つきの<strong>確認の質問</strong>を投げている。</li>
+    <li>単に<strong>応答が完了</strong>し、次のプロンプトを待っている。</li>
+  </ul>
+  <p>
+    1 セッションなら気づけます。4 セッションあると、どれか 1 つは他の出力の陰で静かに
+    止まっています。Yes/No のダイアログが見えないまま置かれて、実時間で 5 分が消える——
+    <code>Cmd+Tab</code> でタブを巡回して確認するのは、コードでは絶対に書かない
+    ポーリングループそのものです。
+  </p>
+  <h3>ターミナル標準の仕組みでできること</h3>
+  <p>
+    tmux の <code>monitor-activity</code> は新しい出力があったウィンドウに印を付けます
+    （ただしあらゆる出力で発火するのでノイズが多い）。iTerm2 もアクティビティやベルで
+    タブにバッジを出せます。これらが教えてくれるのは「何かが起きた」であって
+    「Claude があなたを待ってブロックしている」ではありません。結局は見に行くことになります。
+  </p>
+  <h3>hooks でできること</h3>
+  <p>
+    Claude Code の <a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">hooks</a> は、
+    ライフサイクルイベントでシェルコマンドを実行します。<code>Notification</code>（入力が必要）と
+    <code>Stop</code>（応答完了）を macOS 通知につなげば、プッシュ型の通知が手に入ります。
+    コピペで使える設定は<a href="claude-code-notifications-macos.html">macOS 通知ガイド</a>にまとめました。
+    残る課題は、通知が教えてくれるのは<em>イベント</em>であって<em>状態</em>ではないこと。
+    「<em>今この瞬間</em>、5 セッションのうちどれがブロック中か？」に答えるには、
+    集約する何かが必要です。
+  </p>
+
+  <h2>Step 4: 全セッションのステータスボード</h2>
+  <p>
+    その「集約する何か」を、私たちはアプリとして作りました。
+    <a href="/ja.html">AgentManager</a> は、マシン上のすべての Claude Code セッションを
+    常時最前面の小さなフローティングウィンドウに一覧表示する macOS メニューバーアプリです:
+  </p>
+  <ul>
+    <li>各セッションが 1 行で、状態ランプ付き —
+      <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#F5A623"/></svg> 確認待ち、
+      <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#5E9ED6"/></svg> 処理中、
+      <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#4EC46A"/></svg> 完了、
+      <svg class="px-sq" viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#9B9B9B"/></svg> 待機。</li>
+    <li>確認待ちの行には<em>返答の形</em>が表示される — Yes/No の許可、プランのレビュー、選択式の質問 — 切り替える前に優先順位を判断できます。</li>
+    <li>どれかが確認待ちになるとウィンドウが自動で前面に出て、すべて解消すると引っ込みます。</li>
+    <li>行をクリックすると、そのセッションが動いているターミナルペインへ直接ジャンプ — iTerm2、Terminal.app、Ghostty、VS Code 系エディタに対応（tmux のセッションも状態表示は対応しますが、tmux ペインへのジャンプは現状非対応）。</li>
+  </ul>
+  <p>
+    仕組みは上で説明したのと同じ公開 hooks API です（セットアップはワンクリック、hooks は
+    きれいに解除可能）。自作の hook スクリプトとも共存できます。セッションが worktree・タブ・
+    tmux のどこで動いていても、同じボードに載ります。
+  </p>
+
+  <h2>並列セッションを破綻させないための実践 Tips</h2>
+  <ul>
+    <li><strong>名前を付ける。</strong>セッション一覧（AgentManager の行も）には作業ディレクトリ名が出ます。<code>myapp-fix-auth</code> は <code>myapp (2)</code> より一目で分かります。</li>
+    <li><strong>リポジトリごとに <code>CLAUDE.md</code> を置く。</strong>ビルドコマンド・テストコマンド・コーディング規約を毎セッション説明し直さずに済みます。</li>
+    <li><strong>セッション数はレビュー帯域に合わせる。</strong>並列セッションはそれぞれ読むべき diff を生みます。多くの人は 2〜4 が適正で、それを超えると生成ではなくレビューがボトルネックになります。</li>
+    <li><strong>大きめのタスクはプランモードで。</strong>30 秒のプランレビューは、方向を間違えた 40 ファイルの diff レビューに勝ります。</li>
+    <li><strong>終わったセッションは閉じる。</strong>タブを放置せずセッションを終了すれば、目にする一覧がすべて正確に保たれます。</li>
+  </ul>
+
+  <div class="guide-cta">
+    <h2>全セッションを一目で</h2>
+    <p>
+      AgentManager はすべての Claude Code セッションに状態ランプを付け、
+      対応が必要なものを自動で前面に出します。無料で使えます — アカウント登録不要。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る</a>
+    </div>
+    <div class="cta-note">macOS 13+ — フリープランは同時表示 2 セッションまで</div>
+  </div>
+
+  <nav class="related" aria-label="関連ガイド">
+    <h2>関連ガイド</h2>
+    <ul>
+      <li><a href="claude-code-notifications-macos.html">Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Claude Code hooks でセッション状態を追跡する</a></li>
+      <li><a href="claude-code-git-worktrees.html">git worktree で Claude Code を並列で走らせる方法</a></li>
+      <li><a href="claude-code-tmux-workflow.html">Claude Code のための実践 tmux ワークフロー</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>
