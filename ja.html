@@ -262,6 +262,31 @@
       letter-spacing: .03em;
     }
 
+    /* Hero: Homebrew one-liner under the download button (Mac only) */
+    .brew-line {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-top: 12px;
+      font-family: var(--mono); font-size: 12px; color: var(--dim);
+      letter-spacing: .02em;
+    }
+    .brew-cmd {
+      padding: 6px 10px;
+      background: var(--surf); color: var(--text);
+      border: 1px solid var(--border-2); border-radius: 7px;
+      font-family: var(--mono); font-size: 12px;
+      user-select: all; -webkit-user-select: all;
+      overflow-x: auto; max-width: 100%;
+    }
+    .brew-copy {
+      padding: 6px 10px;
+      background: transparent; color: var(--dim);
+      border: 1px solid var(--border-2); border-radius: 7px;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .03em;
+      cursor: pointer; white-space: nowrap;
+      transition: color .12s, border-color .12s, background .12s;
+    }
+    .brew-copy:hover { color: var(--text); background: var(--surf2); border-color: rgba(255,255,255,.26); }
+
     .nonmac-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
     .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
@@ -718,6 +743,11 @@
 <div class="cta-row">
 <div>
 <a class="btn btn-primary" data-cta="hero_download" data-en="↓ Free Download" data-ja="↓ 無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="download-btn">↓ 無料ダウンロード</a>
+<div class="brew-line" id="brew-line">
+<span data-en="or via Homebrew:" data-ja="または Homebrew で:">または Homebrew で:</span>
+<code class="brew-cmd" id="brew-cmd">brew install --cask umechanhika/tap/agent-manager</code>
+<button class="brew-copy" data-cta="hero_brew_copy" data-en="⧉ Copy" data-ja="⧉ コピー" id="brew-copy" type="button">⧉ コピー</button>
+</div>
 <div class="nonmac-cta hidden" id="nonmac-cta">
 <span class="macos-note" data-en="Available on macOS — save the link and open it on your Mac" data-ja="macOS専用アプリです — リンクを保存して、あとでMacから開いてください">macOS専用アプリです — リンクを保存して、あとでMacから開いてください</span>
 <div class="nonmac-actions">
@@ -869,6 +899,16 @@
 </div>
 <div class="feat-item feat-item--shot">
 <div class="feat-thumb">
+<img alt="The AgentManager session list showing a colored percentage on sessions nearing their context limit, and a banner reading Usage: 12% left (5h)" class="feat-thumb-img" loading="lazy" src="feature-context.png"/>
+</div>
+<div class="feat-title">
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
+<h3 data-en="Know before it compacts" data-ja="限界が来る前にわかる">限界が来る前にわかる</h3>
+</div>
+<p data-en="A percentage appears once a session passes 80% of its context, so you can wrap up before it auto-compacts. When your 5-hour or 7-day usage limit runs low, a banner shows what's left." data-ja="コンテキスト消費が 80% を超えると消費率が表示されます。自動圧縮される前に区切りをつけられます。5 時間枠・7 日枠の利用上限が残り少なくなると、残量を帯で表示します。">コンテキスト消費が 80% を超えると消費率が表示されます。自動圧縮される前に区切りをつけられます。5 時間枠・7 日枠の利用上限が残り少なくなると、残量を帯で表示します。</p>
+</div>
+<div class="feat-item feat-item--shot">
+<div class="feat-thumb">
 <img alt="The onboarding screen where you choose between Cat Room and Simple view modes" class="feat-thumb-img" loading="lazy" src="feature-modes.png"/>
 </div>
 <div class="feat-title">
@@ -1003,7 +1043,7 @@
 <span class="step-n">01</span>
 <div class="step-body">
 <strong data-en="Download the app" data-ja="アプリをダウンロード">アプリをダウンロード</strong>
-<span data-en="Free — no account or credit card. Open the DMG and drag AgentManager to Applications." data-ja="無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするだけ。">無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするだけ。</span>
+<span data-en="Free — no account or credit card. Open the DMG and drag AgentManager to Applications, or run &lt;code&gt;brew install --cask umechanhika/tap/agent-manager&lt;/code&gt;." data-ja="無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするか、&lt;code&gt;brew install --cask umechanhika/tap/agent-manager&lt;/code&gt; を実行。">無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするか、<code>brew install --cask umechanhika/tap/agent-manager</code> を実行。</span>
 </div>
 </li>
 <li class="step">
@@ -1197,6 +1237,19 @@
   });
 
   (function() {
+    // Homebrew コマンドのコピー。失敗は握り潰さずボタン文言で明示する。
+    var brewCopy = document.getElementById('brew-copy');
+    brewCopy.addEventListener('click', function() {
+      var cmd = document.getElementById('brew-cmd').textContent;
+      navigator.clipboard.writeText(cmd).then(function() {
+        brewCopy.textContent = IS_JA ? '✓ コピーしました' : '✓ Copied';
+      }, function() {
+        brewCopy.textContent = IS_JA ? 'コピーできませんでした' : 'Copy failed';
+      });
+    });
+  }());
+
+  (function() {
     // iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
     // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
     // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
@@ -1204,6 +1257,7 @@
     var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
     if (isMac) return;
     document.getElementById('download-btn').classList.add('hidden');
+    document.getElementById('brew-line').classList.add('hidden');
     document.getElementById('hdr-cta').classList.add('hidden');
     document.getElementById('price-download-btn').classList.add('hidden');
     document.getElementById('nonmac-cta').classList.remove('hidden');
