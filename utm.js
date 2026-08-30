@@ -5,10 +5,19 @@
 // 初回起動時にそこから utm_* を読んで GA4 の first_open に流入元
 // （session_source / session_medium / session_campaign）を付与する。
 // GitHub Releases はリダイレクトの 1 ホップ目でダウンロード URL のクエリを落とすため、
-// 「ダウンロード時に開いていたページ URL に utm を必ず載せる」ことが確実な運搬経路。
+// 「ダウンロード時に開いていたページ URL」が実効的な運搬経路になる。
 //
-// - 流入 URL に utm_* があればそのまま維持・引き継ぐ（キャンペーンリンク → アプリまで貫通）
-// - 無ければサイト自身を示すデフォルトを付与する（直接訪問も LP 経由と判別できるようにする）
+// - 流入 URL に utm_* があればそのまま維持・引き継ぐ（キャンペーンリンク → アプリまで貫通）。
+//   この場合ページ URL には最初から utm_* が載っているため、書き換えは不要。
+// - 無ければサイト自身を示すデフォルトを「ダウンロードリンクにのみ」付与する。
+//
+// ページ URL 自体は書き換えないこと。合成したデフォルト値を history.replaceState で
+// 現在の URL に書き込むと、リモート取得の gtag.js（async）が到着して page_view を組み立てる
+// 時点では既に書き換え後の URL になっており、GA4 が直接流入・オーガニック検索・SNS 参照を
+// すべて「agentmgr.app / website」という偽の流入元として記録してしまう（同一オリジンの
+// defer スクリプトである本ファイルの方が先に走るため、この順序が常態になる）。
+// 流入 utm の無いダウンロードは、アプリ側が kMDItemWhereFroms のページ URL のホストを
+// source、"referral" を medium とするフォールバックで LP 経由と判別する。
 (function () {
   var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
   var incoming = new URLSearchParams(location.search);
@@ -32,13 +41,4 @@
     Object.keys(utm).forEach(function (key) { url.searchParams.set(key, utm[key]); });
     link.href = url.toString();
   });
-
-  // ページ URL 側にも utm を反映する（kMDItemWhereFroms に記録される実効経路）。
-  var pageUrl = new URL(location.href);
-  Object.keys(utm).forEach(function (key) {
-    if (!pageUrl.searchParams.get(key)) pageUrl.searchParams.set(key, utm[key]);
-  });
-  if (pageUrl.toString() !== location.href) {
-    history.replaceState(history.state, '', pageUrl.toString());
-  }
 })();
