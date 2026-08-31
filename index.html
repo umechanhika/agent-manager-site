@@ -1418,7 +1418,10 @@
     try { saved = localStorage.getItem('am-lang') || ''; } catch(e) {}
     if (saved === 'en') return;
     var nav = (navigator.language || '').toLowerCase();
-    if (saved === 'ja' || (!saved && nav.startsWith('ja'))) location.replace('ja.html');
+    // クエリとハッシュを引き継ぐ。引き継がないと日本語ブラウザで開いたキャンペーンリンクの
+    // utm_* がこの遷移で消え、しかも参照元が自サイト（自己参照）になるため、GA4 では
+    // 流入元が失われて直接流入として計上されてしまう。
+    if (saved === 'ja' || (!saved && nav.startsWith('ja'))) location.replace('ja.html' + location.search + location.hash);
   }());
 
   // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
