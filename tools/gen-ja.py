@@ -93,14 +93,19 @@ def main() -> None:
     ld = find_one(soup, "script", type="application/ld+json")
     data = json.loads(ld.string)
     data["description"] = DESCRIPTION
+    data["url"] = JA_URL
+    data["image"] = OG_IMAGE
     data["inLanguage"] = "ja"
     ld.string = json.dumps(data, ensure_ascii=False, indent=2)
 
     # 言語トグルの active 状態を JA 側へ
-    btn_en = find_one(soup, "button", id="btn-en")
-    btn_ja = find_one(soup, "button", id="btn-ja")
+    btn_en = find_one(soup, "a", id="btn-en")
+    btn_ja = find_one(soup, "a", id="btn-ja")
     btn_en["class"] = [c for c in btn_en.get("class", []) if c != "active"]
     btn_ja["class"] = list(btn_ja.get("class", [])) + ["active"]
+
+    logo = find_one(soup, "a", class_="logo")
+    logo["href"] = "/ja.html"
 
     # 日本語のみの要素（特商法リンク等）を表示状態に
     ja_only = soup.select(".ja-only")

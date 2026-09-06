@@ -148,7 +148,7 @@
       font-family: var(--mono); font-size: 11px; font-weight: 700;
       letter-spacing: .08em; padding: 4px 9px;
       border: none; background: transparent; color: var(--dim);
-      border-radius: 5px;
+      border-radius: 5px; text-decoration: none;
       cursor: pointer; transition: background .12s, color .12s;
     }
     .lang-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
@@ -682,9 +682,9 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "AgentManager",
-  "url": "https://agentmgr.app/",
+  "url": "https://agentmgr.app/ja.html",
   "description": "全 Claude Code セッションを監視する macOS 用フローティングウィンドウ。確認が必要な瞬間に自動で現れ、見逃しを防ぎます。無料で使えます。",
-  "image": "https://agentmgr.app/og-image.png",
+  "image": "https://agentmgr.app/og-image-ja.png",
   "screenshot": "https://agentmgr.app/screenshot-simple.png",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS 13.0 or later",
@@ -716,7 +716,7 @@
 <body>
 <!-- HEADER -->
 <header>
-<a class="logo" href="/">
+<a class="logo" href="/ja.html">
 <img alt="AgentManager" class="logo-img" height="20" src="logo-dark.svg" width="322"/>
 </a>
 <div class="hdr-right">
@@ -727,8 +727,8 @@
 <a data-en="FAQ" data-ja="よくあるご質問" href="#faq">よくあるご質問</a>
 </nav>
 <div aria-label="Language" class="lang-toggle" role="group">
-<button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
-<button class="lang-btn active" id="btn-ja" onclick="setLang('ja')">JA</button>
+<a class="lang-btn" href="./" hreflang="en" id="btn-en" lang="en" onclick="return setLang('en')">EN</a>
+<a class="lang-btn active" href="ja.html" hreflang="ja" id="btn-ja" lang="ja" onclick="return setLang('ja')">JA</a>
 </div>
 <a class="hdr-cta" data-cta="header_download" data-en="Free download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="hdr-cta">無料ダウンロード</a>
 <button aria-controls="hdr-nav" aria-expanded="false" aria-label="Menu" class="hdr-burger" id="hdr-burger" onclick="toggleNav()" type="button">☰</button>
@@ -1213,10 +1213,11 @@
   // 属性の innerHTML 差し替えでは日本語テキストが検索エンジンに載らないため、
   // 切替はページ遷移で行う。ja.html は tools/gen-ja.py で index.html から生成する。
   var IS_JA = document.documentElement.lang === 'ja';
+  // 遷移自体は <a href> に任せる（クローラがリンクとして辿れるようにするため）。
+  // 現在と同じ言語を押したときだけ、無駄な再読み込みを避けて false を返す。
   function setLang(lang) {
     try { localStorage.setItem('am-lang', lang); } catch(e) {}
-    if (lang === 'ja' && !IS_JA) location.href = 'ja.html';
-    if (lang === 'en' && IS_JA) location.href = './';
+    return lang !== (IS_JA ? 'ja' : 'en');
   }
 
   (function() {

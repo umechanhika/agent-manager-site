@@ -147,7 +147,7 @@
       font-family: var(--mono); font-size: 11px; font-weight: 700;
       letter-spacing: .08em; padding: 4px 9px;
       border: none; background: transparent; color: var(--dim);
-      border-radius: 5px;
+      border-radius: 5px; text-decoration: none;
       cursor: pointer; transition: background .12s, color .12s;
     }
     .lang-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
@@ -730,8 +730,8 @@
     </nav>
 
     <div class="lang-toggle" role="group" aria-label="Language">
-      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
-      <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">JA</button>
+      <a class="lang-btn active" id="btn-en" href="./"      hreflang="en" lang="en" onclick="return setLang('en')">EN</a>
+      <a class="lang-btn"        id="btn-ja" href="ja.html" hreflang="ja" lang="ja" onclick="return setLang('ja')">JA</a>
     </div>
     <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
        class="hdr-cta" id="hdr-cta" data-cta="header_download"
@@ -1406,10 +1406,11 @@
   // 属性の innerHTML 差し替えでは日本語テキストが検索エンジンに載らないため、
   // 切替はページ遷移で行う。ja.html は tools/gen-ja.py で index.html から生成する。
   var IS_JA = document.documentElement.lang === 'ja';
+  // 遷移自体は <a href> に任せる（クローラがリンクとして辿れるようにするため）。
+  // 現在と同じ言語を押したときだけ、無駄な再読み込みを避けて false を返す。
   function setLang(lang) {
     try { localStorage.setItem('am-lang', lang); } catch(e) {}
-    if (lang === 'ja' && !IS_JA) location.href = 'ja.html';
-    if (lang === 'en' && IS_JA) location.href = './';
+    return lang !== (IS_JA ? 'ja' : 'en');
   }
 
   (function() {
