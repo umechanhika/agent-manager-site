@@ -298,7 +298,16 @@ fi</code></pre>
   document.addEventListener('click', function(e) {
     var cta = e.target.closest('[data-cta]');
     if (!cta || typeof gtag !== 'function') return;
-    gtag('event', 'cta_click', { cta_location: cta.getAttribute('data-cta') });
+    var loc = cta.getAttribute('data-cta');
+    gtag('event', 'cta_click', { cta_location: loc });
+    // キーイベント用の派生イベントを LP 側で判定して直接送る。GA4 管理画面の
+    // 「イベントを作成」はカスタムイベント（cta_click）をトリガーに選べないため。
+    // 判定ルールは agent-manager/docs/spec/08-telemetry-sentry-ga4.md の登録一覧と対応。
+    var keyEvent = null;
+    if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
+    else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
+    else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
   });
 
   (function() {
