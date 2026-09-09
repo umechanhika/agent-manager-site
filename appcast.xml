@@ -246,6 +246,21 @@
       />
     </item>
 
+
+    <item>
+      <title>Version 2.7.1</title>
+      <pubDate>Wed, 09 Sep 2026 12:58:07 +0000</pubDate>
+      <sparkle:version>456</sparkle:version>
+      <sparkle:shortVersionString>2.7.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/umechanhika/agent-manager-site/releases/download/v2.7.1/AgentManager-2.7.1.dmg"
+        sparkle:edSignature="3hz8IUACWvlUbOlFFmecLXmKLA7OUY+8Lz6kUnulRaoIB+8PIA1uQzLI6ksrRxBEdJs0HbqzHMPMen1lzu7VDg=="
+        length="2746975"
+        type="application/octet-stream"
+      />
+    </item>
+
     <!--
     リリースのたびに <item> を先頭に追加する。
     sign_update コマンドで edSignature と length を取得:
