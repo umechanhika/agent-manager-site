@@ -1479,6 +1479,12 @@
     // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
     var ua = navigator.userAgent || '';
     var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    // どちらの CTA を出したかを 1 ページビューにつき 1 回送る。cta_click だけでは
+    // 「ダウンロードボタンが出ていたセッションが何件あったか」という分母が取れず、
+    // クリック率を Mac / 非 Mac で比較できない。GA4 の operatingSystem では代用できない:
+    // iPad はデスクトップモードで Macintosh を名乗り、ここでは非 Mac 扱いになるため、
+    // 実際に出し分けた結果と一致しない。判定に使った値そのものは送らない。
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
     if (isMac) return;
     document.getElementById('download-btn').classList.add('hidden');
     document.getElementById('brew-line').classList.add('hidden');
