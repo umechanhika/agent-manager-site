@@ -48,7 +48,7 @@
      *
      * Font sizes (hard-won, do not regress):
      *   section heading: 22px/700  feat body: 17px  price feats: 16px
-     *   price-cyc: 16px  step body: 15-16px
+     *   step body: 15-16px
      */
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -198,8 +198,8 @@
       gap: 56px; align-items: start;
     }
     @media (max-width: 760px) {
+      /* モバイルはキーメッセージ → 説明 → CTA → 画像の順（画像先行だと初見で意味が取れない） */
       .hero { grid-template-columns: 1fr; gap: 36px; padding: 40px 24px; }
-      .hero-right { order: -1; }
     }
 
     /* Status dots — session lamp colors (SVG squares clipped round) */
@@ -218,6 +218,11 @@
     .hero-sub {
       font-size: 17px; color: var(--muted);
       line-height: 1.7; max-width: 430px; margin-bottom: 36px;
+    }
+    /* PC は 1 行に収まる（JA 466px / EN 419px）ので改行を消す。モバイルは 2 行 */
+    @media (min-width: 761px) {
+      .hero-sub { max-width: none; }
+      .hero-sub br { display: none; }
     }
 
     /* Buttons */
@@ -247,12 +252,6 @@
     .btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); }
 
     .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-    .cta-note {
-      font-family: var(--mono); font-size: 11px;
-      color: var(--dim); letter-spacing: .03em;
-    }
-    .ph-badge { margin-top: 18px; }
-    .ph-badge img { display: block; width: 250px; height: 54px; }
     .macos-note {
       display: inline-flex; align-items: center;
       padding: 13px 22px;
@@ -270,6 +269,8 @@
       font-family: var(--mono); font-size: 12px; color: var(--dim);
       letter-spacing: .02em;
     }
+    /* ラベルを 1 行目に置き、コマンドの箱の左端をダウンロードボタンと揃える */
+    .brew-line > span { flex-basis: 100%; }
     .brew-cmd {
       padding: 6px 10px;
       background: var(--surf); color: var(--text);
@@ -291,24 +292,8 @@
     .nonmac-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
     .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
-    /* ── HERO RIGHT: window frame + screenshot toggle ─────── */
+    /* ── HERO RIGHT: window frame + screenshot ─────────────── */
     .hero-right { display: flex; flex-direction: column; gap: 10px; }
-
-    .ss-toggle {
-      display: flex; gap: 2px; padding: 2px;
-      border: 1px solid var(--border);
-      background: var(--surf);
-      border-radius: 8px;
-      align-self: flex-start;
-    }
-    .ss-btn {
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
-      letter-spacing: .06em; padding: 4px 14px;
-      border: none; background: transparent; color: var(--dim); cursor: pointer;
-      border-radius: 6px;
-      transition: background .12s, color .12s;
-    }
-    .ss-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
 
     /* Dark macOS window frame — the hero screenshot is raw window content */
     .px-window {
@@ -365,14 +350,22 @@
       line-height: 1.7; color: var(--text); font-weight: 500;
     }
     .pain-inner strong { color: var(--amber); font-weight: 700; }
+    .pain-inner .nw { white-space: nowrap; }
+    /* 400px 前後の端末でキーメッセージが 1 文字だけ折り返さないよう、余白と文字を詰める */
+    @media (max-width: 480px) {
+      .pain-sec { padding: 48px 20px; }
+      .pain-inner p { font-size: 16px; }
+    }
     .pain-inner em     { font-style: normal; color: var(--link); }
+    /* Product Hunt バッジ: 実績としてメッセージの直下に置く（CTA と並べない） */
+    .ph-badge { margin-top: 28px; display: flex; justify-content: center; }
+    .ph-badge img { display: block; width: 250px; height: 54px; }
 
     /* ── DIVIDER — a single hairline, centered ─────────────── */
     .px-divider {
       display: flex; justify-content: center;
       padding: 44px 0;
     }
-    .px-divider svg { display: none; }
     .px-divider::before {
       content: '';
       width: min(520px, 70vw); height: 1px;
@@ -396,12 +389,11 @@
     }
     .feat-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-      align-items: start;
+      /* 横並びの行内では一番長いカードに高さを揃える（1 列のときは各自の高さ） */
+      align-items: stretch;
     }
-    @media (max-width: 640px) {
-      .feat-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 400px) {
+    /* モバイルは 1 列（2 列だとカードが細く縦長になりすぎる） */
+    @media (max-width: 760px) {
       .feat-grid { grid-template-columns: 1fr; }
     }
 
@@ -411,13 +403,9 @@
       padding: 22px 20px;
       background: var(--surf);
       overflow: hidden;
-      transition: border-color .15s, transform .15s, box-shadow .15s;
+      transition: border-color .15s;
     }
-    .feat-item:hover {
-      border-color: var(--border-2);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.35);
-    }
+    .feat-item:hover { border-color: var(--border-2); }
 
     .feat-title { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
     .feat-px { width: 9px; height: 9px; flex-shrink: 0; border-radius: 50%; }
@@ -450,7 +438,7 @@
     /* ── CAT BONUS: 幅を絞った2枚グリッド。カード自体は .feat-item を再利用。
        機能グリッドより一段小ぶりにして「おまけ」の格を視覚的に伝える。 ── */
     .cat-sec  { max-width: 640px; margin: 0 auto; padding: 0 32px 80px; }
-    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
     @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
 
     /* ── PRICING ───────────────────────────────────────────── */
@@ -481,30 +469,26 @@
       box-shadow: 0 0 28px rgba(94,158,214,.14);
     }
 
-    /* Badge row: fixed height keeps price-tier/price-main baseline-aligned */
-    .price-badge-row { height: 22px; display: flex; align-items: center; margin-bottom: 12px; }
-    .price-badge {
-      font-family: var(--mono); font-size: 10px; font-weight: 700;
-      letter-spacing: .08em; text-transform: uppercase;
-      color: #0B1420; background: var(--sky);
-      border-radius: 5px;
-      padding: 3px 8px;
-    }
-    .price-badge.hidden { visibility: hidden; }
-
+    /* Plan name as a pill badge so the tier reads at a glance */
     .price-tier {
-      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      align-self: center; display: inline-block;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 12px;
+      color: var(--text); padding: 5px 12px;
+      border: 1px solid var(--border-2); border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      margin-bottom: 18px;
+    }
+    .price-card.featured .price-tier {
+      color: #9CC5EA; border-color: rgba(94,158,214,.5); background: rgba(94,158,214,.12);
     }
 
     /* Price number: cur($) + int + dec, all bottom-aligned */
-    .price-main { display: flex; align-items: flex-end; margin-bottom: 6px; line-height: 1; }
+    .price-main { display: flex; align-items: flex-end; justify-content: center; margin-bottom: 20px; line-height: 1; }
     .price-cur  { font-family: var(--mono); font-size: 18px; font-weight: 400; padding-bottom: 7px; color: var(--muted); }
     .price-int  { font-family: var(--mono); font-size: 52px; font-weight: 300; line-height: 1; }
     .price-dec  { font-family: var(--mono); font-size: 20px; font-weight: 400; padding-bottom: 7px; color: var(--muted); }
 
-    .price-cyc  { font-size: 16px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
     .price-div  { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
 
     .price-feats {
@@ -547,6 +531,7 @@
     }
     .price-note a { color: var(--link); text-decoration: none; }
     .price-note a:hover { text-decoration: underline; }
+    .price-note--tight { margin-top: 6px; }
 
     /* ── SETUP ─────────────────────────────────────────────── */
     .setup-sec {
@@ -739,7 +724,7 @@
 <a class="lang-btn" href="./" hreflang="en" id="btn-en" lang="en" onclick="return setLang('en')">EN</a>
 <a class="lang-btn active" href="ja.html" hreflang="ja" id="btn-ja" lang="ja" onclick="return setLang('ja')">JA</a>
 </div>
-<a class="hdr-cta" data-cta="header_download" data-en="Free download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="hdr-cta">無料ダウンロード</a>
+<a class="hdr-cta" data-cta="header_download" data-en="Free Download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="hdr-cta">無料ダウンロード</a>
 <button aria-controls="hdr-nav" aria-expanded="false" aria-label="Menu" class="hdr-burger" id="hdr-burger" onclick="toggleNav()" type="button">☰</button>
 </div>
 </header>
@@ -747,13 +732,13 @@
 <div class="hero">
 <!-- LEFT: copy -->
 <div>
-<h1 data-en="Stop keeping&lt;br&gt;&lt;em&gt;Claude waiting.&lt;/em&gt;" data-ja="Claude を、&lt;br&gt;&lt;em&gt;待たせない。&lt;/em&gt;">Claude を、<br/><em>待たせない。</em></h1>
-<p class="hero-sub" data-en="Run as many Claude Code sessions as you like. A floating window appears the moment one needs you — and jumps you to the right terminal in one click." data-ja="何本の Claude Code セッションを並べても大丈夫。確認が必要な瞬間だけ現れるフローティングウィンドウが、1クリックでそのターミナルへ連れて行きます。">何本の Claude Code セッションを並べても大丈夫。確認が必要な瞬間だけ現れるフローティングウィンドウが、1クリックでそのターミナルへ連れて行きます。</p>
+<h1 data-en="Stop keeping&lt;br&gt;&lt;em&gt;Claude waiting.&lt;/em&gt;" data-ja="Claude を、&lt;em&gt;待たせない。&lt;/em&gt;">Claude を、<em>待たせない。</em></h1>
+<p class="hero-sub" data-en="Tells you when a session is waiting. &lt;br&gt;One click to jump in." data-ja="確認待ちをすぐにお知らせ、&lt;br&gt;1クリックでセッションへ移動。">確認待ちをすぐにお知らせ、<br/>1クリックでセッションへ移動。</p>
 <div class="cta-row">
 <div>
-<a class="btn btn-primary" data-cta="hero_download" data-en="↓ Free Download" data-ja="↓ 無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="download-btn">↓ 無料ダウンロード</a>
+<a class="btn btn-primary" data-cta="hero_download" data-en="Free Download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="download-btn">無料ダウンロード</a>
 <div class="brew-line" id="brew-line">
-<span data-en="or via Homebrew:" data-ja="または Homebrew で:">または Homebrew で:</span>
+<span data-en="or" data-ja="または">または</span>
 <code class="brew-cmd" id="brew-cmd">brew install --cask umechanhika/tap/agent-manager</code>
 <button class="brew-copy" data-cta="hero_brew_copy" data-en="⧉ Copy" data-ja="⧉ コピー" id="brew-copy" type="button">⧉ コピー</button>
 </div>
@@ -766,17 +751,9 @@
 </div>
 </div>
 </div>
-<div class="cta-note" data-en="Free to use — no account or credit card required" data-ja="無料で使えます — アカウント登録・クレジットカード不要">無料で使えます — アカウント登録・クレジットカード不要</div>
-<div class="ph-badge">
-<a href="https://www.producthunt.com/products/agentmanager?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-agentmanager" rel="noopener noreferrer" target="_blank"><img alt="AgentManager - Never miss a Claude Code session waiting for your input | Product Hunt" decoding="async" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202701&amp;theme=dark&amp;t=1784854368793" width="250"/></a>
 </div>
-</div>
-<!-- RIGHT: pixel window + view-mode toggle + status legend -->
+<!-- RIGHT: pixel window + status legend -->
 <div class="hero-right">
-<div class="ss-toggle" role="group">
-<button class="ss-btn active" data-en="▦ Simple" data-ja="▦ シンプル" id="ss-btn-simple" onclick="showSimple()">▦ シンプル</button>
-<button class="ss-btn" data-en="🐱 Cat Room" data-ja="🐱 猫部屋" id="ss-btn-cat" onclick="showCat()">🐱 猫部屋</button>
-</div>
 <div class="px-window">
 <div class="px-titlebar">
 <div aria-hidden="true" class="px-traffic">
@@ -788,7 +765,6 @@
 </div>
 <div class="px-winbody">
 <img alt="AgentManager simple mode — a minimal dark list of Claude Code sessions with status dots and elapsed times" id="ss-simple" src="screenshot-simple.png"/>
-<img alt="AgentManager cat room mode — pixel-art cats living below the session list" class="hidden" id="ss-cat" src="screenshot-cat.gif"/>
 </div>
 </div>
 <!-- Status legend in context, directly below the screenshot -->
@@ -809,30 +785,20 @@
 <svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
 <span data-en="Idle" data-ja="待機">待機</span>
 </div>
-<div class="ss-legend-item">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#DE5454" height="8" width="8"></rect></svg>
-<span data-en="Error" data-ja="エラー停止">エラー停止</span>
-</div>
 </div>
 </div>
 </div><!-- /hero -->
 <!-- PAIN SECTION: why you need this — one beat, before features -->
 <section class="pain-sec">
 <div class="pain-inner">
-<p data-en="Sessions run in parallel. &lt;strong&gt;Until you notice, Claude just sits idle.&lt;/strong&gt; AgentManager fixes that." data-ja="複数のセッションが同時進行。&lt;strong&gt;あなたが気づくまで、Claude は止まったまま。&lt;/strong&gt;AgentManager が解決します。">複数のセッションが同時進行。<strong>あなたが気づくまで、Claude は止まったまま。</strong>AgentManager が解決します。</p>
+<p data-en='Sessions run in parallel.&lt;br&gt;&lt;strong&gt;&lt;span class="nw"&gt;Until you notice,&lt;/span&gt; &lt;span class="nw"&gt;Claude just sits idle.&lt;/span&gt;&lt;/strong&gt;&lt;br&gt;AgentManager fixes that.' data-ja='複数のセッションが同時進行。&lt;br&gt;&lt;strong&gt;&lt;span class="nw"&gt;あなたが気づくまで、&lt;/span&gt;&lt;span class="nw"&gt;Claude は止まったまま。&lt;/span&gt;&lt;/strong&gt;&lt;br&gt;AgentManager が解決します。'>複数のセッションが同時進行。<br/><strong><span class="nw">あなたが気づくまで、</span><span class="nw">Claude は止まったまま。</span></strong><br/>AgentManager が解決します。</p>
+<div class="ph-badge">
+<a href="https://www.producthunt.com/products/agentmanager?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-agentmanager" rel="noopener noreferrer" target="_blank"><img alt="AgentManager - Never miss a Claude Code session waiting for your input | Product Hunt" decoding="async" height="54" loading="lazy" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202701&amp;theme=dark&amp;t=1784854368793" width="250"/></a>
+</div>
 </div>
 </section>
 <!-- PIXEL DIVIDER -->
 <div aria-hidden="true" class="px-divider" id="features">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#3BAD52" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#4E8BC8" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
 </div>
 <!-- FEATURES -->
 <section class="features-sec">
@@ -840,7 +806,7 @@
 <span class="section-label" data-en="Features" data-ja="機能">機能</span>
 </div>
 <div class="feat-grid">
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="The AgentManager window listing sessions that are running, waiting, and done — each with a colored status dot" class="feat-thumb-img" loading="lazy" src="feature-waiting.png"/>
 </div>
@@ -850,7 +816,7 @@
 </div>
 <p data-en="Every session's status at a glance — which is running, which needs you, which is done." data-ja="全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済みがひと目でわかります。">全セッションの状態を一覧で確認。動いているもの、確認待ち、完了済みがひと目でわかります。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="The AgentManager session list with status dots showing icons for approval, plan review, and choice — labeled Approve or deny, Review the plan, and Pick an option" class="feat-thumb-img" loading="lazy" src="feature-waiting-kinds.png"/>
 </div>
@@ -860,7 +826,7 @@
 </div>
 <p data-en="A quick yes/no, a plan to review, or a choice to make — the status dot itself shows which, so you know what you're getting into before you jump in." data-ja="承認が要るだけなのか、プランをじっくり見る必要があるのか、選択肢から選ぶのか。ステータスドット自体が教えてくれるので、ジャンプする前に心構えができます。">承認が要るだけなのか、プランをじっくり見る必要があるのか、選択肢から選ぶのか。ステータスドット自体が教えてくれるので、ジャンプする前に心構えができます。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="The session list pops up when a session starts waiting, and disappears once everything is resolved" class="feat-thumb-img" loading="lazy" src="feature-autoshow.gif"/>
 </div>
@@ -870,7 +836,7 @@
 </div>
 <p data-en="Appears the moment any session needs input. Hides when everything is clear." data-ja="確認が必要な瞬間に自動で現れ、全て解消すると自動で消えます。">確認が必要な瞬間に自動で現れ、全て解消すると自動で消えます。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="AgentManager session list with the waiting row highlighted for jumping to its terminal" class="feat-thumb-img" loading="lazy" src="feature-jump.png"/>
 </div>
@@ -880,7 +846,7 @@
 </div>
 <p data-en="Click any row to jump straight to that session — the exact pane in iTerm2, the right tab in Terminal and Ghostty, the project window in your IDE." data-ja="行をクリックするとそのセッションへ即ジャンプ。iTerm2 は該当ペイン、Terminal / Ghostty は該当タブ、IDE はプロジェクトウィンドウまで移動します。">行をクリックするとそのセッションへ即ジャンプ。iTerm2 は該当ペイン、Terminal / Ghostty は該当タブ、IDE はプロジェクトウィンドウまで移動します。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="Pressing Option and Space toggles the AgentManager window on and off" class="feat-thumb-img" loading="lazy" src="feature-keyboard.gif"/>
 </div>
@@ -890,7 +856,7 @@
 </div>
 <p data-en='Toggle the window with &lt;kbd class="feat-kbd"&gt;⌥ Space&lt;/kbd&gt; (customizable). Navigate sessions and jump to terminals — all without the mouse.' data-ja='&lt;kbd class="feat-kbd"&gt;⌥ Space&lt;/kbd&gt;（変更可能）でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。'><kbd class="feat-kbd">⌥ Space</kbd>（変更可能）でウィンドウをトグル。セッション移動もターミナルジャンプもキーボードで完結。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="A macOS dock holding the Android Studio and Visual Studio Code icons" class="feat-thumb-img" loading="lazy" src="feature-ide.png"/>
 </div>
@@ -900,7 +866,7 @@
 </div>
 <p data-en="Sessions launched from the integrated terminal of Android Studio, VS Code, Cursor and more show up in the list too — click to jump to that project's window." data-ja="Android Studio・VS Code・Cursor などの統合ターミナルから起動したセッションも一覧に表示。クリックでそのプロジェクトのウィンドウへ遷移できます。">Android Studio・VS Code・Cursor などの統合ターミナルから起動したセッションも一覧に表示。クリックでそのプロジェクトのウィンドウへ遷移できます。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="macOS menu bar showing AgentManager status dots with per-status session counts" class="feat-thumb-img" loading="lazy" src="feature-menubar.png"/>
 </div>
@@ -908,9 +874,9 @@
 <svg class="feat-px" viewbox="0 0 10 10"><rect fill="#4E8BC8" height="10" width="10"></rect></svg>
 <h3 data-en="Status in your menu bar" data-ja="メニューバーで状態表示">メニューバーで状態表示</h3>
 </div>
-<p data-en="Without opening the window, the menu-bar icon shows counts by status as colored dots — so you always know how many sessions are waiting." data-ja="ウィンドウを開かなくても、メニューバーのアイコンが状態別の件数を色付きドットで表示。確認待ちが何件あるか常に把握できます。">ウィンドウを開かなくても、メニューバーのアイコンが状態別の件数を色付きドットで表示。確認待ちが何件あるか常に把握できます。</p>
+<p data-en="See how many sessions are waiting from the menu bar — without opening the window." data-ja="ウィンドウを開かなくても、メニューバーで確認待ちを把握できます。">ウィンドウを開かなくても、メニューバーで確認待ちを把握できます。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="The AgentManager session list showing a colored percentage on sessions nearing their context limit, and a banner reading Usage: 12% left (5h)" class="feat-thumb-img" loading="lazy" src="feature-context.png"/>
 </div>
@@ -920,7 +886,7 @@
 </div>
 <p data-en="A percentage appears once a session passes 80% of its context, so you can wrap up before it auto-compacts. When your 5-hour or 7-day usage limit runs low, a banner shows what's left." data-ja="コンテキスト消費が 80% を超えると消費率が表示されます。自動圧縮される前に区切りをつけられます。5 時間枠・7 日枠の利用上限が残り少なくなると、残量を帯で表示します。">コンテキスト消費が 80% を超えると消費率が表示されます。自動圧縮される前に区切りをつけられます。5 時間枠・7 日枠の利用上限が残り少なくなると、残量を帯で表示します。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="The AgentManager session list with two rows whose status dot is red with an exclamation mark, next to a waiting row and a done row" class="feat-thumb-img" loading="lazy" src="feature-error.png"/>
 </div>
@@ -930,26 +896,26 @@
 </div>
 <p data-en="When a session dies on an API error — rate limit, auth, billing — the lamp turns red with a “!” and the window comes forward. Hover the row to see why." data-ja="レート制限・認証・課金などの API エラーでセッションが止まると、ランプが赤くなって「!」が付き、ウィンドウが前面に出ます。行にホバーすると原因もわかります。">レート制限・認証・課金などの API エラーでセッションが止まると、ランプが赤くなって「!」が付き、ウィンドウが前面に出ます。行にホバーすると原因もわかります。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
-<img alt="The onboarding screen where you choose between Cat Room and Simple view modes" class="feat-thumb-img" loading="lazy" src="feature-modes.png"/>
+<img alt="Pixel-art music notes floating up" class="feat-thumb-img" loading="lazy" src="feature-sound.gif"/>
 </div>
 <div class="feat-title">
-<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#A070D0" height="10" width="10"></rect></svg>
-<h3 data-en="Choose your view" data-ja="表示モードを選べる">表示モードを選べる</h3>
+<svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
+<h3 data-en="Sound alerts" data-ja="音でお知らせ">音でお知らせ</h3>
 </div>
-<p data-en="Pick Simple or Cat Room during onboarding — and switch anytime in Settings. Same list, same shortcuts, same one-click jumps." data-ja="初回セットアップでシンプル／猫部屋を選択。設定からいつでも切り替えられます。一覧・ショートカット・ワンクリックジャンプはどちらのモードでも同じです。">初回セットアップでシンプル／猫部屋を選択。設定からいつでも切り替えられます。一覧・ショートカット・ワンクリックジャンプはどちらのモードでも同じです。</p>
+<p data-en="A sound plays the moment a session needs you. Mute it anytime in Settings." data-ja="セッションに確認が必要になると音でお知らせ。設定からいつでもミュートできます。">セッションに確認が必要になると音でお知らせ。設定からいつでもミュートできます。</p>
 </div>
 </div>
 </section>
 <!-- BONUS: CAT ROOM MODE — 主機能ではなく「おまけの癒し」として独立させる -->
 <section class="cat-sec" id="cat-mode">
 <div class="sec-head">
-<span class="section-label" data-en="Bonus: a cat room to keep you company" data-ja="おまけ：癒しの猫部屋モード">おまけ：癒しの猫部屋モード</span>
-<p class="sec-sub" data-en="Prefer a little warmth while Claude works? Switch to Cat Room mode — the same session list, with pixel cats living beneath it." data-ja="Claude の作業を見守る時間に、ちょっとした癒しを。猫部屋モードに切り替えると、同じセッション一覧の下でピクセルの猫たちが暮らします。">Claude の作業を見守る時間に、ちょっとした癒しを。猫部屋モードに切り替えると、同じセッション一覧の下でピクセルの猫たちが暮らします。</p>
+<span class="section-label" data-en="Bonus: cats, and a breather" data-ja="おまけ：猫と、ひと息。">おまけ：猫と、ひと息。</span>
+<p class="sec-sub" data-en="Cats live beneath your session list.&lt;br&gt;A small comfort between tasks." data-ja="セッション一覧の下に、猫が暮らします。&lt;br&gt;作業の合間の、ちょっとした癒しに。">セッション一覧の下に、猫が暮らします。<br/>作業の合間の、ちょっとした癒しに。</p>
 </div>
 <div class="cat-grid">
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="The pixel-art cat room shifting between a daytime and a nighttime scene" class="feat-thumb-img" loading="lazy" src="feature-catroom.gif"/>
 </div>
@@ -959,7 +925,7 @@
 </div>
 <p data-en="A cat wanders the room in sync with your sessions. The scene shifts between day and night." data-ja="セッション状態に連動して猫が動き、時刻で昼と夜の景色が変わります。">セッション状態に連動して猫が動き、時刻で昼と夜の景色が変わります。</p>
 </div>
-<div class="feat-item feat-item--shot">
+<div class="feat-item">
 <div class="feat-thumb">
 <img alt="A pixel-art cat meowing with music notes floating up" class="feat-thumb-img" loading="lazy" src="feature-catsound.gif"/>
 </div>
@@ -967,7 +933,7 @@
 <svg class="feat-px" viewbox="0 0 10 10"><rect fill="#F5A623" height="10" width="10"></rect></svg>
 <h3 data-en="Cat sound alerts" data-ja="猫の鳴き声で通知">猫の鳴き声で通知</h3>
 </div>
-<p data-en="A cat meow plays the moment a session needs your input. You'll hear it even when you're looking away. Prefer quiet? Mute it anytime in Settings — no Notification Center spam either way. The meow works in Simple mode too." data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。鳴き声はシンプルモードでも使えます。">セッションに確認が必要になると猫の鳴き声でお知らせ。画面を見ていなくても見逃しません。音が気になる場合は設定からいつでもミュートでき、通知センターは使いません。鳴き声はシンプルモードでも使えます。</p>
+<p data-en="A cat meows the moment a session needs your input." data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。">セッションに確認が必要になると猫の鳴き声でお知らせ。</p>
 </div>
 </div>
 </section>
@@ -976,66 +942,49 @@
 <div class="pricing-inner">
 <div class="sec-head">
 <span class="section-label" data-en="Pricing" data-ja="料金">料金</span>
-<p class="sec-sub" data-en="Free to use, forever. When you're ready to run more sessions in parallel, upgrade for unlimited at once." data-ja="ずっと無料で使えます。並列セッションを増やしたくなったら、アップグレードで同時表示が無制限に。">ずっと無料で使えます。並列セッションを増やしたくなったら、アップグレードで同時表示が無制限に。</p>
+<p class="sec-sub" data-en="Free for up to 2 sessions shown at once.&lt;br&gt;Paid plans remove the limit." data-ja="同時表示 2 セッションまでは無料。&lt;br&gt;それ以上は有料プランで無制限に。">同時表示 2 セッションまでは無料。<br/>それ以上は有料プランで無制限に。</p>
 </div>
 <div class="price-grid">
 <!-- Free plan -->
 <div class="price-card">
-<div class="price-badge-row">
-<span class="price-badge hidden">placeholder</span>
-</div>
-<div class="price-tier" data-en="Free" data-ja="無料">無料</div>
+<div class="price-tier" data-en="Free plan" data-ja="無料プラン">無料プラン</div>
 <div class="price-main">
 <span class="price-cur">$</span>
 <span class="price-int">0</span>
 </div>
-<div class="price-cyc" data-en="forever · no account required" data-ja="ずっと無料 · アカウント不要">ずっと無料 · アカウント不要</div>
 <hr class="price-div"/>
 <ul class="price-feats">
+<li data-en="No account required" data-ja="アカウント不要">アカウント不要</li>
 <li data-en="All features included" data-ja="全機能を利用可能">全機能を利用可能</li>
 <li data-en="Up to 2 sessions shown at once" data-ja="同時表示は 2 セッションまで">同時表示は 2 セッションまで</li>
-<li data-en="No time limit" data-ja="期間制限なし">期間制限なし</li>
 </ul>
-<a class="price-cta price-cta-dark" data-cta="pricing_free_download" data-en="↓ Free download" data-ja="↓ 無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="price-download-btn">↓ 無料ダウンロード</a>
+<a class="price-cta price-cta-dark" data-cta="pricing_free_download" data-en="Free Download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="price-download-btn">無料ダウンロード</a>
 </div>
 <!-- Monthly -->
 <div class="price-card">
-<div class="price-badge-row">
-<span class="price-badge hidden">placeholder</span>
-</div>
-<div class="price-tier" data-en="Monthly" data-ja="月額">月額</div>
+<div class="price-tier" data-en="Monthly plan" data-ja="月額プラン">月額プラン</div>
 <div class="price-main">
 <span class="price-cur">$</span>
 <span class="price-int">4</span>
 <span class="price-dec">.99</span>
 </div>
-<div class="price-cyc" data-en="per month, billed monthly" data-ja="月払い">月払い</div>
 <hr class="price-div"/>
 <ul class="price-feats">
 <li data-en="Unlimited sessions shown" data-ja="セッション同時表示 無制限">セッション同時表示 無制限</li>
 <li data-en="Everything in Free" data-ja="無料プランの全機能を含む">無料プランの全機能を含む</li>
-<li data-en="Cancel anytime" data-ja="いつでもキャンセル可">いつでもキャンセル可</li>
 </ul>
 <a class="price-cta price-cta-light" data-cta="pricing_monthly" data-en="Start monthly plan" data-ja="月額プランを見る" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly">月額プランを見る</a>
 </div>
 <!-- Annual — featured -->
 <div class="price-card featured">
-<div class="price-badge-row">
-<span class="price-badge" data-en="▸ ~2 MONTHS FREE" data-ja="▸ 約2ヶ月分お得">▸ 約2ヶ月分お得</span>
-</div>
-<div class="price-tier" data-en="Annual" data-ja="年額">年額</div>
+<div class="price-tier" data-en="Annual plan" data-ja="年額プラン">年額プラン</div>
 <div class="price-main">
 <span class="price-cur">$</span>
-<span class="price-int">4</span>
-<span class="price-dec">.00</span>
+<span class="price-int">48</span>
 </div>
-<div class="price-cyc" data-en="per month · $48 billed annually" data-ja="月換算 · 年額 $48">月換算 · 年額 $48</div>
 <hr class="price-div"/>
 <ul class="price-feats">
-<li data-en="Unlimited sessions shown" data-ja="セッション同時表示 無制限">セッション同時表示 無制限</li>
-<li data-en="Everything in Free" data-ja="無料プランの全機能を含む">無料プランの全機能を含む</li>
-<li data-en="Cancel anytime" data-ja="いつでもキャンセル可">いつでもキャンセル可</li>
-<li data-en="~20% off vs monthly" data-ja="月額より約 20% お得">月額より約 20% お得</li>
+<li data-en="~2 months free vs monthly" data-ja="月額より約 2 ヶ月分お得">月額より約 2 ヶ月分お得</li>
 </ul>
 <a class="price-cta price-cta-blue" data-cta="pricing_annual" data-en="Start annual plan" data-ja="年額プランで始める" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual">年額プランで始める</a>
 </div>
@@ -1044,17 +993,11 @@
 <span data-en="Secure checkout by" data-ja="安全決済">安全決済</span>
 <a href="https://freemius.com" rel="noopener" target="_blank">Freemius</a>
 </p>
+<p class="price-note price-note--tight" data-en="* Cancel anytime." data-ja="※ いつでもキャンセルできます。">※ いつでもキャンセルできます。</p>
 </div>
 </section>
 <!-- PIXEL DIVIDER -->
 <div aria-hidden="true" class="px-divider">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#4E8BC8" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#3BAD52" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#1A1714" height="8" width="8"></rect></svg>
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
 </div>
 <!-- SETUP — 3 steps (compressed from 4) -->
 <section class="setup-sec" id="setup">
@@ -1063,24 +1006,21 @@
 </div>
 <ol class="steps">
 <li class="step">
-<span class="step-n">01</span>
+<span class="step-n">1</span>
 <div class="step-body">
 <strong data-en="Download the app" data-ja="アプリをダウンロード">アプリをダウンロード</strong>
-<span data-en="Free — no account or credit card. Open the DMG and drag AgentManager to Applications, or run &lt;code&gt;brew install --cask umechanhika/tap/agent-manager&lt;/code&gt;." data-ja="無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするか、&lt;code&gt;brew install --cask umechanhika/tap/agent-manager&lt;/code&gt; を実行。">無料です — アカウント登録もカードも不要。DMG を開いて Applications へドラッグするか、<code>brew install --cask umechanhika/tap/agent-manager</code> を実行。</span>
 </div>
 </li>
 <li class="step">
-<span class="step-n">02</span>
+<span class="step-n">2</span>
 <div class="step-body">
-<strong data-en="Launch &amp; set up" data-ja="起動してセットアップ">起動してセットアップ</strong>
-<span data-en="Open AgentManager and finish the quick first-run setup — it takes about 30 seconds." data-ja="アプリを起動して、かんたんな初回セットアップを済ませれば OK。30秒ほどで終わります。">アプリを起動して、かんたんな初回セットアップを済ませれば OK。30秒ほどで終わります。</span>
+<strong data-en="Launch and finish the 30-second setup" data-ja="起動して 30 秒のセットアップ">起動して 30 秒のセットアップ</strong>
 </div>
 </li>
 <li class="step">
-<span class="step-n">03</span>
+<span class="step-n">3</span>
 <div class="step-body">
-<strong data-en="Run Claude Code" data-ja="Claude Code を起動">Claude Code を起動</strong>
-<span data-en="Start any &lt;code&gt;claude&lt;/code&gt; session. AgentManager detects it automatically. That's it." data-ja="&lt;code&gt;claude&lt;/code&gt; を実行するだけ。AgentManager が自動で検出します。以上。"><code>claude</code> を実行するだけ。AgentManager が自動で検出します。以上。</span>
+<strong data-en="Claude Code sessions are detected automatically" data-ja="Claude Code の起動を自動検出">Claude Code の起動を自動検出</strong>
 </div>
 </li>
 </ol>
@@ -1149,19 +1089,19 @@
 <li class="faq-item">
 <details>
 <summary data-en="How does AgentManager detect sessions?" data-ja="セッションはどうやって検出されますか？">セッションはどうやって検出されますか？</summary>
-<p class="faq-ans" data-en="AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically in &lt;code&gt;~/.claude/settings.json&lt;/code&gt; (a &lt;code&gt;.bak&lt;/code&gt; backup is created first) — after that, every &lt;code&gt;claude&lt;/code&gt; session you start appears in the list with no further setup. Sessions running subagents stay marked as running until the last subagent finishes." data-ja="AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が &lt;code&gt;~/.claude/settings.json&lt;/code&gt; へ自動で登録されるため（書き込み前に &lt;code&gt;.bak&lt;/code&gt; バックアップを作成）、それ以降は &lt;code&gt;claude&lt;/code&gt; を起動するだけで一覧に表示されます。追加の設定は不要です。サブエージェント実行中のセッションは、最後の1つが終わるまで「処理中」のまま表示されます。">AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が <code>~/.claude/settings.json</code> へ自動で登録されるため（書き込み前に <code>.bak</code> バックアップを作成）、それ以降は <code>claude</code> を起動するだけで一覧に表示されます。追加の設定は不要です。サブエージェント実行中のセッションは、最後の1つが終わるまで「処理中」のまま表示されます。</p>
+<p class="faq-ans" data-en="AgentManager uses Claude Code hooks to detect sessions. During onboarding, a hook is registered automatically in &lt;code&gt;~/.claude/settings.json&lt;/code&gt; (a &lt;code&gt;.bak&lt;/code&gt; backup is created first) — after that, every &lt;code&gt;claude&lt;/code&gt; session you start appears in the list with no further setup." data-ja="AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が &lt;code&gt;~/.claude/settings.json&lt;/code&gt; へ自動で登録されるため（書き込み前に &lt;code&gt;.bak&lt;/code&gt; バックアップを作成）、それ以降は &lt;code&gt;claude&lt;/code&gt; を起動するだけで一覧に表示されます。追加の設定は不要です。">AgentManager は Claude Code の hook を使ってセッションを検出します。初回オンボーディング時に hook が <code>~/.claude/settings.json</code> へ自動で登録されるため（書き込み前に <code>.bak</code> バックアップを作成）、それ以降は <code>claude</code> を起動するだけで一覧に表示されます。追加の設定は不要です。</p>
+</details>
+</li>
+<li class="faq-item">
+<details>
+<summary data-en="How are sessions running subagents shown?" data-ja="サブエージェント実行中のセッションはどう表示されますか？">サブエージェント実行中のセッションはどう表示されますか？</summary>
+<p class="faq-ans" data-en="They stay marked as running until the last subagent finishes." data-ja="最後の 1 つが終わるまで「処理中」のまま表示されます。">最後の 1 つが終わるまで「処理中」のまま表示されます。</p>
 </details>
 </li>
 <li class="faq-item">
 <details>
 <summary data-en="Where does my session data go?" data-ja="セッションデータはどこかに送信されますか？">セッションデータはどこかに送信されますか？</summary>
 <p class="faq-ans" data-en="Your session data — prompts, file paths, session names — never leaves your Mac. AgentManager sends only anonymized crash reports and usage statistics, and even those never include paths, session names, or license keys." data-ja="セッションの内容（プロンプト・パス・セッション名）が Mac の外に出ることはありません。送信されるのは匿名のクラッシュレポートと利用統計のみで、そこにもパス・セッション名・ライセンスキーは含まれません。">セッションの内容（プロンプト・パス・セッション名）が Mac の外に出ることはありません。送信されるのは匿名のクラッシュレポートと利用統計のみで、そこにもパス・セッション名・ライセンスキーは含まれません。</p>
-</details>
-</li>
-<li class="faq-item">
-<details>
-<summary data-en="Is it really free? What does upgrading add?" data-ja="本当に無料で使えますか？アップグレードすると何が変わりますか？">本当に無料で使えますか？アップグレードすると何が変わりますか？</summary>
-<p class="faq-ans" data-en="Yes — the free plan has no time limit and includes every feature. The only difference: the free plan shows up to 2 sessions at once, and upgrading removes that limit. Upgrade for $4.99/mo, or $48/yr (~2 months free). Just download and start using it." data-ja="はい — 無料プランに期間制限はなく、全機能を利用できます。違いは同時に表示できるセッション数だけで、無料プランは 2 件まで、アップグレードすると無制限になります。料金は月額 $4.99 または年額 $48（約2ヶ月分お得）。ダウンロードするだけで使い始められます。">はい — 無料プランに期間制限はなく、全機能を利用できます。違いは同時に表示できるセッション数だけで、無料プランは 2 件まで、アップグレードすると無制限になります。料金は月額 $4.99 または年額 $48（約2ヶ月分お得）。ダウンロードするだけで使い始められます。</p>
 </details>
 </li>
 <li class="faq-item">
@@ -1198,19 +1138,6 @@
 </p>
 </footer>
 <script>
-  function showSimple() {
-    document.getElementById('ss-simple').classList.remove('hidden');
-    document.getElementById('ss-cat').classList.add('hidden');
-    document.getElementById('ss-btn-simple').classList.add('active');
-    document.getElementById('ss-btn-cat').classList.remove('active');
-  }
-  function showCat() {
-    document.getElementById('ss-cat').classList.remove('hidden');
-    document.getElementById('ss-simple').classList.add('hidden');
-    document.getElementById('ss-btn-cat').classList.add('active');
-    document.getElementById('ss-btn-simple').classList.remove('active');
-  }
-
   function setNavOpen(open) {
     var hdr = document.querySelector('header');
     var burger = document.getElementById('hdr-burger');
