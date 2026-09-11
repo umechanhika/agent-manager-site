@@ -47,7 +47,7 @@
      *
      * Font sizes (hard-won, do not regress):
      *   section heading: 22px/700  feat body: 17px  price feats: 16px
-     *   price-cyc: 16px  step body: 15-16px
+     *   step body: 15-16px
      */
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -197,8 +197,8 @@
       gap: 56px; align-items: start;
     }
     @media (max-width: 760px) {
+      /* モバイルはキーメッセージ → 説明 → CTA → 画像の順（画像先行だと初見で意味が取れない） */
       .hero { grid-template-columns: 1fr; gap: 36px; padding: 40px 24px; }
-      .hero-right { order: -1; }
     }
 
     /* Status dots — session lamp colors (SVG squares clipped round) */
@@ -217,6 +217,11 @@
     .hero-sub {
       font-size: 17px; color: var(--muted);
       line-height: 1.7; max-width: 430px; margin-bottom: 36px;
+    }
+    /* PC は 1 行に収まる（JA 466px / EN 419px）ので改行を消す。モバイルは 2 行 */
+    @media (min-width: 761px) {
+      .hero-sub { max-width: none; }
+      .hero-sub br { display: none; }
     }
 
     /* Buttons */
@@ -246,8 +251,6 @@
     .btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); }
 
     .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-    .ph-badge { margin-top: 18px; }
-    .ph-badge img { display: block; width: 250px; height: 54px; }
     .macos-note {
       display: inline-flex; align-items: center;
       padding: 13px 22px;
@@ -288,24 +291,8 @@
     .nonmac-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
     .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
-    /* ── HERO RIGHT: window frame + screenshot toggle ─────── */
+    /* ── HERO RIGHT: window frame + screenshot ─────────────── */
     .hero-right { display: flex; flex-direction: column; gap: 10px; }
-
-    .ss-toggle {
-      display: flex; gap: 2px; padding: 2px;
-      border: 1px solid var(--border);
-      background: var(--surf);
-      border-radius: 8px;
-      align-self: flex-start;
-    }
-    .ss-btn {
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
-      letter-spacing: .06em; padding: 4px 14px;
-      border: none; background: transparent; color: var(--dim); cursor: pointer;
-      border-radius: 6px;
-      transition: background .12s, color .12s;
-    }
-    .ss-btn.active { background: rgba(255,255,255,.1); color: var(--text); }
 
     /* Dark macOS window frame — the hero screenshot is raw window content */
     .px-window {
@@ -362,7 +349,16 @@
       line-height: 1.7; color: var(--text); font-weight: 500;
     }
     .pain-inner strong { color: var(--amber); font-weight: 700; }
+    .pain-inner .nw { white-space: nowrap; }
+    /* 400px 前後の端末でキーメッセージが 1 文字だけ折り返さないよう、余白と文字を詰める */
+    @media (max-width: 480px) {
+      .pain-sec { padding: 48px 20px; }
+      .pain-inner p { font-size: 16px; }
+    }
     .pain-inner em     { font-style: normal; color: var(--link); }
+    /* Product Hunt バッジ: 実績としてメッセージの直下に置く（CTA と並べない） */
+    .ph-badge { margin-top: 28px; display: flex; justify-content: center; }
+    .ph-badge img { display: block; width: 250px; height: 54px; }
 
     /* ── DIVIDER — a single hairline, centered ─────────────── */
     .px-divider {
@@ -392,12 +388,11 @@
     }
     .feat-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-      align-items: start;
+      /* 横並びの行内では一番長いカードに高さを揃える（1 列のときは各自の高さ） */
+      align-items: stretch;
     }
-    @media (max-width: 640px) {
-      .feat-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 400px) {
+    /* モバイルは 1 列（2 列だとカードが細く縦長になりすぎる） */
+    @media (max-width: 760px) {
       .feat-grid { grid-template-columns: 1fr; }
     }
 
@@ -442,7 +437,7 @@
     /* ── CAT BONUS: 幅を絞った2枚グリッド。カード自体は .feat-item を再利用。
        機能グリッドより一段小ぶりにして「おまけ」の格を視覚的に伝える。 ── */
     .cat-sec  { max-width: 640px; margin: 0 auto; padding: 0 32px 80px; }
-    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
     @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
 
     /* ── PRICING ───────────────────────────────────────────── */
@@ -473,21 +468,26 @@
       box-shadow: 0 0 28px rgba(94,158,214,.14);
     }
 
-    /* Badge row: fixed height keeps price-tier/price-main baseline-aligned */
-
+    /* Plan name as a pill badge so the tier reads at a glance */
     .price-tier {
-      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      align-self: center; display: inline-block;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 12px;
+      color: var(--text); padding: 5px 12px;
+      border: 1px solid var(--border-2); border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      margin-bottom: 18px;
+    }
+    .price-card.featured .price-tier {
+      color: #9CC5EA; border-color: rgba(94,158,214,.5); background: rgba(94,158,214,.12);
     }
 
     /* Price number: cur($) + int + dec, all bottom-aligned */
-    .price-main { display: flex; align-items: flex-end; margin-bottom: 6px; line-height: 1; }
+    .price-main { display: flex; align-items: flex-end; justify-content: center; margin-bottom: 20px; line-height: 1; }
     .price-cur  { font-family: var(--mono); font-size: 18px; font-weight: 400; padding-bottom: 7px; color: var(--muted); }
     .price-int  { font-family: var(--mono); font-size: 52px; font-weight: 300; line-height: 1; }
     .price-dec  { font-family: var(--mono); font-size: 20px; font-weight: 400; padding-bottom: 7px; color: var(--muted); }
 
-    .price-cyc  { font-size: 16px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
     .price-div  { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
 
     .price-feats {
@@ -530,6 +530,7 @@
     }
     .price-note a { color: var(--link); text-decoration: none; }
     .price-note a:hover { text-decoration: underline; }
+    .price-note--tight { margin-top: 6px; }
 
     /* ── SETUP ─────────────────────────────────────────────── */
     .setup-sec {
@@ -728,7 +729,7 @@
     </div>
     <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
        class="hdr-cta" id="hdr-cta" data-cta="header_download"
-       data-en="Free download" data-ja="無料ダウンロード">Free download</a>
+       data-en="Free Download" data-ja="無料ダウンロード">Free Download</a>
     <button class="hdr-burger" id="hdr-burger" type="button"
             aria-label="Menu" aria-expanded="false" aria-controls="hdr-nav"
             onclick="toggleNav()">☰</button>
@@ -741,14 +742,14 @@
   <!-- LEFT: copy -->
   <div>
     <h1 data-en="Stop keeping<br><em>Claude waiting.</em>"
-        data-ja="Claude を、<br><em>待たせない。</em>">
+        data-ja="Claude を、<em>待たせない。</em>">
       Stop keeping<br><em>Claude waiting.</em>
     </h1>
 
     <p class="hero-sub"
-       data-en="Run as many Claude Code sessions as you like. A floating window appears the moment one needs you — and jumps you to the right terminal in one click."
-       data-ja="何本の Claude Code セッションを並べても大丈夫。確認が必要な瞬間だけ現れるフローティングウィンドウが、1クリックでそのターミナルへ連れて行きます。">
-      Run as many Claude Code sessions as you like. A floating window appears the moment one needs you — and jumps you to the right terminal in one click.
+       data-en="Tells you when a session is waiting. <br>One click to jump in."
+       data-ja="確認待ちをすぐにお知らせ、<br>1クリックでセッションへ移動。">
+      Tells you when a session is waiting. <br>One click to jump in.
     </p>
 
     <div class="cta-row">
@@ -776,19 +777,10 @@
         </div>
       </div>
     </div>
-    <div class="ph-badge">
-      <a href="https://www.producthunt.com/products/agentmanager?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-agentmanager" target="_blank" rel="noopener noreferrer"><img alt="AgentManager - Never miss a Claude Code session waiting for your input | Product Hunt" width="250" height="54" decoding="async" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202701&amp;theme=dark&amp;t=1784854368793"></a>
-    </div>
   </div>
 
-  <!-- RIGHT: pixel window + view-mode toggle + status legend -->
+  <!-- RIGHT: pixel window + status legend -->
   <div class="hero-right">
-    <div class="ss-toggle" role="group">
-      <button class="ss-btn active" id="ss-btn-simple" onclick="showSimple()"
-              data-en="▦ Simple" data-ja="▦ シンプル">▦ Simple</button>
-      <button class="ss-btn" id="ss-btn-cat" onclick="showCat()"
-              data-en="🐱 Cat Room" data-ja="🐱 猫部屋">🐱 Cat Room</button>
-    </div>
     <div class="px-window">
       <div class="px-titlebar">
         <div class="px-traffic" aria-hidden="true">
@@ -801,8 +793,6 @@
       <div class="px-winbody">
         <img id="ss-simple" src="screenshot-simple.png"
              alt="AgentManager simple mode — a minimal dark list of Claude Code sessions with status dots and elapsed times">
-        <img id="ss-cat" src="screenshot-cat.gif"
-             alt="AgentManager cat room mode — pixel-art cats living below the session list" class="hidden">
       </div>
     </div>
     <!-- Status legend in context, directly below the screenshot -->
@@ -823,10 +813,6 @@
         <svg class="px-sq" viewBox="0 0 8 8"><rect width="8" height="8" fill="#9B9B9B"/></svg>
         <span data-en="Idle" data-ja="待機">Idle</span>
       </div>
-      <div class="ss-legend-item">
-        <svg class="px-sq" viewBox="0 0 8 8"><rect width="8" height="8" fill="#DE5454"/></svg>
-        <span data-en="Error" data-ja="エラー停止">Error</span>
-      </div>
     </div>
   </div>
 
@@ -835,10 +821,13 @@
 <!-- PAIN SECTION: why you need this — one beat, before features -->
 <section class="pain-sec">
   <div class="pain-inner">
-    <p data-en="Sessions run in parallel. <strong>Until you notice, Claude just sits idle.</strong> AgentManager fixes that."
-       data-ja="複数のセッションが同時進行。<strong>あなたが気づくまで、Claude は止まったまま。</strong>AgentManager が解決します。">
-      Sessions run in parallel. <strong>Until you notice, Claude just sits idle.</strong> AgentManager fixes that.
+    <p data-en="Sessions run in parallel.<br><strong><span class=&quot;nw&quot;>Until you notice,</span> <span class=&quot;nw&quot;>Claude just sits idle.</span></strong><br>AgentManager fixes that."
+       data-ja="複数のセッションが同時進行。<br><strong><span class=&quot;nw&quot;>あなたが気づくまで、</span><span class=&quot;nw&quot;>Claude は止まったまま。</span></strong><br>AgentManager が解決します。">
+      Sessions run in parallel.<br><strong><span class="nw">Until you notice,</span> <span class="nw">Claude just sits idle.</span></strong><br>AgentManager fixes that.
     </p>
+    <div class="ph-badge">
+      <a href="https://www.producthunt.com/products/agentmanager?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-agentmanager" target="_blank" rel="noopener noreferrer"><img alt="AgentManager - Never miss a Claude Code session waiting for your input | Product Hunt" width="250" height="54" decoding="async" loading="lazy" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202701&amp;theme=dark&amp;t=1784854368793"></a>
+    </div>
   </div>
 </section>
 
@@ -990,11 +979,11 @@
 <section class="cat-sec" id="cat-mode">
   <div class="sec-head">
     <span class="section-label"
-          data-en="Bonus: a cat room to keep you company"
-          data-ja="おまけ：癒しの猫部屋モード">Bonus: a cat room to keep you company</span>
+          data-en="Bonus: cats, and a breather"
+          data-ja="おまけ：猫と、ひと息。">Bonus: cats, and a breather</span>
     <p class="sec-sub"
-       data-en="Prefer a little warmth while Claude works? Switch to Cat Room mode, with pixel cats living beneath your session list."
-       data-ja="Claude の作業を見守る時間に、ちょっとした癒しを。猫部屋モードに切り替えると、セッション一覧の下でピクセルの猫たちが暮らします。">Prefer a little warmth while Claude works? Switch to Cat Room mode, with pixel cats living beneath your session list.</p>
+       data-en="Cats live beneath your session list.<br>A small comfort between tasks."
+       data-ja="セッション一覧の下に、猫が暮らします。<br>作業の合間の、ちょっとした癒しに。">Cats live beneath your session list.<br>A small comfort between tasks.</p>
   </div>
   <div class="cat-grid">
 
@@ -1033,8 +1022,8 @@
     <div class="sec-head">
       <span class="section-label" data-en="Pricing" data-ja="料金">Pricing</span>
       <p class="sec-sub"
-         data-en="Free for up to 2 sessions shown at once. Paid plans remove the limit."
-       data-ja="同時表示 2 セッションまでは無料。それ以上は有料プランで無制限に。">Free for up to 2 sessions shown at once. Paid plans remove the limit.</p>
+         data-en="Free for up to 2 sessions shown at once.<br>Paid plans remove the limit."
+       data-ja="同時表示 2 セッションまでは無料。<br>それ以上は有料プランで無制限に。">Free for up to 2 sessions shown at once.<br>Paid plans remove the limit.</p>
     </div>
 
     <div class="price-grid">
@@ -1046,18 +1035,16 @@
           <span class="price-cur">$</span>
           <span class="price-int">0</span>
         </div>
-        <div class="price-cyc"
-             data-en="no account required"
-           data-ja="アカウント不要">no account required</div>
         <hr class="price-div">
         <ul class="price-feats">
+          <li data-en="No account required"            data-ja="アカウント不要">No account required</li>
           <li data-en="All features included"          data-ja="全機能を利用可能">All features included</li>
           <li data-en="Up to 2 sessions shown at once" data-ja="同時表示は 2 セッションまで">Up to 2 sessions shown at once</li>
         </ul>
         <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
            id="price-download-btn"
            class="price-cta price-cta-dark" data-cta="pricing_free_download"
-           data-en="Free download" data-ja="無料ダウンロード">Free download</a>
+           data-en="Free Download" data-ja="無料ダウンロード">Free Download</a>
       </div>
 
       <!-- Monthly -->
@@ -1068,9 +1055,6 @@
           <span class="price-int">4</span>
           <span class="price-dec">.99</span>
         </div>
-        <div class="price-cyc"
-             data-en="billed monthly"
-           data-ja="月払い">billed monthly</div>
         <hr class="price-div">
         <ul class="price-feats">
           <li data-en="Unlimited sessions shown" data-ja="セッション同時表示 無制限">Unlimited sessions shown</li>
@@ -1088,9 +1072,6 @@
           <span class="price-cur">$</span>
           <span class="price-int">48</span>
         </div>
-        <div class="price-cyc"
-             data-en="billed annually"
-           data-ja="年払い">billed annually</div>
         <hr class="price-div">
         <ul class="price-feats">
           <li data-en="~2 months free vs monthly" data-ja="月額より約 2 ヶ月分お得">~2 months free vs monthly</li>
@@ -1101,13 +1082,12 @@
       </div>
 
     </div>
-    <p class="price-note" data-en="Cancel anytime." data-ja="いつでもキャンセルできます。">Cancel anytime.</p>
-
     <p class="price-note">
       <span data-en="Secure checkout by"
             data-ja="安全決済">Secure checkout by</span>
       <a href="https://freemius.com" target="_blank" rel="noopener">Freemius</a>
     </p>
+    <p class="price-note price-note--tight" data-en="* Cancel anytime." data-ja="※ いつでもキャンセルできます。">* Cancel anytime.</p>
   </div>
 </section>
 
@@ -1122,19 +1102,19 @@
   </div>
   <ol class="steps">
     <li class="step">
-      <span class="step-n">01</span>
+      <span class="step-n">1</span>
       <div class="step-body">
         <strong data-en="Download the app" data-ja="アプリをダウンロード">Download the app</strong>
       </div>
     </li>
     <li class="step">
-      <span class="step-n">02</span>
+      <span class="step-n">2</span>
       <div class="step-body">
         <strong data-en="Launch and finish the 30-second setup" data-ja="起動して 30 秒のセットアップ">Launch and finish the 30-second setup</strong>
       </div>
     </li>
     <li class="step">
-      <span class="step-n">03</span>
+      <span class="step-n">3</span>
       <div class="step-body">
         <strong data-en="Claude Code sessions are detected automatically" data-ja="Claude Code の起動を自動検出">Claude Code sessions are detected automatically</strong>
       </div>
@@ -1333,19 +1313,6 @@
 </footer>
 
 <script>
-  function showSimple() {
-    document.getElementById('ss-simple').classList.remove('hidden');
-    document.getElementById('ss-cat').classList.add('hidden');
-    document.getElementById('ss-btn-simple').classList.add('active');
-    document.getElementById('ss-btn-cat').classList.remove('active');
-  }
-  function showCat() {
-    document.getElementById('ss-cat').classList.remove('hidden');
-    document.getElementById('ss-simple').classList.add('hidden');
-    document.getElementById('ss-btn-cat').classList.add('active');
-    document.getElementById('ss-btn-simple').classList.remove('active');
-  }
-
   function setNavOpen(open) {
     var hdr = document.querySelector('header');
     var burger = document.getElementById('hdr-burger');
