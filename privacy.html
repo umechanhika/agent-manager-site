@@ -16,6 +16,14 @@
     })(window, document, "clarity", "script", "xf42alibd6");
   </script>
   <!-- Google Analytics (GA4) -->
+  <!-- 本番ホスト以外（localhost / 127.0.0.1 でのローカル確認）では送信しない。
+       ローカル確認ぶんの page_view / first_visit / cta_variant_shown が本番プロパティに
+       混ざると、母数が小さいぶん CTR もチャネル内訳もそのまま歪む。
+       gtag.js 公式のオプトアウトフラグ。gtag.js 本体が到着する前に立てる必要があるので
+       async の読み込みタグより前に置く。配信ホストは CNAME で agentmgr.app に固定。 -->
+  <script>
+    if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
+  </script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
