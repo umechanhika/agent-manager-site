@@ -360,6 +360,21 @@
     .ph-badge { margin-top: 28px; display: flex; justify-content: center; }
     .ph-badge img { display: block; width: 250px; height: 54px; }
 
+    /* ── PAIN: 4 枚のカード ─────────────────────────────────
+       「並行開発は、ここで差がつく。」を受けて差がつく場所を 4 つ並べ、直後の
+       「AgentManager が解決します。」→ FEATURES へ繋ぐ。カードは機能グリッドと同じ
+       .feat-item を再利用し、4 列 1 行・一回り小さく組む。 */
+    .pain-sec .pain-cards {
+      list-style: none; max-width: 920px; margin: 40px auto;
+      grid-template-columns: repeat(4, 1fr); gap: 16px;
+    }
+    .pain-cards .feat-item { padding: 18px 16px; }
+    .pain-cards .feat-thumb { margin: -18px -16px 14px; }
+    .pain-cards .feat-item h3 { font-size: 15px; }
+    .pain-cards .feat-item p  { font-size: 14px; }
+    @media (max-width: 760px) { .pain-sec .pain-cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .pain-sec .pain-cards { grid-template-columns: 1fr; margin: 32px auto; } }
+
     /* ── DIVIDER — a single hairline, centered ─────────────── */
     .px-divider {
       display: flex; justify-content: center;
@@ -818,18 +833,64 @@
 
 </div><!-- /hero -->
 
-<!-- PAIN SECTION: why you need this — one beat, before features -->
-<section class="pain-sec">
+<!-- PAIN SECTION: 並行開発の前提 → 差がつく 4 つ → AgentManager が解決 → FEATURES -->
+<section class="pain-sec" id="troubles">
   <div class="pain-inner">
-    <p data-en="Sessions run in parallel.<br><strong><span class=&quot;nw&quot;>Until you notice,</span> <span class=&quot;nw&quot;>Claude just sits idle.</span></strong><br>AgentManager fixes that."
-       data-ja="複数のセッションが同時進行。<br><strong><span class=&quot;nw&quot;>あなたが気づくまで、</span><span class=&quot;nw&quot;>Claude は止まったまま。</span></strong><br>AgentManager が解決します。">
-      Sessions run in parallel.<br><strong><span class="nw">Until you notice,</span> <span class="nw">Claude just sits idle.</span></strong><br>AgentManager fixes that.
+    <p data-en="Sessions run in parallel.<br><strong><span class=&quot;nw&quot;>Parallel dev:</span> <span class=&quot;nw&quot;>where the gap opens.</span></strong>"
+       data-ja="複数のセッションが同時進行。<br><strong><span class=&quot;nw&quot;>並行開発は、</span><span class=&quot;nw&quot;>ここで差がつく。</span></strong>">
+      Sessions run in parallel.<br><strong><span class="nw">Parallel dev:</span> <span class="nw">where the gap opens.</span></strong>
     </p>
+  </div>
+  <ul class="feat-grid pain-cards">
+    <li class="feat-item">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="trouble-unnoticed.svg" loading="lazy" alt="Claude Code asking Do you want to proceed, mostly hidden behind the window you are working in">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="Wasted wait." data-ja="待たせる無駄">Wasted wait.</h3>
+      </div>
+      <p data-en="Claude sits on “proceed?” behind whatever you're doing." data-ja="裏で承認待ちのまま、Claude は止まっている。">Claude sits on “proceed?” behind whatever you're doing.</p>
+    </li>
+    <li class="feat-item">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="trouble-checking.svg" loading="lazy" alt="Six identical windows with a dashed path looping through all of them and a cursor at the end">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="Constant checking." data-ja="見に行く手間">Constant checking.</h3>
+      </div>
+      <p data-en="You cycle through tabs just to see if anything stopped." data-ja="止まっていないか、タブを順番に確かめて回る。">You cycle through tabs just to see if anything stopped.</p>
+    </li>
+    <li class="feat-item">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="trouble-crash.svg" loading="lazy" alt="A Claude Code session that has stopped on a red API Error: rate limited line">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="The silent crash." data-ja="気付かぬ事故">The silent crash.</h3>
+      </div>
+      <p data-en="It died on an API error. You thought it was still running." data-ja="動いていると思ったら、エラーで落ちている。">It died on an API error. You thought it was still running.</p>
+    </li>
+    <li class="feat-item">
+      <div class="feat-thumb">
+        <img class="feat-thumb-img" src="trouble-cutoff.svg" loading="lazy" alt="A Claude Code session cut by a dashed line, with Compacting conversation in amber">
+      </div>
+      <div class="feat-title">
+        <svg class="feat-px" viewBox="0 0 10 10"><rect width="10" height="10" fill="#F5A623"/></svg>
+        <h3 data-en="Lost context." data-ja="途切れる意図">Lost context.</h3>
+      </div>
+      <p data-en="Context compacts mid-task, and the premise is gone." data-ja="不意の圧縮で、これまでの文脈を失う。">Context compacts mid-task, and the premise is gone.</p>
+    </li>
+  </ul>
+  <div class="pain-inner">
+    <p data-en="AgentManager closes the gap." data-ja="AgentManager が解決します。">AgentManager closes the gap.</p>
     <div class="ph-badge">
       <a href="https://www.producthunt.com/products/agentmanager?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-agentmanager" target="_blank" rel="noopener noreferrer"><img alt="AgentManager - Never miss a Claude Code session waiting for your input | Product Hunt" width="250" height="54" decoding="async" loading="lazy" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202701&amp;theme=dark&amp;t=1784854368793"></a>
     </div>
   </div>
 </section>
+
 
 <!-- PIXEL DIVIDER -->
 <div class="px-divider" id="features" aria-hidden="true">
