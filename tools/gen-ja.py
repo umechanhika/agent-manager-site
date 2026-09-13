@@ -67,6 +67,17 @@ def main() -> None:
         for child in list(frag.contents):
             el.append(child)
 
+    # data-ja-<attr> 属性を <attr> に差し替える（動画の src / poster / aria-label など、
+    # テキストではなく属性値が言語ごとに変わる要素用）。
+    swapped = 0
+    for el in soup.find_all(True):
+        for name in [n for n in el.attrs if n.startswith("data-ja-")]:
+            el[name[len("data-ja-"):]] = el[name]
+            del el[name]
+            swapped += 1
+    if swapped == 0:
+        die("no data-ja-* attributes found — source layout changed?")
+
     # head の日本語化
     find_one(soup, "title").string = TITLE
     find_one(soup, "meta", attrs={"name": "description"})["content"] = DESCRIPTION
@@ -119,7 +130,7 @@ def main() -> None:
     )
     soup.html.insert_before("\n")
     DST.write_text(str(soup), encoding="utf-8")
-    print(f"wrote {DST} ({DST.stat().st_size} bytes, {len(targets)} elements translated)")
+    print(f"wrote {DST} ({DST.stat().st_size} bytes, {len(targets)} elements translated, {swapped} attributes swapped)")
 
 
 if __name__ == "__main__":
