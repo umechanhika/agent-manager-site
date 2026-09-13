@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AgentManager intro video source</title>
+<style>
+  :root {
+    --bg: #0B0D12;
+    --text: #F3F0EA;
+    --dim: #8B93A3;
+    --amber: #F5A623;
+    --blue: #4E8BC8;
+    --green: #3BAD52;
+    --gray: #9B9B9B;
+    --red: #E5484D;
+    --sans: "Inter", "Noto Sans CJK JP", "Hiragino Sans", "IPAGothic", -apple-system, system-ui, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", "DejaVu Sans Mono", Menlo, monospace;
+  }
+  html, body { margin: 0; background: #000; }
+  body { font-family: var(--sans); color: var(--text); -webkit-font-smoothing: antialiased; }
+  #stage {
+    position: relative; width: 1200px; height: 960px; overflow: hidden;
+    background: radial-gradient(1200px 760px at 50% 0%, #1A1F2B 0%, var(--bg) 62%);
+  }
+  #stage * { box-sizing: border-box; }
+  #desktop { position: absolute; inset: 0; }
+
+  /* ---------- macOS menubar ---------- */
+  #menubar {
+    position: absolute; left: 0; top: 0; width: 100%; height: 40px;
+    background: rgba(22, 26, 33, .96); border-bottom: 1px solid #000;
+    display: flex; align-items: center; padding: 0 18px; gap: 22px;
+    font-size: 17px; font-weight: 600; color: var(--text);
+  }
+  #menubar .spacer { flex: 1; }
+  #mb-am { display: flex; align-items: center; gap: 6px; opacity: 0; }
+  #mb-am .dot { width: 11px; height: 11px; border-radius: 50%; }
+  #mb-am .n { font-variant-numeric: tabular-nums; font-size: 16px; margin-right: 6px; }
+  #clock { font-variant-numeric: tabular-nums; font-weight: 500; }
+
+  /* ---------- dock (terminal icon bounces when a session rings the bell) ---------- */
+  #dock {
+    position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+    display: flex; gap: 14px; padding: 10px 16px; border-radius: 22px;
+    background: rgba(40, 44, 54, .75); border: 1px solid rgba(255,255,255,.12);
+  }
+  #dock .app { width: 58px; height: 58px; border-radius: 14px; position: relative; }
+  #dock .app.finder { background: linear-gradient(#5AC8FA, #2D8FE0); }
+  #dock .app.term { background: #1C1F26; border: 1px solid #3A3F4B; }
+  #dock .app.term::before { content: ">_"; position: absolute; left: 10px; top: 8px; font: 700 20px var(--mono); color: #E8EBF0; }
+  #dock .app.editor { background: linear-gradient(#3C9AF0, #1F6FD0); }
+  #dock .app.browser { background: linear-gradient(#FF9F43, #F26B1F); }
+  #dock .badge {
+    position: absolute; right: -8px; top: -8px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px;
+    background: var(--red); color: #fff; font-size: 15px; font-weight: 800; line-height: 24px; text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5); opacity: 0;
+  }
+
+  /* ---------- terminal windows ---------- */
+  .term {
+    position: absolute; border-radius: 12px; overflow: hidden;
+    background: #0F1218; border: 1px solid #2E3440;
+    box-shadow: 0 30px 60px -10px rgba(0,0,0,.7);
+    transform-origin: center;
+  }
+  .titlebar {
+    height: 38px; background: #1C2029; border-bottom: 1px solid #000;
+    display: flex; align-items: center; padding: 0 14px; gap: 8px;
+  }
+  .tl { width: 13px; height: 13px; border-radius: 50%; }
+  .tl-r { background: #FF5F57; } .tl-y { background: #FEBC2E; } .tl-g { background: #28C840; }
+  .wtitle { flex: 1; text-align: center; font-size: 15px; color: var(--dim); font-weight: 600; margin-right: 55px; white-space: nowrap; }
+  .wtitle .nag { color: var(--amber); font-weight: 800; }
+  .tbody {
+    padding: 16px 20px; font-family: var(--mono); font-size: 20px; line-height: 1.5;
+    color: #C9D1DC; white-space: pre;
+  }
+  .tbody .c { color: #D97757; }         /* claude orange */
+  .tbody .d { color: var(--dim); }
+  .tbody .g { color: #58C27D; }
+  .tbody .y { color: var(--amber); }
+  .tbody .box { color: #7B8496; }
+  .tbody .sel { color: var(--amber); font-weight: 700; }
+  .line { display: block; }
+  .caret::after, .blink::after {
+    content: ""; display: inline-block; width: 12px; height: 23px; vertical-align: -4px;
+    background: #C9D1DC; margin-left: 2px;
+  }
+  .blink::after { background: var(--amber); }
+  #desktop.blink-off .blink::after { opacity: 0; }
+  .term .prompt { display: block; transform-origin: left center; }
+
+  /* ---------- AgentManager window ---------- */
+  #am {
+    position: absolute; background: #1A1B1F; border-radius: 14px;
+    border: 1px solid #33363E; box-shadow: 0 30px 70px -10px rgba(0,0,0,.8);
+    padding: 12px; transform-origin: top right;
+  }
+  #am .row {
+    position: relative; display: flex; align-items: center; gap: 18px;
+    height: 68px; padding: 0 16px; border-radius: 12px;
+    font-size: 27px; font-weight: 700; color: #F2F4F7; letter-spacing: -.01em;
+  }
+  #am .row .badge {
+    width: 34px; height: 34px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #am .row .badge svg { width: 20px; height: 20px; }
+  #am .row .dot { width: 20px; height: 20px; border-radius: 50%; margin: 0 7px; flex: none; }
+  #am .row .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #am .row .pct { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--red); }
+  #am .row .label { font-size: 23px; font-weight: 600; white-space: nowrap; padding-left: 8px; }
+  #am .row .glow {
+    position: absolute; inset: 0; border-radius: 12px; pointer-events: none;
+    background: linear-gradient(90deg, rgba(245,166,35,.28), rgba(245,166,35,0) 45%);
+    opacity: 0;
+  }
+  #am .row .hl { position: absolute; inset: 0; border-radius: 12px; background: rgba(255,255,255,.10); opacity: 0; }
+
+  /* ripple (sound cue) */
+  #ripple { position: absolute; pointer-events: none; }
+  #ripple .ring {
+    position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; border-radius: 50%;
+    border: 4px solid var(--amber); transform: translate(-50%,-50%) scale(1); opacity: 0;
+  }
+
+  /* cursor */
+  #cursor { position: absolute; width: 34px; height: 44px; opacity: 0; filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); }
+
+  /* caption: centered card */
+  #caption {
+    position: absolute; left: 60px; right: 60px; top: 50%; transform: translateY(-50%);
+    text-align: center; font-size: 64px; font-weight: 700; line-height: 1.45; letter-spacing: -.01em;
+    color: var(--text); opacity: 0; text-shadow: 0 6px 30px rgba(0,0,0,.6);
+  }
+  html[lang="ja"] #caption { font-size: 60px; letter-spacing: .01em; }
+  #caption em { font-style: normal; color: var(--amber); }
+  #caption img { height: 64px; width: auto; display: block; margin: 36px auto 0; opacity: var(--logo, 0);
+    transform: translateY(calc((1 - var(--logo, 0)) * 10px)); }
+
+  /* narration: lower panel, stays up while the scene plays */
+  #sub {
+    position: absolute; left: 50%; bottom: 118px; transform: translateX(-50%);
+    width: max-content; max-width: 1000px; white-space: nowrap; padding: 22px 40px; border-radius: 22px;
+    background: rgba(17, 20, 28, .78); border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(10px); box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    font-size: 40px; font-weight: 600; line-height: 1.45; text-align: center; color: var(--text); opacity: 0;
+  }
+  html[lang="ja"] #sub { font-size: 38px; }
+  html[lang="en"] #sub { white-space: normal; }
+
+  /* spotlight: darkens everything except the thing being explained */
+  #spot { position: absolute; inset: -400px; pointer-events: none; opacity: 0; z-index: 7; }
+
+  /* outro */
+  #outro {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 44px; opacity: 0;
+    background: radial-gradient(900px 600px at 50% 40%, #1A2030 0%, var(--bg) 70%);
+  }
+  #outro .tag { white-space: nowrap; font-size: 66px; font-weight: 700; letter-spacing: -.02em; text-align: center; line-height: 1.15; }
+  html[lang="ja"] #outro .tag { font-size: 72px; letter-spacing: .01em; }
+  #outro .tag em { font-style: normal; color: var(--amber); }
+  #outro .cta {
+    display: inline-flex; align-items: center; gap: 12px; padding: 22px 52px; border-radius: 999px;
+    background: var(--amber); color: #1a1408; font-weight: 700; font-size: 34px;
+    box-shadow: 0 12px 40px rgba(245,166,35,.35);
+  }
+
+  #fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="desktop">
+    <div id="menubar">
+      <span>Terminal</span><span>File</span><span>Edit</span><span>View</span>
+      <span class="spacer"></span>
+      <span id="mb-am"></span>
+      <span id="clock">14:02</span>
+    </div>
+
+    <div id="terms"></div>
+
+    <div id="dock">
+      <div class="app finder"></div>
+      <div class="app term" id="dock-term"><div class="badge" id="dock-badge">1</div></div>
+      <div class="app editor"></div>
+      <div class="app browser"></div>
+    </div>
+
+    <div id="ripple"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+
+    <div id="am"></div>
+
+    <div id="spot"></div>
+
+    <svg id="cursor" viewBox="0 0 34 44"><path d="M2 2 L2 34 L10 27 L16 42 L22 39 L16 25 L27 25 Z" fill="#fff" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div id="caption"></div>
+  <div id="sub"></div>
+
+  <div id="outro">
+    <div class="tag" id="outro-tag"></div>
+    <div class="cta" id="outro-cta"></div>
+  </div>
+
+  <div id="fade"></div>
+</div>
+
+<script>
+const DURATION = 50;
+const params = new URLSearchParams(location.search);
+const LANG = params.get('lang') === 'ja' ? 'ja' : 'en';
+document.documentElement.lang = LANG;
+
+const STR = {
+  en: {
+    intro: 'When you run Claude Code<br>in parallel,',
+    question: 'do you ever miss a session<br>that is <em>waiting for you?</em>',
+    meet: 'Meet',
+    notify: 'The moment a session waits for you, it lets you know.',
+    jump: 'One click takes you straight to that terminal.',
+    hide: 'When nothing is waiting, the window hides itself.',
+    overview: 'See the state of every session at a glance.',
+    error: 'Errors and context compaction are never missed, either.',
+    tag: 'Stop keeping <em>Claude waiting.</em>',
+    cta: 'Download free now',
+    nag: '● waiting for your input',
+    st: { waiting: 'Waiting for you', running: 'Running', done: 'Done', idle: 'Idle', error: 'Error — stopped' },
+  },
+  ja: {
+    intro: 'Claude で<br>並行開発していると、',
+    question: '待ちに気付かないこと、<br><em>ありませんか？</em>',
+    meet: 'そんなあなたに、',
+    notify: '待ちが発生すると、<br>すぐにお知らせします。',
+    jump: 'クリックひとつで、<br>そのターミナルへ移動できます。',
+    hide: '待ちがなくなれば、<br>自動で消えます。',
+    overview: 'すべてのセッションの状態が、<br>ひと目でわかります。',
+    error: 'エラーやコンテキストの圧縮も、<br>見逃しません。',
+    tag: 'Claude を、<em>待たせない。</em>',
+    cta: '今すぐ無料ダウンロード',
+    nag: '● 入力待ちです',
+    st: { waiting: '確認待ち', running: '処理中', done: '完了', idle: '待機', error: 'エラー停止' },
+  },
+}[LANG];
+
+/* ---------- icons ---------- */
+const ICON = {
+  wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5L22 9l-2-2-1.3 1.3-3-3L17 4l-2-2-2.7 2.3a4 4 0 0 0 2.4 2z"/><path d="M13 11 3 21l2 2 10-10"/></svg>',
+  error:  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/></svg>',
+};
+const COLOR = { waiting: '#F5A623', running: '#4E8BC8', done: '#3BAD52', idle: '#9B9B9B', error: '#E5484D' };
+const SPIN = ['✻', '✽', '✶', '✳', '✢', '·'];
+
+/* ---------- terminal windows (4 sessions; the first one is the one that stops and asks) ---------- */
+const TERMS = [
+  { id: 'web-frontend', l: 40, t: 70, w: 700, h: 430, lines: [
+    '<span class="d">&gt;</span> add a dark-mode toggle to the header', '',
+    '<span class="c">⏺</span> <b>Update</b>(src/components/Header.tsx)',
+    '  <span class="d">⎿</span>  <span class="g">Added 18 lines</span>, removed 2 lines', '',
+  ], prompt: [
+    '<span class="box">╭──────────────────────────────────────╮</span>',
+    '<span class="box">│</span> Do you want to make this edit?        <span class="box">│</span>',
+    '<span class="box">│</span> <span class="sel">❯ 1. Yes</span><span class="blink"></span>                            <span class="box">│</span>',
+    '<span class="box">│</span>   2. Yes, allow all edits this session <span class="box">│</span>',
+    '<span class="box">│</span>   3. No                                <span class="box">│</span>',
+    '<span class="box">╰──────────────────────────────────────╯</span>',
+  ], after: [
+    '<span class="c">⏺</span> <b>Bash</b>(npm test -- Header)',
+    '  <span class="d">⎿</span>  <span class="g">✓ 12 passed</span> (1.8s)', '',
+    '<span class="c">⏺</span> Done. The toggle persists the choice in localStorage.',
+  ]},
+  { id: 'api-server', l: 300, t: 150, w: 700, h: 430, lines: [
+    '<span class="d">&gt;</span> refactor the auth middleware to use the token store', '',
+    '<span class="c">⏺</span> <b>Read</b>(src/middleware/auth.ts)',
+    '<span class="c">⏺</span> <b>Update</b>(src/middleware/auth.ts)',
+    '  <span class="d">⎿</span>  <span class="g">Added 41 lines</span>, removed 27 lines',
+    '<span class="c">⏺</span> <b>Bash</b>(npm run typecheck)',
+  ], spin: 'Running typecheck…' },
+  { id: 'data-pipeline', l: 460, t: 230, w: 700, h: 430, lines: [
+    '<span class="d">&gt;</span> add retries to the S3 export job', '',
+    '<span class="c">⏺</span> <b>Read</b>(jobs/export.py)',
+    '<span class="c">⏺</span> <b>Update</b>(jobs/export.py)',
+    '  <span class="d">⎿</span>  <span class="g">Added 22 lines</span>, removed 4 lines',
+    '<span class="c">⏺</span> <b>Bash</b>(pytest jobs/test_export.py)',
+  ], spin: 'Running 14 tests…' },
+  { id: 'docs-site', l: 560, t: 330, w: 620, h: 470, lines: [
+    '<span class="d">&gt;</span> write the release notes for v2.8', '',
+    '<span class="c">⏺</span> <b>Read</b>(CHANGELOG.md)',
+    '<span class="c">⏺</span> <b>Read</b>(docs/releases/2.7.md)',
+    '<span class="c">⏺</span> <b>Write</b>(docs/releases/2.8.md)',
+    '  <span class="d">⎿</span>  <span class="g">Wrote 64 lines</span>',
+  ], spin: 'Thinking…' },
+];
+const termsEl = document.getElementById('terms');
+termsEl.innerHTML = TERMS.map(w => `
+  <div class="term" id="term-${w.id}" style="left:${w.l}px;top:${w.t}px;width:${w.w}px;height:${w.h}px">
+    <div class="titlebar"><span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
+      <span class="wtitle"><span class="tname">${w.id} — claude</span><span class="nag"></span></span></div>
+    <div class="tbody"></div>
+  </div>`).join('');
+const termEl = Object.fromEntries(TERMS.map(w => [w.id, document.getElementById(`term-${w.id}`)]));
+const wait = TERMS[0], waitEl = termEl[wait.id];
+
+function setLines(el, lines) {
+  const html = lines.map(l => `<span class="line">${l || ' '}</span>`).join('');
+  if (el.dataset.html !== html) { el.innerHTML = html; el.dataset.html = html; }
+}
+
+/* ---------- AgentManager rows ---------- */
+const SESSIONS = ['web-frontend', 'api-server', 'data-pipeline', 'docs-site'];
+const am = document.getElementById('am');
+am.innerHTML = SESSIONS.map(n => `
+  <div class="row">
+    <div class="glow"></div><div class="hl"></div>
+    <div class="badge"></div><div class="dot"></div>
+    <div class="name">${n}</div>
+    <div class="pct"></div>
+    <div class="label"></div>
+  </div>`).join('');
+const rows = [...am.querySelectorAll('.row')];
+
+function setRow(i, state, o = {}) {
+  const r = rows[i];
+  const badge = r.querySelector('.badge'), dot = r.querySelector('.dot'), glow = r.querySelector('.glow');
+  const iconic = state === 'waiting' || state === 'error';
+  badge.style.display = iconic ? 'flex' : 'none';
+  dot.style.display = iconic ? 'none' : 'block';
+  if (iconic) {
+    badge.style.background = COLOR[state];
+    badge.innerHTML = ICON[state === 'error' ? 'error' : 'wrench'];
+    glow.style.background = state === 'error'
+      ? 'linear-gradient(90deg, rgba(229,72,77,.30), rgba(229,72,77,0) 45%)'
+      : 'linear-gradient(90deg, rgba(245,166,35,.28), rgba(245,166,35,0) 45%)';
+    glow.style.opacity = 1;
+  } else {
+    dot.style.background = COLOR[state];
+    glow.style.opacity = 0;
+  }
+  r.querySelector('.pct').textContent = o.pct || '';
+  const label = r.querySelector('.label');
+  label.textContent = o.label ? STR.st[state] : '';
+  label.style.color = COLOR[state];
+  label.style.transform = `scale(${o.labelPop ?? 1})`;
+  label.style.opacity = o.labelOp ?? 1;
+  r.style.display = o.hidden ? 'none' : 'flex';
+  r.style.opacity = o.opacity ?? 1;
+  r.querySelector('.hl').style.opacity = o.hl ?? 0;
+  r.style.transform = o.transform || '';
+}
+
+/* ---------- helpers ---------- */
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;   // easeInOutCubic
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const back = x => { const c = 1.70158; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const prog = (t, a, b, fn = ease) => fn(clamp((t - a) / (b - a), 0, 1));
+const lerp = (a, b, p) => a + (b - a) * p;
+const fadeIO = (t, a, b, f = .4) => Math.min(prog(t, a, a + f, easeOut), 1 - prog(t, b - f, b, easeOut));
+const pop = (t, a, len = .35) => t < a ? 0 : (t >= a + len ? 1 : back((t - a) / len));
+
+const $ = id => document.getElementById(id);
+const el = {
+  clock: $('clock'), mbam: $('mb-am'), am, ripple: $('ripple'), cursor: $('cursor'), caption: $('caption'),
+  outro: $('outro'), fade: $('fade'), desktop: $('desktop'), dockTerm: $('dock-term'), dockBadge: $('dock-badge'),
+  sub: $('sub'), spot: $('spot'), dock: $('dock'),
+};
+$('outro-tag').innerHTML = STR.tag;
+$('outro-cta').textContent = STR.cta;
+
+/* geometry */
+const AM_SMALL = { l: 720, t: 62, w: 440 };
+const AM_BIG = { l: 200, t: 318, w: 800 };
+const WAIT_RECT = { cx: 390, cy: 285, rx: 430, ry: 270 };            // spotlight over the waiting terminal
+const AM_RECT = { cx: 940, cy: 120, rx: 330, ry: 190 };              // spotlight over menubar item + window
+
+/* ---------- timeline (seconds) ----------
+   0.0 – 3.6   card: "When you run Claude Code in parallel,"
+   3.6 – 8.6   scene: 4 terminals working | 5.0 one asks for permission: spotlight, title nags, dock bounces | 6.0–7.4 clock 14:02→14:12
+   8.6 – 12.0  card: "do you ever miss a session that is waiting for you?"
+   12.0 – 15.6 card: "Meet" + logo
+   15.6 – 22.6 notify: 16.0 prompt again | 16.5 window appears, spotlight | 17.4–19.0 slow zoom | narration 17.6 – 22.2
+   22.6 – 29.0 jump: 22.6 zoom out | 23.4 cursor | 24.4 click | 24.6 terminal comes front | 25.2 approved | narration 25.0 – 28.8
+   29.0 – 33.4 hide: 29.2 window fades out | narration 30.0 – 33.2
+   33.4 – 39.8 overview: 33.6 window appears centered | 34.2.. rows one by one | narration 35.4 – 39.6
+   39.8 – 45.4 error: 39.8 status names fade | 40.6 error | 41.4 95% | narration 41.8 – 45.2
+   45.4 – 50.0 outro
+   Narration appears after the UI event it explains and stays while the scene plays. */
+const CARDS = [
+  { key: 'intro', a: 0.4, b: 3.6 },
+  { key: 'question', a: 8.8, b: 12.0 },
+  { key: 'meet', a: 12.2, b: 15.6, logo: true },
+];
+const SUBS = [
+  { key: 'notify', a: 17.6, b: 22.2 },
+  { key: 'jump', a: 25.0, b: 28.8 },
+  { key: 'hide', a: 30.0, b: 33.2 },
+  { key: 'overview', a: 35.4, b: 39.6 },
+  { key: 'error', a: 41.8, b: 45.2 },
+];
+const PROMPT_AT = [5.0, 16.0];           // when the permission prompt appears (problem / solution)
+const RESET_AT = 12.0;                   // the solution half starts from a working session again
+
+function seek(t) {
+  t = ((t % DURATION) + DURATION) % DURATION;
+
+  /* ----- global fades ----- */
+  el.fade.style.opacity = Math.max(1 - prog(t, 0, .8, easeOut), prog(t, 49.2, 50, easeOut));
+  const desktopOut = prog(t, 45.4, 46.4);
+  el.outro.style.opacity = prog(t, 46.0, 47.0, easeOut);
+  el.outro.style.transform = `scale(${lerp(1.03, 1, prog(t, 46.0, 47.6, easeOut))})`;
+
+  /* ----- centered cards (intro / question / meet): the scene rests dimly behind them ----- */
+  let dim = 0;
+  el.caption.style.opacity = 0;
+  for (const c of CARDS) {
+    const o = fadeIO(t, c.a, c.b, .6);
+    dim = Math.max(dim, o);
+    if (o > 0) {
+      if (el.caption.dataset.key !== c.key) {
+        el.caption.innerHTML = STR[c.key] + (c.logo ? '<img src="../../logo-dark.svg" alt="AgentManager">' : '');
+        el.caption.dataset.key = c.key;
+      }
+      el.caption.style.opacity = o;
+      el.caption.style.transform = `translateY(calc(-50% + ${(1 - prog(t, c.a, c.a + .6, easeOut)) * 12}px))`;
+      el.caption.style.setProperty('--logo', c.logo ? prog(t, c.a + .9, c.a + 1.6, easeOut) : 0);
+    }
+  }
+  /* the scene behind the intro card is still empty; behind the question card it stays visible but calm */
+  el.desktop.style.opacity = 1 - desktopOut;
+  el.desktop.style.filter = dim > 0 ? `brightness(${1 - dim * .7}) blur(${dim * 4}px)` : '';
+
+  /* ----- narration (lower panel) ----- */
+  el.sub.style.opacity = 0;
+  for (const s of SUBS) {
+    const o = fadeIO(t, s.a, s.b, .5);
+    if (o > 0) {
+      if (el.sub.dataset.key !== s.key) { el.sub.innerHTML = STR[s.key]; el.sub.dataset.key = s.key; }
+      el.sub.style.opacity = o;
+      el.sub.style.transform = `translate(-50%, ${(1 - prog(t, s.a, s.a + .5, easeOut)) * 10}px)`;
+    }
+  }
+
+  /* ----- camera: slow zoom onto the menubar item + AgentManager window while it is introduced ----- */
+  const zoomIn = prog(t, 17.4, 19.0), zoomOut = prog(t, 22.6, 23.3);
+  const z = lerp(1, 1.6, zoomIn) * lerp(1, 1 / 1.6, zoomOut);
+  const zs = Math.max(1, z), fx = 880, fy = 150;
+  const zx = 600 - zs * fx, zy = 300 - zs * fy;
+  el.desktop.style.transformOrigin = '0 0';
+  el.desktop.style.transform = zs > 1.001 ? `translate(${zx}px, ${zy}px) scale(${zs})` : '';
+
+  /* ----- which half, has the prompt appeared ----- */
+  const half = t < RESET_AT ? 0 : 1;
+  const promptAt = PROMPT_AT[half];
+  const promptP = pop(t, promptAt, .35);
+  const jumpP = prog(t, 24.6, 25.1);
+  const resolved = t >= 25.2;
+  const blinkOff = Math.floor(t * 2) % 2 === 1;
+  el.desktop.classList.toggle('blink-off', promptP > 0 && !resolved && blinkOff);
+
+  /* clock: 14:02 -> 14:12 while nobody notices; stays at 14:12 afterwards */
+  const mins = 2 + Math.floor(prog(t, 6.0, 7.4, x => x) * 10.99);
+  el.clock.textContent = `14:${String(Math.min(mins, 12)).padStart(2, '0')}`;
+
+  /* ----- overview backdrop ----- */
+  const big = prog(t, 33.2, 34.0);
+  const spinFrame = SPIN[Math.floor(t * 8) % SPIN.length];
+
+  /* ----- terminals ----- */
+  const winIn = prog(t, 3.2, 4.4, easeOut);
+  el.dock.style.opacity = winIn;
+  TERMS.forEach((w, i) => {
+    const e = termEl[w.id];
+    const stagger = clamp((winIn * 1.6 - i * .2) / 1, 0, 1);
+    e.style.opacity = (1 - big * .85) * stagger;
+    e.style.filter = big > 0 ? `blur(${big * 8}px)` : '';
+    e.style.transform = `translateY(${(1 - stagger) * 24}px)`;
+    if (w.spin) setLines(e.querySelector('.tbody'), [...w.lines, `<span class="y">${spinFrame}</span> <span class="d">${w.spin}</span>`]);
+  });
+  const nagOn = promptP > 0 && !resolved;
+  const pulse = nagOn ? .5 + .5 * Math.sin((t - promptAt) * 5) : 0;
+  waitEl.querySelector('.nag').textContent = nagOn ? '   ' + STR.nag : '';
+  waitEl.querySelector('.tname').style.opacity = nagOn ? .6 : 1;
+  waitEl.style.zIndex = jumpP > 0 ? 9 : 0;
+  const bounce = Math.sin(jumpP * Math.PI) * .02;
+  waitEl.style.transform += ` scale(${1 + bounce})`;
+  const ring = jumpP > 0 ? .9 * (1 - prog(t, 25.2, 27.0)) : 0;
+  waitEl.style.boxShadow = `0 0 0 3px rgba(245,166,35,${Math.max(pulse * .8, ring)}), 0 30px 60px -10px rgba(0,0,0,.7)`;
+  const body = waitEl.querySelector('.tbody');
+  if (resolved) {
+    const n = Math.floor(prog(t, 25.2, 26.6, x => x) * (wait.after.length + .99));
+    setLines(body, [...wait.lines, ...wait.after.slice(0, n), ...(n >= wait.after.length ? ['', '<span class="d">&gt;</span> <span class="caret"></span>'] : [])]);
+  } else {
+    setLines(body, [...wait.lines, ...(promptP > 0 ? wait.prompt.map(l => `<span class="prompt" style="transform:scale(${promptP});opacity:${promptP}">${l}</span>`) : [])]);
+  }
+
+  /* dock: terminal icon bounces + badge while the bell is ringing (problem half only) */
+  const bell = half === 0 && nagOn;
+  const bt = bell ? (t - promptAt) % 1.2 : 0;
+  const hop = bell && bt < .6 ? Math.sin(bt / .6 * Math.PI) * 24 : 0;
+  el.dockTerm.style.transform = `translateY(${-hop}px)`;
+  el.dockBadge.style.opacity = bell ? 1 : 0;
+  el.dockBadge.style.transform = `scale(${bell ? pop(t, promptAt, .4) : 0})`;
+
+  /* ----- spotlight: guides the eye to what the narration talks about ----- */
+  let spot = 0, sr = WAIT_RECT;
+  if (t >= 5.0 && t < 8.8) { spot = prog(t, 5.0, 5.8, easeOut); sr = WAIT_RECT; }
+  else if (t >= 16.5 && t < 24.4) { spot = prog(t, 16.5, 17.2, easeOut); sr = AM_RECT; }
+  else if (t >= 24.4 && t < 29.4) {
+    const p = prog(t, 24.5, 25.2);
+    spot = 1 - prog(t, 28.6, 29.4);
+    sr = { cx: lerp(AM_RECT.cx, WAIT_RECT.cx, p), cy: lerp(AM_RECT.cy, WAIT_RECT.cy, p), rx: lerp(AM_RECT.rx, WAIT_RECT.rx, p), ry: lerp(AM_RECT.ry, WAIT_RECT.ry, p) };
+  }
+  el.spot.style.opacity = spot;
+  el.spot.style.background = `radial-gradient(ellipse ${sr.rx}px ${sr.ry}px at ${sr.cx}px ${sr.cy}px, rgba(11,13,18,0) 60%, rgba(11,13,18,.62) 100%)`;
+
+  /* ----- AgentManager window: auto-shows on a wait, auto-hides when nothing waits, then returns for the overview ----- */
+  const small = t >= 16.5 && t < 30.0;
+  const table = t >= 33.6;
+  const amIn = small ? pop(t, 16.5, .6) : (table ? pop(t, 33.6, .6) : 0);
+  const amOut = small ? prog(t, 29.2, 29.9, easeOut) : (table ? prog(t, 45.4, 46.4) : 0);
+  const G = table ? AM_BIG : AM_SMALL;
+  Object.assign(am.style, {
+    left: G.l + 'px', top: G.t + 'px', width: G.w + 'px', zIndex: 5,
+    opacity: (small || table) ? Math.min(1, amIn * 1.5) * (1 - amOut) : 0,
+    transform: `translateY(${(1 - amIn) * -24 + amOut * -12}px) scale(${lerp(.94, 1, amIn) * (1 - amOut * .04)})`,
+  });
+
+  const clickP = pop(t, 24.4, .25);
+  const rowHl = t >= 24.4 && t < 25.1 ? .9 * (1 - prog(t, 24.7, 25.1)) : 0;
+  const labelOp = 1 - prog(t, 39.8, 40.2);
+  const errP = pop(t, 40.6, .45);
+  const shake = t >= 40.6 && t < 41.0 ? Math.sin((t - 40.6) * 60) * 4 * (1 - prog(t, 40.6, 41.0)) : 0;
+  const pctP = pop(t, 41.4, .45);
+  const reveal = i => table ? prog(t, 34.2 + i * .5, 34.7 + i * .5, easeOut) : 1;
+  const rowState = table
+    ? ['waiting', 'running', errP > 0 ? 'error' : 'done', 'idle']
+    : [t < 25.1 ? 'waiting' : 'running', 'running', 'running', 'running'];
+
+  rowState.forEach((state, i) => {
+    const rv = reveal(i);
+    const o = { hidden: rv <= 0, opacity: rv, label: table && labelOp > 0, labelOp, labelPop: table ? pop(t, 34.4 + i * .5, .4) : 1 };
+    if (i === 0 && !table) {
+      o.hl = rowHl;
+      o.transform = clickP > 0 && clickP < 1 ? `scale(${1 - .03 * Math.sin(clickP * Math.PI)})` : '';
+    }
+    if (table && rv < 1) o.transform = `translateX(${(1 - rv) * -20}px)`;
+    if (i === 1 && table) o.pct = pctP > 0 ? '95%' : '';
+    if (i === 2 && table) {
+      o.transform = shake ? `translateX(${shake}px)` : (errP > 0 && errP < 1 ? `scale(${1 + .04 * Math.sin(errP * Math.PI)})` : '');
+    }
+    setRow(i, state, o);
+  });
+  rows[1].querySelector('.pct').style.transform = `scale(${pctP})`;
+
+  /* menubar item (solution half only): counts of the visible rows */
+  const mbOn = t >= 15.6 && t < 46.4;
+  el.mbam.style.opacity = mbOn ? prog(t, 15.6, 16.0, easeOut) : 0;
+  const counts = {};
+  if (!small && !table) counts.running = 4;
+  else rowState.forEach((s, i) => { if (reveal(i) > 0) counts[s] = (counts[s] || 0) + 1; });
+  const mbHtml = ['waiting', 'running', 'done', 'error', 'idle'].filter(s => counts[s])
+    .map(s => `<span class="dot" style="background:${COLOR[s]}"></span><span class="n">${counts[s]}</span>`).join('');
+  if (el.mbam.dataset.html !== mbHtml) { el.mbam.innerHTML = mbHtml; el.mbam.dataset.html = mbHtml; }
+
+  /* ripple around the waiting row (notification sound cue) */
+  const rp = clamp((t - 16.9) / 3.0, 0, 1);
+  el.ripple.style.left = (AM_SMALL.l + 12 + 16 + 17) + 'px';
+  el.ripple.style.top = (AM_SMALL.t + 12 + 34) + 'px';
+  el.ripple.style.zIndex = 6;
+  [...el.ripple.children].forEach((r, i) => {
+    const p = clamp((rp * 3 - i * .5) / 1.6, 0, 1);
+    const active = t >= 16.9 && t < 22.6 && p > 0 && p < 1;
+    r.style.opacity = active ? (1 - p) * .85 : 0;
+    r.style.transform = `translate(-50%,-50%) scale(${1 + p * 5})`;
+  });
+
+  /* cursor (jump) */
+  const cvis = t >= 23.3 && t < 25.4;
+  el.cursor.style.opacity = cvis ? fadeIO(t, 23.3, 25.4, .3) : 0;
+  const cp = prog(t, 23.4, 24.2);
+  const cx = lerp(820, AM_SMALL.l + 250, cp), cy = lerp(640, AM_SMALL.t + 12 + 34, cp);
+  el.cursor.style.left = cx + 'px'; el.cursor.style.top = cy + 'px'; el.cursor.style.zIndex = 9;
+  el.cursor.style.transform = clickP > 0 && clickP < 1 ? 'scale(.85)' : '';
+}
+
+/* live preview loop unless ?capture=1 */
+window.seek = seek;
+window.DURATION = DURATION;
+seek(0);
+if (!params.has('capture')) {
+  const start = performance.now();
+  (function loop() { seek(((performance.now() - start) / 1000) % DURATION); requestAnimationFrame(loop); })();
+}
+</script>
+</body>
+</html>
