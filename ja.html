@@ -1201,18 +1201,52 @@
   // 現在と同じ言語を押したときだけ、無駄な再読み込みを避けて false を返す。
   // Hero intro video: click toggles pause/resume, the bottom bar seeks (pointer drag or ←/→ keys),
   // and playback pauses while the video is scrolled out of view.
+  //
+  // GA4 (video engagement — the built-in video measurement only covers YouTube embeds):
+  //   video_start     first time playback actually runs (once per page view)
+  //   video_progress  playback crosses 25 / 50 / 75 / 100 % (each once per page view; only when reached by
+  //                   playing, not by seeking past it, so a jump to 80 % does not fire 25/50/75)
+  //   video_pause     the viewer paused it (click / Space), with video_percent at that moment
+  //   video_seek      one seek operation (drag end or arrow key), with the video_percent landed on
+  // All carry video_id = hero_intro. The production-host gate above (ga-disable) applies as usual.
+  // Parameter registration is listed in agent-manager/docs/spec/08-telemetry-sentry-ga4.md.
   (function() {
     var v = document.getElementById('hero-video'), wrap = document.getElementById('vid-wrap');
     var bar = document.getElementById('vid-bar'), fill = document.getElementById('vid-fill');
     if (!v || !wrap || !bar || !fill) return;
+    var VIDEO_ID = 'hero_intro';
+    function track(name, params) {
+      if (typeof gtag !== 'function') return;
+      params = params || {}; params.video_id = VIDEO_ID;
+      gtag('event', name, params);
+    }
+    function pct() { return v.duration ? Math.round(v.currentTime / v.duration * 100) : 0; }
+    var sent = {}, lastT = 0;
+    function progress() {
+      if (!v.duration) return;
+      var t = v.currentTime;
+      if (t < lastT) {                                // looped back to the start: the end was reached
+        if (!sent.p100 && lastT / v.duration > 0.9) { sent.p100 = true; track('video_progress', { video_percent: 100 }); }
+        lastT = 0;
+      }
+      if (t - lastT < 1) {                            // continuous playback, not a seek jump
+        var from = lastT / v.duration * 100, to = t / v.duration * 100;
+        [25, 50, 75, 100].forEach(function(m) {
+          var line = m === 100 ? 99 : m;              // the loop restarts before hitting exactly 100 %
+          if (!sent['p' + m] && from < line && to >= line) { sent['p' + m] = true; track('video_progress', { video_percent: m }); }
+        });
+      }
+      lastT = t;
+    }
     function draw() {
       if (!v.duration) return;
       var p = v.currentTime / v.duration;
       fill.style.width = (p * 100) + '%';
       bar.setAttribute('aria-valuenow', String(Math.round(p * 100)));
     }
-    (function tick() { if (!v.paused) draw(); requestAnimationFrame(tick); }());
-    v.addEventListener('seeked', draw);
+    (function tick() { if (!v.paused) { draw(); progress(); } requestAnimationFrame(tick); }());
+    v.addEventListener('seeked', function() { lastT = v.currentTime; draw(); });
+    v.addEventListener('playing', function() { if (!sent.start) { sent.start = true; track('video_start'); } });
     function seekTo(clientX) {
       if (!v.duration) return;
       var r = bar.getBoundingClientRect();
@@ -1226,16 +1260,24 @@
       bar.setPointerCapture(e.pointerId); seekTo(e.clientX); e.preventDefault(); e.stopPropagation();
     });
     bar.addEventListener('pointermove', function(e) { if (dragging) seekTo(e.clientX); });
-    function endDrag() { dragging = false; wrap.classList.remove('seeking'); }
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false; wrap.classList.remove('seeking');
+      track('video_seek', { video_percent: pct() });
+    }
     bar.addEventListener('pointerup', endDrag);
     bar.addEventListener('pointercancel', endDrag);
+    function toggle() {
+      if (v.paused) { v.play(); }
+      else { v.pause(); track('video_pause', { video_percent: pct() }); }
+    }
     bar.addEventListener('keydown', function(e) {
       if (!v.duration) return;
-      if (e.key === 'ArrowRight') { v.currentTime = Math.min(v.duration, v.currentTime + 5); e.preventDefault(); }
-      else if (e.key === 'ArrowLeft') { v.currentTime = Math.max(0, v.currentTime - 5); e.preventDefault(); }
-      else if (e.key === ' ' || e.key === 'Enter') { v.paused ? v.play() : v.pause(); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { v.currentTime = Math.min(v.duration, v.currentTime + 5); track('video_seek', { video_percent: pct() }); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft') { v.currentTime = Math.max(0, v.currentTime - 5); track('video_seek', { video_percent: pct() }); e.preventDefault(); }
+      else if (e.key === ' ' || e.key === 'Enter') { toggle(); e.preventDefault(); }
     });
-    v.addEventListener('click', function() { v.paused ? v.play() : v.pause(); });
+    v.addEventListener('click', toggle);
     var userPaused = false;
     v.addEventListener('pause', function() { wrap.classList.add('paused'); });
     v.addEventListener('play', function() { wrap.classList.remove('paused'); userPaused = false; });
