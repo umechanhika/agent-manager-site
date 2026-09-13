@@ -202,9 +202,6 @@
       .hero { gap: 32px; padding: 40px 24px; }
     }
 
-    /* Status dots — session lamp colors (SVG squares clipped round) */
-    .px-sq  { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; }
-
     h1 {
       font-size: clamp(30px, 5vw, 52px);
       font-weight: 800; letter-spacing: -.03em; line-height: 1.08;
@@ -293,7 +290,7 @@
     .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
     /* ── HERO RIGHT: window frame + screenshot ─────────────── */
-    .hero-right { display: flex; flex-direction: column; gap: 10px; max-width: 860px; width: 100%; margin: 0 auto; }
+    .hero-right { max-width: 860px; width: 100%; margin: 0 auto; }
 
     /* Intro video: silent, autoplays, loops. Click to pause/resume; the thin bar at the bottom seeks. */
     .vid-wrap { position: relative; cursor: pointer; background: #0B0D12; }
@@ -333,16 +330,6 @@
       width: 100%;
       min-width: 0;
       background: #0D1015;
-    }
-    /* Status legend under the video — contextual, not standalone */
-    .ss-legend {
-      display: flex; gap: 10px; flex-wrap: wrap;
-      padding: 8px 2px 0;
-    }
-    .ss-legend-item {
-      display: flex; align-items: center; gap: 6px;
-      font-family: var(--mono); font-size: 10px; color: var(--muted);
-      letter-spacing: .02em;
     }
 
     /* ── PAIN SECTION ──────────────────────────────────────── */
@@ -777,7 +764,7 @@
 </div>
 </div>
 </div>
-<!-- BELOW: intro video (per-language file; gen-ja.py swaps the data-ja-* attributes) + status legend -->
+<!-- BELOW: intro video (per-language file; gen-ja.py swaps the data-ja-* attributes) -->
 <div class="hero-right">
 <div class="px-window">
 <div class="vid-wrap" id="vid-wrap">
@@ -786,25 +773,6 @@
 <div aria-label="再生位置" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="vid-bar" id="vid-bar" role="slider" tabindex="0">
 <div class="vid-fill" id="vid-fill"></div>
 </div>
-</div>
-</div>
-<!-- Status legend in context, directly below the video -->
-<div aria-label="Session status colors" class="ss-legend">
-<div class="ss-legend-item">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#F5A623" height="8" width="8"></rect></svg>
-<span data-en="Waiting" data-ja="確認待ち">確認待ち</span>
-</div>
-<div class="ss-legend-item">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#4E8BC8" height="8" width="8"></rect></svg>
-<span data-en="Running" data-ja="処理中">処理中</span>
-</div>
-<div class="ss-legend-item">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#3BAD52" height="8" width="8"></rect></svg>
-<span data-en="Done" data-ja="完了">完了</span>
-</div>
-<div class="ss-legend-item">
-<svg class="px-sq" viewbox="0 0 8 8"><rect fill="#9B9B9B" height="8" width="8"></rect></svg>
-<span data-en="Idle" data-ja="待機">待機</span>
 </div>
 </div>
 </div>
