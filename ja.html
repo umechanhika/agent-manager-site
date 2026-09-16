@@ -783,7 +783,7 @@
 </div>
 </header>
 <!-- HERO -->
-<div class="hero">
+<div class="hero" data-section="hero">
 <!-- LEFT: copy -->
 <div>
 <a class="campaign-pill" href="review-campaign-ja.html" data-cta="campaign_banner" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
@@ -821,7 +821,7 @@
 </div>
 </div><!-- /hero -->
 <!-- PAIN SECTION: 並行開発の前提 → 差がつく 4 つ → AgentManager が解決 → FEATURES -->
-<section class="pain-sec" id="troubles">
+<section class="pain-sec" data-section="troubles" id="troubles">
 <div class="pain-inner">
 <p data-en='Sessions run in parallel.&lt;br&gt;&lt;strong&gt;&lt;span class="nw"&gt;Parallel dev:&lt;/span&gt; &lt;span class="nw"&gt;where the gap opens.&lt;/span&gt;&lt;/strong&gt;' data-ja='複数のセッションが同時進行。&lt;br&gt;&lt;strong&gt;&lt;span class="nw"&gt;並行開発は、&lt;/span&gt;&lt;span class="nw"&gt;ここで差がつく。&lt;/span&gt;&lt;/strong&gt;'>複数のセッションが同時進行。<br/><strong><span class="nw">並行開発は、</span><span class="nw">ここで差がつく。</span></strong></p>
 </div>
@@ -878,7 +878,7 @@
 <div aria-hidden="true" class="px-divider" id="features">
 </div>
 <!-- FEATURES -->
-<section class="features-sec">
+<section class="features-sec" data-section="features">
 <div class="sec-head">
 <span class="section-label" data-en="Features" data-ja="機能">機能</span>
 </div>
@@ -986,7 +986,7 @@
 </div>
 </section>
 <!-- BONUS: CAT ROOM MODE — 主機能ではなく「おまけの癒し」として独立させる -->
-<section class="cat-sec" id="cat-mode">
+<section class="cat-sec" data-section="cat_mode" id="cat-mode">
 <div class="sec-head">
 <span class="section-label" data-en="Bonus: cats, and a breather" data-ja="おまけ：猫と、ひと息。">おまけ：猫と、ひと息。</span>
 <p class="sec-sub" data-en="Cats live beneath your session list.&lt;br&gt;A small comfort between tasks." data-ja="セッション一覧の下に、猫が暮らします。&lt;br&gt;作業の合間の、ちょっとした癒しに。">セッション一覧の下に、猫が暮らします。<br/>作業の合間の、ちょっとした癒しに。</p>
@@ -1016,7 +1016,7 @@
 </section>
 <!-- PRICING -->
 <!-- REVIEWS: hidden until the first accepted campaign review is added (remove the hidden attribute then). -->
-<section class="reviews-sec" id="reviews" hidden>
+<section class="reviews-sec" id="reviews" data-section="reviews" hidden>
   <div class="reviews-inner">
     <div class="sec-head">
       <span class="section-label" data-en="From our Founding Users" data-ja="利用者の声">利用者の声</span>
@@ -1035,8 +1035,7 @@
     </p>
   </div>
 </section>
-
-<section class="pricing-sec" id="pricing">
+<section class="pricing-sec" data-section="pricing" id="pricing">
 <div class="pricing-inner">
 <div class="sec-head">
 <span class="section-label" data-en="Pricing" data-ja="料金">料金</span>
@@ -1099,7 +1098,7 @@
 <div aria-hidden="true" class="px-divider">
 </div>
 <!-- SETUP — 3 steps (compressed from 4) -->
-<section class="setup-sec" id="setup">
+<section class="setup-sec" data-section="setup" id="setup">
 <div class="sec-head">
 <span class="section-label" data-en="Setup" data-ja="始め方">始め方</span>
 </div>
@@ -1125,7 +1124,7 @@
 </ol>
 </section>
 <!-- FAQ -->
-<section class="faq-sec" id="faq">
+<section class="faq-sec" data-section="faq" id="faq">
 <div class="sec-head">
 <span class="section-label" data-en="FAQ" data-ja="よくあるご質問">よくあるご質問</span>
 </div>
@@ -1394,24 +1393,25 @@
   });
 
   (function() {
-    // セクション到達を GA4 に送る（section で区別、1 ページビューにつき各 1 回）。
-    // 「料金 → 機能 → 離脱」の経路を記憶ではなく数字で追うための計測。
-    // GA4 側でイベントパラメータ section をカスタムディメンションに登録しないとレポートに出ない。
-    if (!('IntersectionObserver' in window) || typeof gtag !== 'function') return;
-    var seen = {};
-    var obs = new IntersectionObserver(function(entries) {
-      entries.forEach(function(en) {
-        if (!en.isIntersecting) return;
-        var id = en.target.id;
-        if (seen[id]) return;
-        seen[id] = true;
-        gtag('event', 'section_view', { section: id });
+    // どのセクションまで読まれたかを 1 ページビューにつきセクション 1 回ずつ送る。
+    // GA4 拡張計測の scroll は 90% 到達の 1 点しか取れないため、離脱がヒーローなのか
+    // 料金表の手前なのかを切り分けられない。cta_click の分母（各 CTA が置かれた
+    // セクションに何人到達したか）もこれが無いと取れない。
+    // section は GA4 のカスタムディメンションに登録済み（LP プロパティ・EVENT スコープ）。
+    var SEEN_RATIO = 0.5;
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        // 画面より高いセクションでは「セクションの 50% が見えた」が成立しないので、
+        // 「画面の 50% をそのセクションが占めた」ときも到達とみなす。
+        var seen = entry.intersectionRatio >= SEEN_RATIO
+          || entry.intersectionRect.height >= window.innerHeight * SEEN_RATIO;
+        if (!seen) return;
+        observer.unobserve(entry.target);
+        gtag('event', 'section_view', { section: entry.target.getAttribute('data-section') });
       });
-    }, { threshold: 0.3 });
-    ['features', 'cat-mode', 'reviews', 'pricing', 'setup', 'faq'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) obs.observe(el);
-    });
+    }, { threshold: [0, 0.25, SEEN_RATIO] });
+    var sections = document.querySelectorAll('[data-section]');
+    for (var i = 0; i < sections.length; i++) observer.observe(sections[i]);
   }());
 
   (function() {
