@@ -204,3 +204,6 @@ footer a:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* Language toggle rendered as links on pages without the in-page toggle (review-campaign*.html) */
+a.lang-btn { text-decoration: none; }
