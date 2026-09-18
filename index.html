@@ -528,8 +528,10 @@
       background: #1A2430; color: #AEB8C6; font-size: 16px; line-height: 1; cursor: pointer;
     }
     .campaign-pop-x:hover { background: #24303E; color: #fff; }
-    /* 画面の下端すぎると視線が届かず気付かれないので、本文の下端から持ち上げる */
-    @media (max-width: 760px) { .campaign-pop { bottom: 22vh; } }
+    /* 画面の下端すぎると視線が届かず気付かれないので、本文の下端から持ち上げる。
+       vh は URL バー非表示時の高さで固定され、バーが出ている間は見えている範囲に対して持ち上げすぎになるので、
+       dvh で今見えている高さに追従させ、どちらの状態でも同じ位置に見えるようにする。 */
+    @media (max-width: 760px) { .campaign-pop { bottom: 22dvh; } }
     @media (prefers-reduced-motion: reduce) { .campaign-pop { transition: none; } }
 
     /* Reviews (hidden until the first accepted review is added; see docs/promo/review-campaign/ops-checklist.md) */
