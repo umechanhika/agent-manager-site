@@ -457,14 +457,53 @@
     /* Campaign pill (above the hero headline). Remove when the program ends. */
     .campaign-pill {
       display: inline-flex; align-items: center; gap: 8px;
-      margin-bottom: 18px; padding: 7px 12px;
-      font-family: var(--mono); font-size: 12px; letter-spacing: .01em;
-      color: var(--amber); text-decoration: none;
-      border: 1px solid rgba(245,166,35,.45); border-radius: 999px;
-      background: rgba(245,166,35,.08);
+      margin-bottom: 22px; padding: 11px 18px;
+      font-family: var(--mono); font-size: 14px; line-height: 1.5; letter-spacing: .01em;
+      color: var(--amber); text-decoration: none; text-align: left;
+      border: 1px solid rgba(245,166,35,.7); border-radius: 999px;
+      background: rgba(245,166,35,.14);
+      box-shadow: 0 0 0 4px rgba(245,166,35,.05);
     }
-    .campaign-pill:hover { background: rgba(245,166,35,.16); border-color: rgba(245,166,35,.8); }
-    .campaign-pill-pricing { margin: 18px 0 0; }
+    .campaign-pill:hover { background: rgba(245,166,35,.22); border-color: var(--amber); }
+    .campaign-pill-pricing { margin: 22px 0 0; }
+    /* 長い告知文が折り返す幅では、丸型のままだと角の余白が空きすぎる */
+    @media (max-width: 560px) { .campaign-pill { font-size: 13px; padding: 10px 14px; border-radius: 14px; } }
+
+    /* ── CAMPAIGN POPUP ─────────────────────────────────────
+       ヒーローと料金表の告知ピルがどちらも画面外にある間だけ出す追従カード。
+       ピルが見えている間は出さない（同じ告知が画面に 2 つ並ばないようにするため）。
+       × で閉じると localStorage に記録し、以後は出さない。
+       募集終了時は、ピル・このカード・末尾の初期化スクリプトをまとめて削除する。 ── */
+    .campaign-pop {
+      position: fixed; right: 20px; bottom: 20px; z-index: 200;
+      width: min(360px, calc(100vw - 40px));
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 16px 16px 18px 18px;
+      border: 1px solid rgba(245,166,35,.55); border-radius: var(--r);
+      /* 背後の本文が透けると読みにくいので不透明色で塗る */
+      background: #1B1509;
+      box-shadow: 0 14px 36px rgba(0,0,0,.55);
+      opacity: 0; transform: translateY(14px); pointer-events: none;
+      transition: opacity .28s ease, transform .28s ease;
+    }
+    .campaign-pop.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+    .campaign-pop-body { flex: 1 1 auto; min-width: 0; text-decoration: none; }
+    .campaign-pop-title {
+      display: block; margin-bottom: 6px;
+      font-family: var(--mono); font-size: 13px; letter-spacing: .01em; color: var(--amber);
+    }
+    .campaign-pop-text { display: block; font-size: 14px; line-height: 1.6; color: var(--text); }
+    .campaign-pop-go { display: block; margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--amber); }
+    .campaign-pop-body:hover .campaign-pop-go { text-decoration: underline; }
+    .campaign-pop-x {
+      flex: none; width: 30px; height: 30px; margin: -6px -6px 0 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; border: 0; border-radius: 50%; background: transparent;
+      color: var(--dim); font-size: 20px; line-height: 1; cursor: pointer;
+    }
+    .campaign-pop-x:hover { background: rgba(255,255,255,.08); color: var(--text); }
+    @media (max-width: 560px) { .campaign-pop { right: 12px; left: 12px; bottom: 12px; width: auto; } }
+    @media (prefers-reduced-motion: reduce) { .campaign-pop { transition: none; } }
 
     /* Reviews (hidden until the first accepted review is added; see docs/promo/review-campaign/ops-checklist.md) */
     .reviews-sec {
@@ -786,7 +825,7 @@
 <div class="hero" data-section="hero">
 <!-- LEFT: copy -->
 <div>
-<a class="campaign-pill" href="review-campaign-ja.html" data-cta="campaign_banner" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
+<a class="campaign-pill" data-cta="campaign_banner" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →" href="review-campaign-ja.html">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
 <h1 data-en="Stop keeping&lt;br&gt;&lt;em&gt;Claude waiting.&lt;/em&gt;" data-ja="Claude を、&lt;em&gt;待たせない。&lt;/em&gt;">Claude を、<em>待たせない。</em></h1>
 <p class="hero-sub" data-en="Tells you when a session is waiting. &lt;br&gt;One click to jump in." data-ja="確認待ちをすぐにお知らせ、&lt;br&gt;1クリックでセッションへ移動。">確認待ちをすぐにお知らせ、<br/>1クリックでセッションへ移動。</p>
 <div class="cta-row">
@@ -1016,31 +1055,31 @@
 </section>
 <!-- PRICING -->
 <!-- REVIEWS: hidden until the first accepted campaign review is added (remove the hidden attribute then). -->
-<section class="reviews-sec" id="reviews" data-section="reviews" hidden>
-  <div class="reviews-inner">
-    <div class="sec-head">
-      <span class="section-label" data-en="From our Founding Users" data-ja="利用者の声">利用者の声</span>
-      <p class="sec-sub" data-en="Reviews from users who received a lifetime Pro plan license through the Founding Users program. Selected and lightly edited for length." data-ja="モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。">モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。</p>
-    </div>
-    <div class="review-grid">
-      <!-- Template for one review (copy per displayed review; excerpt/shorten allowed, meaning must be preserved; no link):
+<section class="reviews-sec" data-section="reviews" hidden="" id="reviews">
+<div class="reviews-inner">
+<div class="sec-head">
+<span class="section-label" data-en="From our Founding Users" data-ja="利用者の声">利用者の声</span>
+<p class="sec-sub" data-en="Reviews from users who received a lifetime Pro plan license through the Founding Users program. Selected and lightly edited for length." data-ja="モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。">モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。</p>
+</div>
+<div class="review-grid">
+<!-- Template for one review (copy per displayed review; excerpt/shorten allowed, meaning must be preserved; no link):
       <article class="review-card">
         <blockquote>QUOTE (up to ~200 chars)</blockquote>
         <cite><img class="review-avatar" src="reviews/USERNAME.jpg" alt="" width="28" height="28"><span class="review-name">DISPLAY NAME</span><span class="review-handle">@USERNAME</span></cite>
       </article>
       -->
-    </div>
-    <p class="reviews-note">
-      <a href="review-campaign-ja.html" data-cta="reviews_campaign_link" data-en="Become a Founding User and get the Pro plan for life →" data-ja="モニターに応募して Pro プランを永久無料に →">モニターに応募して Pro プランを永久無料に →</a>
-    </p>
-  </div>
+</div>
+<p class="reviews-note">
+<a data-cta="reviews_campaign_link" data-en="Become a Founding User and get the Pro plan for life →" data-ja="モニターに応募して Pro プランを永久無料に →" href="review-campaign-ja.html">モニターに応募して Pro プランを永久無料に →</a>
+</p>
+</div>
 </section>
 <section class="pricing-sec" data-section="pricing" id="pricing">
 <div class="pricing-inner">
 <div class="sec-head">
 <span class="section-label" data-en="Pricing" data-ja="料金">料金</span>
 <p class="sec-sub" data-en="Free for up to 2 sessions shown at once.&lt;br&gt;The Pro plan removes the limit." data-ja="同時表示 2 セッションまでは無料。&lt;br&gt;それ以上は Pro プランで無制限に。">同時表示 2 セッションまでは無料。<br/>それ以上は Pro プランで無制限に。</p>
-      <a class="campaign-pill campaign-pill-pricing" href="review-campaign-ja.html" data-cta="campaign_banner_pricing" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
+<a class="campaign-pill campaign-pill-pricing" data-cta="campaign_banner_pricing" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →" href="review-campaign-ja.html">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
 </div>
 <div class="price-grid">
 <!-- Free plan -->
@@ -1232,11 +1271,21 @@
 <a data-en="Privacy" data-ja="プライバシーポリシー" href="privacy.html">プライバシーポリシー</a>
      · 
     <a data-en="Terms" data-ja="利用規約" href="terms.html">利用規約</a>
-    &nbsp;·&nbsp;
-    <a href="review-campaign-ja.html" data-en="Founding Users" data-ja="Pro モニター募集">Pro モニター募集</a>
+     · 
+    <a data-en="Founding Users" data-ja="Pro モニター募集" href="review-campaign-ja.html">Pro モニター募集</a>
 <span class="ja-only" style="display:inline"> · <a href="legal.html">特定商取引法に基づく表記</a></span>
 </p>
 </footer>
+<!-- CAMPAIGN POPUP: ヒーロー／料金表の告知ピルがどちらも画面外の間だけ出る追従カード。
+     募集終了時は、この要素・.campaign-pill・末尾の初期化スクリプトをまとめて削除する。 -->
+<aside class="campaign-pop" hidden="" id="campaign-pop">
+<a class="campaign-pop-body" data-cta="campaign_banner_popup" href="review-campaign-ja.html">
+<span class="campaign-pop-title" data-en="🎁 Founding Users" data-ja="🎁 Pro プラン モニター募集">🎁 Pro プラン モニター募集</span>
+<span class="campaign-pop-text" data-en="Get the Pro plan free for life. All we ask in return is one honest review." data-ja="Pro プランを永久無料でお使いいただけます。お願いするのはレビュー 1 本だけです。">Pro プランを永久無料でお使いいただけます。お願いするのはレビュー 1 本だけです。</span>
+<span class="campaign-pop-go" data-en="See the details →" data-ja="詳しく見る →">詳しく見る →</span>
+</a>
+<button aria-label="閉じる" class="campaign-pop-x" data-cta="campaign_popup_close" id="campaign-pop-x" type="button">×</button>
+</aside>
 <script>
   function setNavOpen(open) {
     var hdr = document.querySelector('header');
@@ -1460,6 +1509,60 @@
       }, function() {
         copyBtn.textContent = IS_JA ? 'コピーできませんでした' : 'Copy failed';
       });
+    });
+  }());
+</script>
+<script>
+  /* CAMPAIGN POPUP: 告知ピル（ヒーロー・料金表）がどちらも画面外にある間だけ追従カードを出す。
+     同じ告知が画面に 2 つ並ぶのを避けるため、ピルが見えている間は出さない。
+     × で閉じたら localStorage に記録して以後は出さない。
+     募集終了時は、このスクリプト・#campaign-pop・.campaign-pill をまとめて削除する。 */
+  (function () {
+    var pop = document.getElementById('campaign-pop');
+    var closeBtn = document.getElementById('campaign-pop-x');
+    var pills = document.querySelectorAll('.campaign-pill');
+    if (!pop || !closeBtn || !pills.length || !window.IntersectionObserver) return;
+
+    var DISMISS_KEY = 'am_campaign_pop_dismissed';
+    // プライベートウィンドウ等で localStorage が例外を投げても、告知そのものは出す。
+    try {
+      if (window.localStorage.getItem(DISMISS_KEY) === '1') return;
+    } catch (e) {}
+
+    var FADE_MS = 300;
+    // 画面内にあるピルの集合。初回コールバックは画面外のピルも
+    // isIntersecting: false で流れてくるため、増減ではなく集合で持つ。
+    var onScreen = new Set();
+    var hideTimer = null;
+
+    function show() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      if (!pop.hidden) return;
+      pop.hidden = false;
+      // hidden を外した直後だと transition が走らないので次フレームでクラスを付ける。
+      requestAnimationFrame(function () { pop.classList.add('is-shown'); });
+    }
+
+    function hide() {
+      if (pop.hidden) return;
+      pop.classList.remove('is-shown');
+      hideTimer = setTimeout(function () { pop.hidden = true; hideTimer = null; }, FADE_MS);
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) onScreen.add(entry.target);
+        else onScreen.delete(entry.target);
+      });
+      if (onScreen.size > 0) hide(); else show();
+    });
+    pills.forEach(function (pill) { io.observe(pill); });
+
+    // クリックの計測は data-cta の共通ハンドラが拾う（cta_location: campaign_popup_close）。
+    closeBtn.addEventListener('click', function () {
+      io.disconnect();
+      hide();
+      try { window.localStorage.setItem(DISMISS_KEY, '1'); } catch (e) {}
     });
   }());
 </script>
