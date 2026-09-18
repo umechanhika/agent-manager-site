@@ -454,6 +454,48 @@
     @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
 
     /* ── PRICING ───────────────────────────────────────────── */
+    /* Campaign pill (above the hero headline). Remove when the program ends. */
+    .campaign-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-bottom: 18px; padding: 7px 12px;
+      font-family: var(--mono); font-size: 12px; letter-spacing: .01em;
+      color: var(--amber); text-decoration: none;
+      border: 1px solid rgba(245,166,35,.45); border-radius: 999px;
+      background: rgba(245,166,35,.08);
+    }
+    .campaign-pill:hover { background: rgba(245,166,35,.16); border-color: rgba(245,166,35,.8); }
+    .campaign-pill-pricing { margin: 18px 0 0; }
+
+    /* Reviews (hidden until the first accepted review is added; see docs/promo/review-campaign/ops-checklist.md) */
+    .reviews-sec {
+      border-top: 1px solid var(--border);
+      background: var(--surf);
+      padding: 88px 32px;
+    }
+    .reviews-sec[hidden] { display: none; }
+    .reviews-inner { max-width: 1040px; margin: 0 auto; }
+    .review-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    }
+    @media (max-width: 900px) { .review-grid { grid-template-columns: 1fr; } }
+    .review-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 22px 22px 18px; display: flex; flex-direction: column; gap: 14px;
+    }
+    .review-card blockquote {
+      margin: 0; font-size: 16px; line-height: 1.7; color: var(--text);
+    }
+    .review-card cite {
+      font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--muted);
+    }
+    .review-card cite { display: flex; align-items: center; gap: 8px; }
+    .review-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--surf2); }
+    .review-name { color: var(--text); font-family: inherit; font-size: 13px; }
+    .review-handle { color: var(--dim); }
+    .reviews-note { margin-top: 24px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+    .reviews-note a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--border-2); }
+    .reviews-note a:hover { color: var(--text); }
+
     .pricing-sec {
       background: #0E1116;
       border-top: 1px solid var(--border);
@@ -706,13 +748,13 @@
       "@type": "Offer",
       "price": "4.99",
       "priceCurrency": "USD",
-      "description": "Monthly plan — unlimited sessions"
+      "description": "Pro plan (monthly) — unlimited sessions shown"
     },
     {
       "@type": "Offer",
       "price": "48",
       "priceCurrency": "USD",
-      "description": "Yearly plan — unlimited sessions"
+      "description": "Pro plan (annual) — unlimited sessions shown"
     }
   ],
   "inLanguage": "ja"
@@ -744,6 +786,7 @@
 <div class="hero" data-section="hero">
 <!-- LEFT: copy -->
 <div>
+<a class="campaign-pill" href="review-campaign-ja.html" data-cta="campaign_banner" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
 <h1 data-en="Stop keeping&lt;br&gt;&lt;em&gt;Claude waiting.&lt;/em&gt;" data-ja="Claude を、&lt;em&gt;待たせない。&lt;/em&gt;">Claude を、<em>待たせない。</em></h1>
 <p class="hero-sub" data-en="Tells you when a session is waiting. &lt;br&gt;One click to jump in." data-ja="確認待ちをすぐにお知らせ、&lt;br&gt;1クリックでセッションへ移動。">確認待ちをすぐにお知らせ、<br/>1クリックでセッションへ移動。</p>
 <div class="cta-row">
@@ -972,11 +1015,32 @@
 </div>
 </section>
 <!-- PRICING -->
+<!-- REVIEWS: hidden until the first accepted campaign review is added (remove the hidden attribute then). -->
+<section class="reviews-sec" id="reviews" data-section="reviews" hidden>
+  <div class="reviews-inner">
+    <div class="sec-head">
+      <span class="section-label" data-en="From our Founding Users" data-ja="利用者の声">利用者の声</span>
+      <p class="sec-sub" data-en="Reviews from users who received a lifetime Pro plan license through the Founding Users program. Selected and lightly edited for length." data-ja="モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。">モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。</p>
+    </div>
+    <div class="review-grid">
+      <!-- Template for one review (copy per displayed review; excerpt/shorten allowed, meaning must be preserved; no link):
+      <article class="review-card">
+        <blockquote>QUOTE (up to ~200 chars)</blockquote>
+        <cite><img class="review-avatar" src="reviews/USERNAME.jpg" alt="" width="28" height="28"><span class="review-name">DISPLAY NAME</span><span class="review-handle">@USERNAME</span></cite>
+      </article>
+      -->
+    </div>
+    <p class="reviews-note">
+      <a href="review-campaign-ja.html" data-cta="reviews_campaign_link" data-en="Become a Founding User and get the Pro plan for life →" data-ja="モニターに応募して Pro プランを永久無料に →">モニターに応募して Pro プランを永久無料に →</a>
+    </p>
+  </div>
+</section>
 <section class="pricing-sec" data-section="pricing" id="pricing">
 <div class="pricing-inner">
 <div class="sec-head">
 <span class="section-label" data-en="Pricing" data-ja="料金">料金</span>
-<p class="sec-sub" data-en="Free for up to 2 sessions shown at once.&lt;br&gt;Paid plans remove the limit." data-ja="同時表示 2 セッションまでは無料。&lt;br&gt;それ以上は有料プランで無制限に。">同時表示 2 セッションまでは無料。<br/>それ以上は有料プランで無制限に。</p>
+<p class="sec-sub" data-en="Free for up to 2 sessions shown at once.&lt;br&gt;The Pro plan removes the limit." data-ja="同時表示 2 セッションまでは無料。&lt;br&gt;それ以上は Pro プランで無制限に。">同時表示 2 セッションまでは無料。<br/>それ以上は Pro プランで無制限に。</p>
+      <a class="campaign-pill campaign-pill-pricing" href="review-campaign-ja.html" data-cta="campaign_banner_pricing" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →</a>
 </div>
 <div class="price-grid">
 <!-- Free plan -->
@@ -996,7 +1060,7 @@
 </div>
 <!-- Monthly -->
 <div class="price-card">
-<div class="price-tier" data-en="Monthly plan" data-ja="月額プラン">月額プラン</div>
+<div class="price-tier" data-en="Pro plan · Monthly" data-ja="Pro プラン · 月額">Pro プラン · 月額</div>
 <div class="price-main">
 <span class="price-cur">$</span>
 <span class="price-int">4</span>
@@ -1007,11 +1071,11 @@
 <li data-en="Unlimited sessions shown" data-ja="セッション同時表示 無制限">セッション同時表示 無制限</li>
 <li data-en="Everything in Free" data-ja="無料プランの全機能を含む">無料プランの全機能を含む</li>
 </ul>
-<a class="price-cta price-cta-light" data-cta="pricing_monthly" data-en="Start monthly plan" data-ja="月額プランを見る" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly">月額プランを見る</a>
+<a class="price-cta price-cta-light" data-cta="pricing_monthly" data-en="Start Pro plan (monthly)" data-ja="Pro プランを月額で始める" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=monthly">Pro プランを月額で始める</a>
 </div>
 <!-- Annual — featured -->
 <div class="price-card featured">
-<div class="price-tier" data-en="Annual plan" data-ja="年額プラン">年額プラン</div>
+<div class="price-tier" data-en="Pro plan · Annual" data-ja="Pro プラン · 年額">Pro プラン · 年額</div>
 <div class="price-main">
 <span class="price-cur">$</span>
 <span class="price-int">48</span>
@@ -1020,7 +1084,7 @@
 <ul class="price-feats">
 <li data-en="~2 months free vs monthly" data-ja="月額より約 2 ヶ月分お得">月額より約 2 ヶ月分お得</li>
 </ul>
-<a class="price-cta price-cta-blue" data-cta="pricing_annual" data-en="Start annual plan" data-ja="年額プランで始める" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual">年額プランで始める</a>
+<a class="price-cta price-cta-blue" data-cta="pricing_annual" data-en="Start Pro plan (annual)" data-ja="Pro プランを年額で始める" href="https://checkout.freemius.com/app/32620/plan/53509/?billing_cycle=annual">Pro プランを年額で始める</a>
 </div>
 </div>
 <p class="price-note">
@@ -1168,6 +1232,8 @@
 <a data-en="Privacy" data-ja="プライバシーポリシー" href="privacy.html">プライバシーポリシー</a>
      · 
     <a data-en="Terms" data-ja="利用規約" href="terms.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="review-campaign-ja.html" data-en="Founding Users" data-ja="Pro モニター募集">Pro モニター募集</a>
 <span class="ja-only" style="display:inline"> · <a href="legal.html">特定商取引法に基づく表記</a></span>
 </p>
 </footer>
@@ -1322,6 +1388,7 @@
     if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
     else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
     else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    else if (/^campaign_apply/.test(loc)) keyEvent = 'lp_campaign_apply';
     if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
   });
 
