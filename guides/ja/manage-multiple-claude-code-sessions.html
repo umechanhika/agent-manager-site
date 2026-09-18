@@ -290,6 +290,13 @@ tmux split-window -h</code></pre>
     // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
     var ua = navigator.userAgent || '';
     var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    // どちらの CTA を出したかを 1 ページビューにつき 1 回送る。ガイドも index.html と
+    // 同じ出し分けをしているため、これが無いと「ダウンロードボタンが出ていたセッション」
+    // という分母がガイド流入ぶんだけ GA4 に存在せず、guide_header_download /
+    // guide_cta_download の cta_click をクリック率として読めない。GA4 の
+    // operatingSystem では代用できない: iPad はデスクトップモードで Macintosh を名乗り、
+    // ここでは非 Mac 扱いになるため、実際に出し分けた結果と一致しない。
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
     if (isMac) return;
     document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
       el.classList.add('hidden');
