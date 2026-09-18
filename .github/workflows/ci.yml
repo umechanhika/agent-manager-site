@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install beautifulsoup4
+
+      # ja.html は index.html からの生成物。手で編集する、あるいは index.html だけ直して
+      # 再生成を忘れると、日本語ページだけ内容が古いまま公開される（過去にリンク 4 本が
+      # 英語ページを指したまま残った）。生成し直して差分が出たら落とす。
+      - name: ja.html is generated from index.html
+        run: |
+          python3 tools/gen-ja.py
+          if ! git diff --quiet -- ja.html; then
+            echo "::error file=ja.html::ja.html が index.html からの生成結果と一致しません"
+            echo "ja.html は tools/gen-ja.py の生成物です。直接編集せず、index.html を編集してから"
+            echo "  python3 tools/gen-ja.py"
+            echo "を実行し、生成された ja.html をコミットしてください。差分:"
+            git --no-pager diff -- ja.html
+            exit 1
+          fi
+
+      - name: Tests
+        run: python3 -m unittest discover -s Tests -p 'test_*.py' -v
