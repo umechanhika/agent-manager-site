@@ -503,7 +503,7 @@
        ピルが見えている間は出さない（同じ告知を画面に 2 つ並べないため）。
        × で閉じると localStorage に記録し、以後は出さない。 */
     .campaign-pop {
-      position: fixed; right: 20px; bottom: 20px; z-index: 200;
+      position: fixed; right: 20px; bottom: 88px; z-index: 200;
       max-width: calc(100vw - 40px);
       padding: 12px 14px;
       border: 1px solid rgba(245,166,35,.3); border-radius: var(--r);
@@ -529,6 +529,8 @@
       background: #1A2430; color: #AEB8C6; font-size: 16px; line-height: 1; cursor: pointer;
     }
     .campaign-pop-x:hover { background: #24303E; color: #fff; }
+    /* 画面の下端すぎると視線が届かず気付かれないので、本文の下端から持ち上げる */
+    @media (max-width: 760px) { .campaign-pop { bottom: 22vh; } }
     @media (prefers-reduced-motion: reduce) { .campaign-pop { transition: none; } }
 
     /* Reviews (hidden until the first accepted review is added; see docs/promo/review-campaign/ops-checklist.md) */
