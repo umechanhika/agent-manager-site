@@ -453,55 +453,81 @@
     @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
 
     /* ── PRICING ───────────────────────────────────────────── */
-    /* Campaign pill (above the hero headline). Remove when the program ends. */
+    /* ── CAMPAIGN ANNOUNCEMENT ──────────────────────────────
+       同じ告知をヒーロー・料金表の告知ピルと追従カードの 2 か所に出すため、
+       レイアウトを共通化する（アイコン位置・書き出し・行の役割を揃える）。
+       構成は左からアイコン / コピー 2 行 / 送り記号の 3 列。
+       コピーは「小さい条件行」と「大きい訴求行」で、どちらも折り返さない。
+       1 行が長いと中途半端な位置で折れて読みにくくなるため、
+       折り返しに任せず、行の区切りを文言側で決める。
+       募集終了時は、この節・.campaign-pill・#campaign-pop・末尾の初期化スクリプトを
+       まとめて削除する。 ── */
+    .campaign-ann {
+      display: inline-flex; align-items: center; gap: 12px;
+      max-width: 100%;
+      text-decoration: none; text-align: left;
+    }
+    .campaign-ann-icon { flex: none; font-size: 18px; line-height: 1; }
+    .campaign-ann-copy { min-width: 0; }
+    .campaign-ann-label {
+      display: block;
+      font-family: var(--mono); font-size: 11px; line-height: 1.4; letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .campaign-ann-title {
+      display: block; margin-top: 3px;
+      font-size: 15px; font-weight: 700; line-height: 1.35;
+      white-space: nowrap;
+    }
+    .campaign-ann-go { flex: none; font-size: 16px; line-height: 1; }
+    @media (max-width: 360px) {
+      .campaign-ann-label { font-size: 10px; }
+      .campaign-ann-title { font-size: 14px; }
+    }
+
+    /* 告知ピル: ヒーロー見出しの上と、料金表の上に置く */
     .campaign-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin-bottom: 22px; padding: 11px 18px;
-      font-family: var(--mono); font-size: 14px; line-height: 1.5; letter-spacing: .01em;
-      color: var(--amber); text-decoration: none; text-align: left;
-      border: 1px solid rgba(245,166,35,.7); border-radius: 999px;
-      background: rgba(245,166,35,.14);
+      padding: 10px 16px; margin-bottom: 22px;
+      border: 1px solid rgba(245,166,35,.55); border-radius: var(--r);
+      background: rgba(245,166,35,.12);
       box-shadow: 0 0 0 4px rgba(245,166,35,.05);
     }
-    .campaign-pill:hover { background: rgba(245,166,35,.22); border-color: var(--amber); }
+    .campaign-pill .campaign-ann-label { color: rgba(245,166,35,.8); }
+    .campaign-pill .campaign-ann-title,
+    .campaign-pill .campaign-ann-go { color: var(--amber); }
+    .campaign-pill:hover { background: rgba(245,166,35,.2); border-color: var(--amber); }
     .campaign-pill-pricing { margin: 22px 0 0; }
-    /* 長い告知文が折り返す幅では、丸型のままだと角の余白が空きすぎる */
-    @media (max-width: 560px) { .campaign-pill { font-size: 13px; padding: 10px 14px; border-radius: 14px; } }
 
-    /* ── CAMPAIGN POPUP ─────────────────────────────────────
-       ヒーローと料金表の告知ピルがどちらも画面外にある間だけ出す追従カード。
-       ピルが見えている間は出さない（同じ告知が画面に 2 つ並ばないようにするため）。
-       × で閉じると localStorage に記録し、以後は出さない。
-       募集終了時は、ピル・このカード・末尾の初期化スクリプトをまとめて削除する。 ── */
+    /* 追従カード: ピルがどちらも画面外にある間だけ出す。
+       ピルが見えている間は出さない（同じ告知を画面に 2 つ並べないため）。
+       × で閉じると localStorage に記録し、以後は出さない。 */
     .campaign-pop {
       position: fixed; right: 20px; bottom: 20px; z-index: 200;
-      width: min(360px, calc(100vw - 40px));
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 16px 16px 18px 18px;
-      border: 1px solid rgba(245,166,35,.55); border-radius: var(--r);
+      max-width: calc(100vw - 40px);
+      padding: 12px 14px;
+      border: 1px solid rgba(245,166,35,.3); border-radius: var(--r);
       /* 背後の本文が透けると読みにくいので不透明色で塗る */
-      background: #1B1509;
-      box-shadow: 0 14px 36px rgba(0,0,0,.55);
-      opacity: 0; transform: translateY(14px); pointer-events: none;
+      background: #1A2430;
+      box-shadow: 0 10px 30px rgba(0,0,0,.6);
+      opacity: 0; transform: translateY(12px); pointer-events: none;
       transition: opacity .28s ease, transform .28s ease;
     }
+    /* クラスの詳細度が [hidden] の既定より強いので、非表示を明示する */
+    .campaign-pop[hidden] { display: none; }
     .campaign-pop.is-shown { opacity: 1; transform: none; pointer-events: auto; }
-    .campaign-pop-body { flex: 1 1 auto; min-width: 0; text-decoration: none; }
-    .campaign-pop-title {
-      display: block; margin-bottom: 6px;
-      font-family: var(--mono); font-size: 13px; letter-spacing: .01em; color: var(--amber);
-    }
-    .campaign-pop-text { display: block; font-size: 14px; line-height: 1.6; color: var(--text); }
-    .campaign-pop-go { display: block; margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--amber); }
-    .campaign-pop-body:hover .campaign-pop-go { text-decoration: underline; }
+    .campaign-pop .campaign-ann-label { color: var(--amber); }
+    .campaign-pop .campaign-ann-title { color: #fff; }
+    .campaign-pop .campaign-ann-go { color: var(--amber); }
+    .campaign-pop-body:hover .campaign-ann-title { text-decoration: underline; }
+    /* 角にはみ出させて、カード本体のクリック領域と取り違えないようにする */
     .campaign-pop-x {
-      flex: none; width: 30px; height: 30px; margin: -6px -6px 0 0;
+      position: absolute; top: -12px; right: -12px;
+      width: 30px; height: 30px;
       display: flex; align-items: center; justify-content: center;
-      padding: 0; border: 0; border-radius: 50%; background: transparent;
-      color: var(--dim); font-size: 20px; line-height: 1; cursor: pointer;
+      padding: 0; border: 1px solid rgba(255,255,255,.16); border-radius: 50%;
+      background: #1A2430; color: #AEB8C6; font-size: 16px; line-height: 1; cursor: pointer;
     }
-    .campaign-pop-x:hover { background: rgba(255,255,255,.08); color: var(--text); }
-    @media (max-width: 560px) { .campaign-pop { right: 12px; left: 12px; bottom: 12px; width: auto; } }
+    .campaign-pop-x:hover { background: #24303E; color: #fff; }
     @media (prefers-reduced-motion: reduce) { .campaign-pop { transition: none; } }
 
     /* Reviews (hidden until the first accepted review is added; see docs/promo/review-campaign/ops-checklist.md) */
@@ -834,7 +860,7 @@
 
   <!-- LEFT: copy -->
   <div>
-    <a class="campaign-pill" href="review-campaign.html" data-ja-href="review-campaign-ja.html" data-cta="campaign_banner" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 Founding Users: the Pro plan free for life, for one honest review →</a>
+    <a class="campaign-pill campaign-ann" href="review-campaign.html" data-ja-href="review-campaign-ja.html" data-cta="campaign_banner"><span class="campaign-ann-icon" aria-hidden="true">🎁</span><span class="campaign-ann-copy"><span class="campaign-ann-label" data-en="Founding Users · for one review" data-ja="モニター募集・レビュー 1 本で">Founding Users · for one review</span><span class="campaign-ann-title" data-en="The Pro plan, free for life" data-ja="Pro プランが永久無料">The Pro plan, free for life</span></span><span class="campaign-ann-go" aria-hidden="true">→</span></a>
     <h1 data-en="Stop keeping<br><em>Claude waiting.</em>"
         data-ja="Claude を、<em>待たせない。</em>">
       Stop keeping<br><em>Claude waiting.</em>
@@ -1166,7 +1192,7 @@
       <p class="sec-sub"
          data-en="Free for up to 2 sessions shown at once.<br>The Pro plan removes the limit."
        data-ja="同時表示 2 セッションまでは無料。<br>それ以上は Pro プランで無制限に。">Free for up to 2 sessions shown at once.<br>The Pro plan removes the limit.</p>
-      <a class="campaign-pill campaign-pill-pricing" href="review-campaign.html" data-ja-href="review-campaign-ja.html" data-cta="campaign_banner_pricing" data-en="🎁 Founding Users: the Pro plan free for life, for one honest review →" data-ja="🎁 モニター募集: Pro プランが永久無料。レビューをお寄せください →">🎁 Founding Users: the Pro plan free for life, for one honest review →</a>
+      <a class="campaign-pill campaign-ann campaign-pill-pricing" href="review-campaign.html" data-ja-href="review-campaign-ja.html" data-cta="campaign_banner_pricing"><span class="campaign-ann-icon" aria-hidden="true">🎁</span><span class="campaign-ann-copy"><span class="campaign-ann-label" data-en="Founding Users · for one review" data-ja="モニター募集・レビュー 1 本で">Founding Users · for one review</span><span class="campaign-ann-title" data-en="The Pro plan, free for life" data-ja="Pro プランが永久無料">The Pro plan, free for life</span></span><span class="campaign-ann-go" aria-hidden="true">→</span></a>
     </div>
 
     <div class="price-grid">
@@ -1460,10 +1486,13 @@
 <!-- CAMPAIGN POPUP: ヒーロー／料金表の告知ピルがどちらも画面外の間だけ出る追従カード。
      募集終了時は、この要素・.campaign-pill・末尾の初期化スクリプトをまとめて削除する。 -->
 <aside class="campaign-pop" id="campaign-pop" hidden>
-<a class="campaign-pop-body" href="review-campaign.html" data-ja-href="review-campaign-ja.html" data-cta="campaign_banner_popup">
-<span class="campaign-pop-title" data-en="🎁 Founding Users" data-ja="🎁 Pro プラン モニター募集">🎁 Founding Users</span>
-<span class="campaign-pop-text" data-en="Get the Pro plan free for life. All we ask in return is one honest review." data-ja="Pro プランを永久無料でお使いいただけます。お願いするのはレビュー 1 本だけです。">Get the Pro plan free for life. All we ask in return is one honest review.</span>
-<span class="campaign-pop-go" data-en="See the details →" data-ja="詳しく見る →">See the details →</span>
+<a class="campaign-pop-body campaign-ann" href="review-campaign.html" data-ja-href="review-campaign-ja.html" data-cta="campaign_banner_popup">
+<span class="campaign-ann-icon" aria-hidden="true">🎁</span>
+<span class="campaign-ann-copy">
+<span class="campaign-ann-label" data-en="Founding Users · for one review" data-ja="モニター募集・レビュー 1 本で">Founding Users · for one review</span>
+<span class="campaign-ann-title" data-en="The Pro plan, free for life" data-ja="Pro プランが永久無料">The Pro plan, free for life</span>
+</span>
+<span class="campaign-ann-go" aria-hidden="true">→</span>
 </a>
 <button class="campaign-pop-x" id="campaign-pop-x" type="button" aria-label="Close" data-ja-aria-label="閉じる" data-cta="campaign_popup_close">×</button>
 </aside>
