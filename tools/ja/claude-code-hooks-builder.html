@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code hooks ビルダー — settings.json を無料で生成</title>
+  <meta name="description" content="Claude Code の hook イベントを選び、matcher とコマンドを入れるだけで、そのまま貼れる settings.json を生成してコピーできます。無料・登録不要・ブラウザ内で完結。全 33 イベントと statusLine 設定に対応。">
+  <link rel="canonical" href="https://agentmgr.app/tools/ja/claude-code-hooks-builder.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/tools/claude-code-hooks-builder.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/tools/ja/claude-code-hooks-builder.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/tools/claude-code-hooks-builder.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://agentmgr.app/tools/ja/claude-code-hooks-builder.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code hooks ビルダー">
+  <meta property="og:description" content="イベントを選んでコマンドを入れるだけ。そのまま貼れる settings.json をコピー。無料・登録不要。">
+  <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Claude Code hooks ビルダー">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code hooks ビルダー">
+  <meta name="twitter:description" content="イベントを選んでコマンドを入れるだけ。そのまま貼れる settings.json をコピー。無料・登録不要。">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <link rel="stylesheet" href="/tools/hooks-builder.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4)
+       本番ホスト以外（localhost / 127.0.0.1 でのローカル確認）では送信しない。
+       gtag.js 公式のオプトアウトフラグ。gtag.js 本体が到着する前に立てる必要があるので
+       async の読み込みタグより前に置く。配信ホストは CNAME で agentmgr.app に固定。 -->
+  <script>
+    if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Claude Code hooks ビルダー",
+    "description": "Claude Code の hook イベントを選び、matcher とコマンドを入れるだけで、そのまま貼れる settings.json を生成してコピーできます。無料・登録不要・ブラウザ内で完結。",
+    "url": "https://agentmgr.app/tools/ja/claude-code-hooks-builder.html",
+    "inLanguage": "ja",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "datePublished": "2026-09-20",
+    "dateModified": "2026-09-20",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn" href="../claude-code-hooks-builder.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="claude-code-hooks-builder.html" aria-current="page">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="tool_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="article-wrap tool-wrap">
+  <nav class="crumbs" aria-label="パンくず"><a href="/ja.html">AgentManager</a> / <a href="/guides/ja/">ガイド</a> / ツール</nav>
+
+  <h1>Claude Code hooks ビルダー</h1>
+  <span class="article-meta">無料 · 登録不要 · ブラウザ内で完結（入力内容はどこにも送信しません）</span>
+  <p class="article-lede">
+    使いたいイベントを選び、コマンドを 1 つ書けば、Claude Code がそのまま受け付ける
+    <code>settings.json</code> の断片をコピーできます。全 33 種の hook イベントを matcher の値つきで載せ、
+    <code>statusLine</code> 設定にも対応しています。項目ごとの詳細は
+    <a href="/guides/ja/claude-code-hooks-reference.html">hooks リファレンス</a>を参照してください。
+  </p>
+
+  <div class="tool-grid">
+    <form class="tool-form" onsubmit="return false;">
+      <h2 class="tool-h">プリセットから始める</h2>
+      <div class="presets" id="presets"></div>
+
+      <h2 class="tool-h">保存先</h2>
+      <div class="targets" id="targets"></div>
+
+      <h2 class="tool-h">イベント</h2>
+      <div class="events" id="events"></div>
+
+      <h2 class="tool-h">コマンド</h2>
+      <label class="field">
+        <span>選んだ各イベントで実行するシェルコマンド。標準入力にイベントの JSON が渡されます。</span>
+        <input type="text" id="command" placeholder="$HOME/.claude/hooks/my-hook.sh" spellcheck="false" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>タイムアウト秒数（任意。Claude Code の既定は多くのイベントで 600 秒）</span>
+        <input type="number" id="timeout" min="1" step="1" placeholder="600">
+      </label>
+
+      <h2 class="tool-h">ステータス行</h2>
+      <label class="field-row">
+        <input type="checkbox" id="statusline-on">
+        <span><code>statusLine</code> も設定する（応答のたびに実行され、コンテキスト使用量と利用上限のデータを受け取る）</span>
+      </label>
+      <label class="field hidden" id="statusline-row">
+        <span>ステータス行のコマンド</span>
+        <input type="text" id="statusline-command" placeholder="$HOME/.claude/hooks/my-hook.sh statusline" spellcheck="false" autocomplete="off">
+      </label>
+    </form>
+
+    <section class="tool-output" aria-live="polite">
+      <div class="out-head">
+        <code id="out-path">~/.claude/settings.json</code>
+        <button type="button" class="copy-btn" id="copy" data-cta="tool_copy_json">JSON をコピー</button>
+      </div>
+      <pre id="out-pre"><code id="out"></code></pre>
+      <div class="copy-status" id="copy-status"></div>
+      <div class="how-to">
+        <ol>
+          <li><code class="how-path">~/.claude/settings.json</code> を開く（無ければ作成する）。</li>
+          <li>既に <code>"hooks"</code> キーがある場合は、各イベントの配列をその中に貼る。無ければオブジェクト全体を貼る。</li>
+          <li>コマンドに実行権限を付ける（<code>chmod +x</code>）。hook はあなたのユーザー権限で実行される。</li>
+          <li>Claude Code 内で <code>/hooks</code> を実行し、変更が反映されたことを確認する。</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <h2>生成しているものは何か</h2>
+  <p>
+    hook は、Claude Code がライフサイクルのイベントごとに実行するシェルコマンドです。標準入力に JSON
+    （<code>session_id</code>・<code>hook_event_name</code>・<code>cwd</code> と、<code>tool_name</code> や
+    <code>notification_type</code> などイベント固有の項目）が渡されます。ビルダーが生成する形は次のとおりです。
+  </p>
+  <pre><code>{
+  "hooks": {
+    "&lt;イベント名&gt;": [
+      {
+        "matcher": "&lt;任意の絞り込み&gt;",
+        "hooks": [ { "type": "command", "command": "&lt;コマンド&gt;", "timeout": 600 } ]
+      }
+    ]
+  }
+}</code></pre>
+  <ul>
+    <li><strong>matcher</strong> は hook を発火させる対象の絞り込みです。ツール系イベントではツール名、<code>Notification</code> では通知の種類、といった具合です。<code>|</code> 区切りの名前は完全一致、正規表現の記号を含むと JavaScript の正規表現として扱われます。空なら全件に一致します。</li>
+    <li><strong>全イベントで同じコマンド</strong>を使うのが一般的な形です。標準入力の <code>hook_event_name</code> を読んでスクリプト内で分岐します。ビルダーは選んだ各イベントに同じハンドラを書き出します。</li>
+    <li><strong>終了コード 2</strong> は、対応イベント（<code>PreToolUse</code>・<code>UserPromptSubmit</code>・<code>PermissionRequest</code> など）で動作をブロックし、標準エラー出力が理由として表示されます。それ以外の終了コードでは動作は続行されます。</li>
+    <li><strong>statusLine</strong> は別のトップレベルキーで、枠は 1 つだけです。そのコマンドには <code>context_window.used_percentage</code>・<code>rate_limits</code>・<code>model</code> が渡されます。これは hook には来ないデータです。</li>
+  </ul>
+  <div class="note">
+    <strong>バージョンを確認してください。</strong>Claude Code 2.1.101 より前の版は、設定ファイルに未知のイベント名があるとファイル全体を無視します。その場合、ファイル内の hook と permissions がすべて黙って無効になります。<code>StopFailure</code> や <code>PostCompact</code> のような新しいイベントを追加する前に <code>claude --version</code> を確認してください。
+  </div>
+
+  <div class="guide-cta">
+    <h2>状態追跡のスクリプトを書きたくないなら</h2>
+    <p>
+      AgentManager は出来合いの hook をインストールしてこれらのイベントを自動登録し、
+      すべての Claude Code セッションをライブの状態ボードとして表示します。無料で使え、アカウント登録は不要です。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="tool_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="tool_cta_lp">機能を見る</a>
+    </div>
+    <div class="cta-note">macOS 13 以降 — 無料プランは同時に 2 セッションまで表示</div>
+  </div>
+
+  <nav class="related" aria-label="関連ページ">
+    <h2>関連</h2>
+    <ul>
+      <li><a href="/guides/ja/claude-code-hooks-reference.html">Claude Code hooks リファレンス — 全イベント・stdin 項目・設定キー</a></li>
+      <li><a href="/guides/ja/claude-code-hooks-session-status.html">Claude Code hooks でセッション状態を追跡する</a></li>
+      <li><a href="/guides/ja/claude-code-notifications-macos.html">macOS で Claude Code の通知を受け取る方法</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/guides/ja/">ガイド</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy-ja.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms-ja.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script src="/tools/hooks-builder.js"></script>
+<script src="/tools/hooks-builder-ui.js"></script>
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  // tool_copy_json はツール利用の指標。_download で終わらないためキーイベントには写らない。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    var loc = cta.getAttribute('data-cta');
+    gtag('event', 'cta_click', { cta_location: loc });
+    // キーイベント用の派生イベントを LP 側で判定して直接送る。
+    // 判定ルールは agent-manager/docs/spec/08-telemetry-sentry-ga4.md の登録一覧と対応。
+    var keyEvent = null;
+    if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
+    else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
+    else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    // どちらの CTA を出したかを 1 ページビューにつき 1 回送る（cta_click の分母。
+    // Tests/test_cta_variant_denominator.py が検査する）。
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="tool_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>

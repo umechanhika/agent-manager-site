@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Hooks Reference — every event, stdin field, and settings key</title>
+  <meta name="description" content="One-page reference for Claude Code hooks: all 33 hook events with their matcher values, the JSON every hook receives on stdin, the settings.json and statusLine schema, exit codes, and the fields of AgentManager's per-session state file.">
+  <link rel="canonical" href="https://agentmgr.app/guides/claude-code-hooks-reference.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-reference.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-hooks-reference.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-hooks-reference.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/claude-code-hooks-reference.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code Hooks Reference">
+  <meta property="og:description" content="All 33 hook events with matcher values, stdin fields, settings and statusLine schema, exit codes, and the session state file layout.">
+  <meta property="og:image" content="https://agentmgr.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Claude Code Hooks Reference">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code Hooks Reference">
+  <meta name="twitter:description" content="All 33 hook events with matcher values, stdin fields, settings and statusLine schema, exit codes, and the session state file layout.">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <style>
+    .article-wrap.ref-wrap { max-width: 900px; }
+    .article-wrap table tr.grp th { background: var(--surf2); color: var(--amber); font: 600 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .article-wrap td .hint { display: block; font: 12px var(--mono); color: var(--dim); margin-top: 3px; word-break: break-all; }
+    .article-wrap td:first-child { white-space: nowrap; }
+    .toc { font-size: 14px; margin: 0 0 8px; }
+    .toc li { margin-bottom: 4px; }
+  </style>
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4)
+       Do not send from hosts other than production (localhost / 127.0.0.1 during local checks).
+       This is gtag.js's official opt-out flag. It has to be set before gtag.js arrives,
+       so it sits above the async loader. The serving host is pinned to agentmgr.app via CNAME. -->
+  <script>
+    if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code Hooks Reference",
+    "description": "One-page reference for Claude Code hooks: all 33 hook events with matcher values, the JSON every hook receives on stdin, the settings.json and statusLine schema, exit codes, and the fields of AgentManager's per-session state file.",
+    "url": "https://agentmgr.app/guides/claude-code-hooks-reference.html",
+    "inLanguage": "en",
+    "datePublished": "2026-09-20",
+    "dateModified": "2026-09-20",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="claude-code-hooks-reference.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="ja/claude-code-hooks-reference.html" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="ref_header_download">Download free</a>
+  </div>
+</header>
+
+<main class="article-wrap ref-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / <a href="/guides/">Guides</a> / Hooks reference</nav>
+
+  <h1>Claude Code Hooks Reference</h1>
+  <span class="article-meta">Checked against the official docs on September 20, 2026</span>
+  <p class="article-lede">
+    Everything you need on one page when writing a hook: the full event list with the values each
+    <code>matcher</code> accepts, the fields every hook gets on stdin, the <code>settings.json</code> and
+    <code>statusLine</code> shapes, and what exit codes mean. The last section documents the per-session
+    state file that <a href="/">AgentManager</a> derives from these events, for anyone who wants to read it
+    from their own scripts. To generate a config instead of writing one, use the
+    <a href="/tools/claude-code-hooks-builder.html">hooks builder</a>.
+  </p>
+
+  <ul class="toc">
+    <li><a href="#events">Hook events</a></li>
+    <li><a href="#stdin">What every hook receives on stdin</a></li>
+    <li><a href="#settings">settings.json schema</a></li>
+    <li><a href="#statusline">statusLine schema and its stdin</a></li>
+    <li><a href="#exit-codes">Exit codes</a></li>
+    <li><a href="#state-file">AgentManager session state file</a></li>
+  </ul>
+
+  <h2 id="events">Hook events</h2>
+  <p>
+    Claude Code currently defines 33 hook events. The third column lists what the <code>matcher</code> field
+    filters on for that event, with example values. Events marked “—” ignore the matcher and always fire.
+    A matcher made of plain names separated by <code>|</code> is an exact match; anything containing regex
+    characters is treated as a JavaScript regular expression. An empty matcher matches everything.
+  </p>
+  <div class="table-scroll"><table id="hook-events">
+    <thead><tr><th>Event</th><th>Fires when</th><th>Matcher filters on</th></tr></thead>
+    <tbody>
+      <tr class="grp"><th colspan="3">Session lifecycle</th></tr>
+      <tr><td><code>SessionStart</code></td><td>A session starts or resumes</td><td>how it started <span class="hint">startup|resume|clear|compact|fork</span></td></tr>
+      <tr><td><code>Setup</code></td><td>Runs for --init / --maintenance setup</td><td>setup trigger <span class="hint">init|maintenance</span></td></tr>
+      <tr><td><code>UserPromptSubmit</code></td><td>You submit a prompt, before Claude reads it</td><td>—</td></tr>
+      <tr><td><code>UserPromptExpansion</code></td><td>A slash command expands into a prompt</td><td>—</td></tr>
+      <tr><td><code>Stop</code></td><td>The main agent finishes its response</td><td>—</td></tr>
+      <tr><td><code>StopFailure</code></td><td>The turn ends because of an API error</td><td>error type <span class="hint">rate_limit|overloaded|authentication_failed|billing_error|max_output_tokens|unknown</span></td></tr>
+      <tr><td><code>Notification</code></td><td>Claude Code needs your attention (permission prompt, idle…)</td><td>notification type <span class="hint">permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input</span></td></tr>
+      <tr><td><code>SessionEnd</code></td><td>The session terminates</td><td>why it ended <span class="hint">clear|resume|logout|prompt_input_exit|other</span></td></tr>
+      <tr class="grp"><th colspan="3">Tools and permissions</th></tr>
+      <tr><td><code>PreToolUse</code></td><td>Before a tool call runs (can block it)</td><td>tool name <span class="hint">Bash|Edit|Write|mcp__.*</span></td></tr>
+      <tr><td><code>PermissionRequest</code></td><td>A tool call needs a permission decision</td><td>tool name <span class="hint">Bash|Edit|Write</span></td></tr>
+      <tr><td><code>PermissionDenied</code></td><td>Auto mode denied a tool call</td><td>tool name <span class="hint">Bash|Edit|Write</span></td></tr>
+      <tr><td><code>PostToolUse</code></td><td>After a tool call succeeds</td><td>tool name <span class="hint">Bash|Edit|Write|mcp__.*</span></td></tr>
+      <tr><td><code>PostToolUseFailure</code></td><td>After a tool call fails</td><td>tool name <span class="hint">Bash|Edit|Write</span></td></tr>
+      <tr><td><code>PostToolBatch</code></td><td>A batch of parallel tool calls has all resolved</td><td>—</td></tr>
+      <tr><td><code>MessageDisplay</code></td><td>An assistant message is displayed</td><td>—</td></tr>
+      <tr class="grp"><th colspan="3">Subagents and tasks</th></tr>
+      <tr><td><code>SubagentStart</code></td><td>A subagent is spawned</td><td>agent type <span class="hint">general-purpose|Explore|Plan</span></td></tr>
+      <tr><td><code>SubagentStop</code></td><td>A subagent finishes</td><td>agent type <span class="hint">general-purpose|Explore|Plan</span></td></tr>
+      <tr><td><code>TaskCreated</code></td><td>A task is created</td><td>—</td></tr>
+      <tr><td><code>TaskCompleted</code></td><td>A task is marked completed</td><td>—</td></tr>
+      <tr><td><code>TeammateIdle</code></td><td>An agent-team teammate is about to go idle</td><td>—</td></tr>
+      <tr class="grp"><th colspan="3">Context, config, model</th></tr>
+      <tr><td><code>PreCompact</code></td><td>Before the context is compacted</td><td>trigger <span class="hint">manual|auto</span></td></tr>
+      <tr><td><code>PostCompact</code></td><td>After compaction completes</td><td>trigger <span class="hint">manual|auto</span></td></tr>
+      <tr><td><code>InstructionsLoaded</code></td><td>A CLAUDE.md or rules file is loaded</td><td>load reason <span class="hint">session_start|nested_traversal|path_glob_match|include|compact</span></td></tr>
+      <tr><td><code>ConfigChange</code></td><td>A settings file changes during the session</td><td>config source <span class="hint">user_settings|project_settings|local_settings|policy_settings|skills</span></td></tr>
+      <tr><td><code>PreModelSwitch</code></td><td>Before a model switch (can block it)</td><td>target model <span class="hint">.*opus.*</span></td></tr>
+      <tr><td><code>PostModelSwitch</code></td><td>After the session model changes</td><td>target model <span class="hint">.*opus.*</span></td></tr>
+      <tr><td><code>Elicitation</code></td><td>An MCP server asks you for input</td><td>MCP server name <span class="hint">my-server</span></td></tr>
+      <tr><td><code>ElicitationResult</code></td><td>You answered an MCP elicitation</td><td>MCP server name <span class="hint">my-server</span></td></tr>
+      <tr class="grp"><th colspan="3">Workspace</th></tr>
+      <tr><td><code>CwdChanged</code></td><td>The working directory changes</td><td>—</td></tr>
+      <tr><td><code>DirectoryAdded</code></td><td>A directory is added with /add-dir</td><td>how it was added <span class="hint">slash_command|register_repo_root</span></td></tr>
+      <tr><td><code>FileChanged</code></td><td>A watched file changes on disk</td><td>file names (literal, | separated) <span class="hint">.envrc|.env</span></td></tr>
+      <tr><td><code>WorktreeCreate</code></td><td>A git worktree is being created</td><td>—</td></tr>
+      <tr><td><code>WorktreeRemove</code></td><td>A git worktree is being removed</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <strong>Older versions reject the whole file.</strong> Claude Code before 2.1.101 ignores a settings file
+    that contains an event name it does not know, which silently disables every hook and permission in that
+    file. Check <code>claude --version</code> before adding recent events such as <code>StopFailure</code>
+    or <code>PostCompact</code>.
+  </div>
+
+  <h2 id="stdin">What every hook receives on stdin</h2>
+  <p>
+    Each hook command gets one JSON object on stdin. These fields are present for every event; each event
+    adds its own on top (for example <code>tool_name</code> and <code>tool_input</code> on the tool events,
+    <code>notification_type</code> on <code>Notification</code>, <code>error_type</code> on
+    <code>StopFailure</code>, <code>reason</code> on <code>SessionEnd</code>).
+  </p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>session_id</code></td><td>Stable ID for the Claude Code session. Use it as the key for anything you persist.</td></tr>
+      <tr><td><code>hook_event_name</code></td><td>The event name from the table above. Branch on this when one script handles several events.</td></tr>
+      <tr><td><code>cwd</code></td><td>Working directory of the session at the time the hook fired.</td></tr>
+      <tr><td><code>transcript_path</code></td><td>Path to the session's JSONL transcript.</td></tr>
+      <tr><td><code>prompt_id</code></td><td>ID of the user prompt the current turn belongs to.</td></tr>
+      <tr><td><code>scratchpad_dir</code></td><td>Session-specific temp directory.</td></tr>
+      <tr><td><code>permission_mode</code></td><td>Current permission mode (<code>default</code>, <code>plan</code>, <code>acceptEdits</code>, <code>bypassPermissions</code>…).</td></tr>
+      <tr><td><code>effort</code></td><td>Current reasoning effort setting.</td></tr>
+      <tr><td><code>agent_id</code>, <code>agent_type</code></td><td>Set when the hook fires inside a subagent. Absent for the main agent.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="settings">settings.json schema</h2>
+  <p>
+    Hooks live under the top-level <code>hooks</code> key in any of <code>~/.claude/settings.json</code> (user),
+    <code>.claude/settings.json</code> (project, committed) or <code>.claude/settings.local.json</code> (project,
+    ignored by git). Files merge; a hook defined in several files runs from each.
+  </p>
+  <pre><code>{
+  "hooks": {
+    "&lt;EventName&gt;": [
+      {
+        "matcher": "&lt;optional filter&gt;",
+        "hooks": [
+          { "type": "command", "command": "&lt;shell command&gt;", "timeout": 600 }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Key</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>matcher</code></td><td>Optional. Filters by the value in the events table. Omit it, or leave it empty, to match everything.</td></tr>
+      <tr><td><code>hooks[].type</code></td><td><code>command</code> runs a shell command. Other handler types exist (<code>http</code>, <code>mcp_tool</code>, <code>prompt</code>, <code>agent</code>); this page and the builder cover <code>command</code>.</td></tr>
+      <tr><td><code>hooks[].command</code></td><td>Shell command, run with your user's environment. <code>$HOME</code> and other variables expand.</td></tr>
+      <tr><td><code>hooks[].timeout</code></td><td>Seconds before the hook is killed. Default 600; 30 for <code>UserPromptSubmit</code>, <code>PreModelSwitch</code> and <code>PostModelSwitch</code>; 10 for <code>MessageDisplay</code>. All <code>SessionEnd</code> hooks share a 1.5-second budget.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="statusline">statusLine schema and its stdin</h2>
+  <p>
+    The status line is a separate top-level key with exactly one slot. Its command runs after every assistant
+    response and receives data that hooks never see: context-window usage and rate-limit state.
+  </p>
+  <pre><code>{
+  "statusLine": {
+    "type": "command",
+    "command": "&lt;shell command&gt;",
+    "padding": 0,
+    "refreshInterval": 5,
+    "hideVimModeIndicator": false
+  }
+}</code></pre>
+  <div class="table-scroll"><table>
+    <thead><tr><th>stdin field</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>session_id</code>, <code>version</code></td><td>Session ID and Claude Code version.</td></tr>
+      <tr><td><code>model.id</code>, <code>model.display_name</code></td><td>The model currently in use.</td></tr>
+      <tr><td><code>workspace.*</code></td><td>Current and project directories.</td></tr>
+      <tr><td><code>cost.*</code></td><td>Cumulative cost and duration counters for the session.</td></tr>
+      <tr><td><code>context_window.used_percentage</code></td><td>Share of the context window in use. Also <code>remaining_percentage</code>, <code>total_input_tokens</code>, <code>context_window_size</code>, <code>current_usage</code>.</td></tr>
+      <tr><td><code>rate_limits.five_hour</code>, <code>rate_limits.seven_day</code></td><td>Each has <code>used_percentage</code> and <code>resets_at</code> (epoch seconds).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="exit-codes">Exit codes</h2>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Exit code</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>0</code></td><td>Success. stdout is shown in verbose mode, or parsed as JSON on events that accept structured output.</td></tr>
+      <tr><td><code>2</code></td><td>Blocks the action on events that support blocking (<code>PreToolUse</code>, <code>UserPromptSubmit</code>, <code>PermissionRequest</code>, <code>PreModelSwitch</code>, <code>Stop</code>, <code>SubagentStop</code>…). stderr is fed back to Claude as the reason.</td></tr>
+      <tr><td>other</td><td>Non-blocking error. stderr is shown to you; the action continues.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="state-file">AgentManager session state file</h2>
+  <p>
+    AgentManager's hook reduces the events above to one JSON file per session at
+    <code>~/.claude/agent-manager/sessions/&lt;session_id&gt;.json</code>. The file is rewritten in place on
+    every event, so treat a parse failure as “read again”, not as corruption. The derivation rules are described in
+    <a href="claude-code-hooks-session-status.html">Tracking Claude Code session status with hooks</a>.
+  </p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>session_id</code></td><td>string</td><td>Claude Code session ID. Same as the file name.</td></tr>
+      <tr><td><code>state</code></td><td>string</td><td>One of <code>waiting</code>, <code>done</code>, <code>processing</code>, <code>idle</code>, <code>error</code>.</td></tr>
+      <tr><td><code>waiting_kind</code></td><td>string | null</td><td>Why the session is waiting: <code>approval</code> (permission prompt), <code>plan</code> (plan approval), <code>choice</code> (a question to answer). Null unless <code>state</code> is <code>waiting</code>.</td></tr>
+      <tr><td><code>error_reason</code></td><td>string | null</td><td>The <code>StopFailure</code> error type when <code>state</code> is <code>error</code>: <code>rate_limit</code>, <code>overloaded</code>, <code>authentication_failed</code>, <code>billing_error</code>, <code>max_output_tokens</code>, <code>unknown</code>.</td></tr>
+      <tr><td><code>cwd</code></td><td>string</td><td>Working directory reported by the latest event.</td></tr>
+      <tr><td><code>label</code></td><td>string</td><td>Display name shown in the app: the last path component of <code>cwd</code>.</td></tr>
+      <tr><td><code>host_bundle_id</code>, <code>host_bundle_chain</code></td><td>string | null, array</td><td>Bundle ID of the terminal app hosting the session, and the process ancestry used to find it.</td></tr>
+      <tr><td><code>iterm_session_id</code>, <code>tmux_pane_id</code></td><td>string | null</td><td>Identifiers used to focus the exact pane when you click the session.</td></tr>
+      <tr><td><code>owner_pid</code>, <code>owner_started_at</code></td><td>int, string</td><td>PID and start time of the <code>claude</code> process. Both are compared to detect a dead session whose PID was reused.</td></tr>
+      <tr><td><code>created_at</code>, <code>updated_at</code>, <code>state_since</code></td><td>ISO 8601 string</td><td>When the file was first written, last written, and when <code>state</code> last changed.</td></tr>
+      <tr><td><code>active_subagent_ids</code>, <code>subagent_seen_ids</code></td><td>array of string</td><td>Subagents currently running, and every subagent seen this session.</td></tr>
+      <tr><td><code>main_stopped</code>, <code>main_waiting</code></td><td>bool</td><td>Internal flags: the main agent has emitted <code>Stop</code>; the main agent is blocked on a prompt.</td></tr>
+      <tr><td><code>agent_input_pending_ids</code></td><td>array of string</td><td>Subagents that raised <code>agent_needs_input</code> and have not been answered.</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    A second file, <code>~/.claude/agent-manager/stats/&lt;session_id&gt;.json</code>, is written by the
+    <code>statusLine</code> pass-through. It carries the <code>context_window</code>, <code>rate_limits</code>
+    and <code>model</code> objects from the status-line stdin unchanged, plus a marker when
+    <code>PreCompact</code> has fired. The status-line command you had before installing is preserved in
+    <code>~/.claude/agent-manager/statusline-original.json</code> and still runs.
+  </p>
+
+  <div class="guide-cta">
+    <h2>Skip the script, keep the state</h2>
+    <p>
+      AgentManager installs the hook and the status-line pass-through for you, registers the events it
+      needs, and shows every Claude Code session on a live board. Free to use, no account.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="ref_cta_download">↓ Download free</a>
+      <a href="/" class="btn btn-ghost" data-cta="ref_cta_lp">See what it does</a>
+    </div>
+    <div class="cta-note">macOS 13 or later — the free plan shows up to 2 sessions at once</div>
+  </div>
+
+  <nav class="related" aria-label="Related guides">
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/tools/claude-code-hooks-builder.html">Claude Code Hooks Builder — generate settings.json from a checklist</a></li>
+      <li><a href="claude-code-hooks-session-status.html">Tracking Claude Code Session Status with Hooks</a></li>
+      <li><a href="claude-code-notifications-macos.html">How to Get Claude Code Notifications on macOS</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/guides/">Guides</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms of Service</a>
+  </p>
+</footer>
+
+<script>
+  // Send CTA clicks to GA4 (cta_location tells the placement apart).
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    var loc = cta.getAttribute('data-cta');
+    gtag('event', 'cta_click', { cta_location: loc });
+    // Derived key events, decided on the page and sent directly.
+    // Rules match the registry in agent-manager/docs/spec/08-telemetry-sentry-ga4.md.
+    var keyEvent = null;
+    if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
+    else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
+    else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
+  });
+
+  (function() {
+    // Same non-Mac detection as the LP (index.html). iPhone UAs say "like Mac OS X" but not "Macintosh".
+    // iPad in desktop mode claims "Macintosh", so maxTouchPoints excludes it.
+    // When undetectable, keep the download visible so real Mac users are never blocked.
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    // Record which CTA variant was shown, once per page view (denominator for cta_click;
+    // checked by Tests/test_cta_variant_denominator.py).
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="ref_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>

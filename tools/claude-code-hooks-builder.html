@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Hooks Builder — free settings.json generator</title>
+  <meta name="description" content="Pick Claude Code hook events, add a matcher and a command, and copy a valid settings.json snippet. Free, no sign-up, runs entirely in your browser. Covers all 33 hook events and the statusLine setting.">
+  <link rel="canonical" href="https://agentmgr.app/tools/claude-code-hooks-builder.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/tools/claude-code-hooks-builder.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/tools/ja/claude-code-hooks-builder.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/tools/claude-code-hooks-builder.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://agentmgr.app/tools/claude-code-hooks-builder.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code Hooks Builder">
+  <meta property="og:description" content="Pick events, add a command, copy a valid settings.json snippet. Free, no sign-up.">
+  <meta property="og:image" content="https://agentmgr.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Claude Code Hooks Builder">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code Hooks Builder">
+  <meta name="twitter:description" content="Pick events, add a command, copy a valid settings.json snippet. Free, no sign-up.">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <link rel="stylesheet" href="/tools/hooks-builder.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4)
+       本番ホスト以外（localhost / 127.0.0.1 でのローカル確認）では送信しない。
+       gtag.js 公式のオプトアウトフラグ。gtag.js 本体が到着する前に立てる必要があるので
+       async の読み込みタグより前に置く。配信ホストは CNAME で agentmgr.app に固定。 -->
+  <script>
+    if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Claude Code Hooks Builder",
+    "description": "Pick Claude Code hook events, add a matcher and a command, and copy a valid settings.json snippet. Free, no sign-up, runs entirely in your browser.",
+    "url": "https://agentmgr.app/tools/claude-code-hooks-builder.html",
+    "inLanguage": "en",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "datePublished": "2026-09-20",
+    "dateModified": "2026-09-20",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="claude-code-hooks-builder.html" aria-current="page">EN</a>
+      <a class="lang-btn" href="ja/claude-code-hooks-builder.html" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="tool_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="article-wrap tool-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / <a href="/guides/">Guides</a> / Tools</nav>
+
+  <h1>Claude Code Hooks Builder</h1>
+  <span class="article-meta">Free · no sign-up · runs in your browser, nothing is uploaded</span>
+  <p class="article-lede">
+    Pick the events you care about, write one command, and copy a
+    <code>settings.json</code> snippet that Claude Code accepts as-is. Every one of the
+    33 hook events is here with its matcher values, plus the <code>statusLine</code> setting.
+    If you need the field-by-field details, see the
+    <a href="/guides/claude-code-hooks-reference.html">hooks reference</a>.
+  </p>
+
+  <div class="tool-grid">
+    <form class="tool-form" onsubmit="return false;">
+      <h2 class="tool-h">Start from a preset</h2>
+      <div class="presets" id="presets"></div>
+
+      <h2 class="tool-h">Save to</h2>
+      <div class="targets" id="targets"></div>
+
+      <h2 class="tool-h">Events</h2>
+      <div class="events" id="events"></div>
+
+      <h2 class="tool-h">Command</h2>
+      <label class="field">
+        <span>Shell command to run on each selected event. It receives the event JSON on stdin.</span>
+        <input type="text" id="command" placeholder="$HOME/.claude/hooks/my-hook.sh" spellcheck="false" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>Timeout in seconds (optional — Claude Code's default is 600 for most events)</span>
+        <input type="number" id="timeout" min="1" step="1" placeholder="600">
+      </label>
+
+      <h2 class="tool-h">Status line</h2>
+      <label class="field-row">
+        <input type="checkbox" id="statusline-on">
+        <span>Also set <code>statusLine</code> (runs after every response with context and rate-limit data)</span>
+      </label>
+      <label class="field hidden" id="statusline-row">
+        <span>Status line command</span>
+        <input type="text" id="statusline-command" placeholder="$HOME/.claude/hooks/my-hook.sh statusline" spellcheck="false" autocomplete="off">
+      </label>
+    </form>
+
+    <section class="tool-output" aria-live="polite">
+      <div class="out-head">
+        <code id="out-path">~/.claude/settings.json</code>
+        <button type="button" class="copy-btn" id="copy" data-cta="tool_copy_json">Copy JSON</button>
+      </div>
+      <pre id="out-pre"><code id="out"></code></pre>
+      <div class="copy-status" id="copy-status"></div>
+      <div class="how-to">
+        <ol>
+          <li>Open <code class="how-path">~/.claude/settings.json</code> (create it if it doesn't exist).</li>
+          <li>If the file already has a <code>"hooks"</code> key, paste each event array inside it; otherwise paste the whole object.</li>
+          <li>Make the command executable: <code>chmod +x</code> your script. Hooks run with your user's permissions.</li>
+          <li>Run <code>/hooks</code> inside Claude Code to confirm it picked up the change.</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <h2>What you're generating</h2>
+  <p>
+    A hook is a shell command Claude Code runs at a lifecycle event, with a JSON payload on stdin
+    (<code>session_id</code>, <code>hook_event_name</code>, <code>cwd</code>, and per-event fields such as
+    <code>tool_name</code> or <code>notification_type</code>). The shape the builder produces is:
+  </p>
+  <pre><code>{
+  "hooks": {
+    "&lt;EventName&gt;": [
+      {
+        "matcher": "&lt;optional filter&gt;",
+        "hooks": [ { "type": "command", "command": "&lt;your command&gt;", "timeout": 600 } ]
+      }
+    ]
+  }
+}</code></pre>
+  <ul>
+    <li><strong>matcher</strong> filters which occurrences fire the hook: tool names for tool events, notification types for <code>Notification</code>, and so on. Plain names separated by <code>|</code> match exactly; anything with regex characters is treated as a JavaScript regex. Leave it empty to match everything.</li>
+    <li><strong>One command for all events</strong> is the common pattern — read <code>hook_event_name</code> from stdin and branch inside the script. The builder writes the same handler under each selected event.</li>
+    <li><strong>Exit code 2</strong> blocks the action on events that support it (<code>PreToolUse</code>, <code>UserPromptSubmit</code>, <code>PermissionRequest</code>…), with stderr shown as the reason. Any other exit code lets it proceed.</li>
+    <li><strong>statusLine</strong> is a separate top-level key with a single slot. Its command gets <code>context_window.used_percentage</code>, <code>rate_limits</code> and <code>model</code> — data that hooks never receive.</li>
+  </ul>
+  <div class="note">
+    <strong>Check the version.</strong> Claude Code releases before 2.1.101 ignore the whole settings file when it contains an unknown event name — and that silently disables every hook and permission rule in it. Run <code>claude --version</code> before adding newer events like <code>StopFailure</code> or <code>PostCompact</code>.
+  </div>
+
+  <div class="guide-cta">
+    <h2>Don't want to write the status script?</h2>
+    <p>
+      AgentManager installs a ready-made hook, registers these events for you, and turns them into a
+      live status board for every Claude Code session — free to use, no account required.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="tool_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="tool_cta_lp">See how it works</a>
+    </div>
+    <div class="cta-note">macOS 13+ — free plan shows up to 2 sessions at once</div>
+  </div>
+
+  <nav class="related" aria-label="Related pages">
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/guides/claude-code-hooks-reference.html">Claude Code Hooks Reference — every event, stdin field and settings key</a></li>
+      <li><a href="/guides/claude-code-hooks-session-status.html">Tracking Claude Code Session Status with Hooks</a></li>
+      <li><a href="/guides/claude-code-notifications-macos.html">How to Get Claude Code Notifications on macOS</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/guides/">Guides</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script src="/tools/hooks-builder.js"></script>
+<script src="/tools/hooks-builder-ui.js"></script>
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  // tool_copy_json はツール利用の指標。_download で終わらないためキーイベントには写らない。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    var loc = cta.getAttribute('data-cta');
+    gtag('event', 'cta_click', { cta_location: loc });
+    // キーイベント用の派生イベントを LP 側で判定して直接送る。
+    // 判定ルールは agent-manager/docs/spec/08-telemetry-sentry-ga4.md の登録一覧と対応。
+    var keyEvent = null;
+    if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
+    else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
+    else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    // どちらの CTA を出したかを 1 ページビューにつき 1 回送る（cta_click の分母。
+    // Tests/test_cta_variant_denominator.py が検査する）。
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="tool_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>
