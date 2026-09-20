@@ -43,7 +43,7 @@
       matcher: { en: 'error type', ja: 'エラーの種類' },
       hint: 'rate_limit|overloaded|authentication_failed|billing_error|max_output_tokens|unknown' },
     { name: 'Notification', group: 'session',
-      desc: { en: 'Claude Code needs your attention (permission prompt, idle…)', ja: '確認が必要になった（許可待ち・放置…）' },
+      desc: { en: 'Waiting on you (permission prompt, idle prompt, or a question)', ja: 'あなたの操作待ち（許可の確認・一定時間入力なし・質問への回答）' },
       matcher: { en: 'notification type', ja: '通知の種類' },
       hint: 'permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input' },
     { name: 'SessionEnd', group: 'session',
@@ -188,10 +188,14 @@
   var byName = {};
   HOOK_EVENTS.forEach(function (e) { byName[e.name] = e; });
 
-  function fail(msg) { throw new Error(msg); }
+  function fail(msg, code) {
+    var err = new Error(msg);
+    if (code) err.code = code;
+    throw err;
+  }
 
-  function nonEmpty(value, what) {
-    if (typeof value !== 'string' || value.trim() === '') fail(what + ' is required');
+  function nonEmpty(value, what, code) {
+    if (typeof value !== 'string' || value.trim() === '') fail(what + ' is required', code);
     return value.trim();
   }
 
@@ -206,14 +210,14 @@
    */
   function buildSettings(spec) {
     if (!spec || typeof spec !== 'object') fail('spec must be an object');
-    if (!Array.isArray(spec.events) || spec.events.length === 0) fail('select at least one event');
+    if (!Array.isArray(spec.events) || spec.events.length === 0) fail('select at least one event', 'no_events');
 
-    var command = nonEmpty(spec.command, 'command');
+    var command = nonEmpty(spec.command, 'command', 'command_required');
 
     var timeout;
     if (spec.timeout !== undefined && spec.timeout !== null && spec.timeout !== '') {
       timeout = Number(spec.timeout);
-      if (!Number.isInteger(timeout) || timeout <= 0) fail('timeout must be a positive whole number of seconds');
+      if (!Number.isInteger(timeout) || timeout <= 0) fail('timeout must be a positive whole number of seconds', 'timeout_invalid');
     }
 
     var hooks = {};
@@ -241,7 +245,7 @@
 
     if (spec.statusLine !== undefined && spec.statusLine !== null) {
       if (typeof spec.statusLine !== 'object') fail('statusLine must be an object');
-      settings.statusLine = { type: 'command', command: nonEmpty(spec.statusLine.command, 'statusLine command') };
+      settings.statusLine = { type: 'command', command: nonEmpty(spec.statusLine.command, 'statusLine command', 'statusline_command_required') };
     }
 
     return settings;

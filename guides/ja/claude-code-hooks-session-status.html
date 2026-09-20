@@ -94,6 +94,7 @@
   <h1>Claude Code hooks でセッション状態を追跡する</h1>
   <span class="article-meta">更新日: 2026年8月26日</span>
   <p class="article-lede">
+    このガイドを読むと、複数の Claude Code セッションのうち「今どれが自分の返答を待っているか」を自動で判定できるようになります。
     Claude Code の hooks は「このツールをブロックする」「編集に lint をかける」といった
     ポリシー制御の文脈で語られがちですが、実は<em>セッションが今何をしているか</em>——
     処理中か、完了したか、質問でブロックしているか——を教えてくれる唯一の公開 API でもあります。
@@ -156,25 +157,9 @@
   <p>
     1 つのスクリプトをいくつかのイベントに登録し、<code>session_id</code> ごとに小さな
     JSON ファイルを 1 つ書きます。あとはステータスバーウィジェットでも tmux のセグメントでも
-    ダッシュボードでも、そのディレクトリを描画すればいい。<code>~/.claude/settings.json</code>:
+    ダッシュボードでも、そのディレクトリを描画すればいい。
   </p>
-  <pre><code>{
-  "hooks": {
-    "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh running" } ] }
-    ],
-    "Notification": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh waiting" } ] }
-    ],
-    "Stop": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh done" } ] }
-    ],
-    "SessionEnd": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh ended" } ] }
-    ]
-  }
-}</code></pre>
-  <p><code>~/.claude/track-status.sh</code> はこう書きます（<a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a> が必要。<code>chmod +x</code> を忘れずに）:</p>
+  <p>まず <code>~/.claude/track-status.sh</code> をこう書きます（<a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a> が必要。未インストールなら <code>brew install jq</code>。<code>chmod +x</code> を忘れずに）:</p>
   <pre><code>#!/bin/bash
 # stdin の hook ペイロードを読み、セッションごとの状態ファイルを保つ。
 STATE="$1"
@@ -193,6 +178,34 @@ else
     '{state: $state, cwd: $cwd, updated: now | todate}' \
     &gt; "$DIR/$SESSION_ID.json.tmp" &amp;&amp; mv "$DIR/$SESSION_ID.json.tmp" "$DIR/$SESSION_ID.json"
 fi</code></pre>
+  <p>次に <code>~/.claude/settings.json</code> に登録します:</p>
+  <pre><code>{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh running" } ] }
+    ],
+    "Notification": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh waiting" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh done" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh ended" } ] }
+    ]
+  }
+}</code></pre>
+  <p>
+    既に <code>settings.json</code> に <code>permissions</code> などの項目がある場合は、その閉じ波括弧の後にカンマを足し、
+    同じ階層に <code>hooks</code> を並べます。例:
+  </p>
+  <pre><code>{
+  "permissions": { "allow": ["Bash(npm test)"] },
+  "hooks": {
+    "UserPromptSubmit": [ /* ここに上の内容 */ ]
+  }
+}</code></pre>
+  <p>貼る形に迷うなら、<a href="/tools/ja/claude-code-hooks-builder.html">hooks ビルダー</a>でイベントを選ぶだけで同じ形を生成できます。</p>
   <p>
     これで <code>cat ~/.claude/session-status/*.json</code> が全セッションのライブな状態を返します。
     設計上の注意は 2 つ、上のコードに織り込み済みです: ファイルのキーは作業ディレクトリではなく
@@ -280,7 +293,7 @@ fi</code></pre>
          class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
       <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る</a>
     </div>
-    <div class="cta-note">macOS 13+ — フリープランは同時表示 2 セッションまで</div>
+    <div class="cta-note">macOS 13+ — 無料プランは同時表示 2 セッションまで</div>
   </div>
 
   <nav class="related" aria-label="関連ガイド">

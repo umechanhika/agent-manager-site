@@ -97,6 +97,8 @@
   <h1>Claude Code hooks ビルダー</h1>
   <span class="article-meta">無料 · 登録不要 · ブラウザ内で完結（入力内容はどこにも送信しません）</span>
   <p class="article-lede">
+    hook は、Claude Code が「確認待ちになった」「応答が終わった」などの節目で自動実行するコマンドです。
+    このページで設定を作り、コピーして <code>~/.claude/settings.json</code> に貼るだけで有効になります。
     使いたいイベントを選び、コマンドを 1 つ書けば、Claude Code がそのまま受け付ける
     <code>settings.json</code> の断片をコピーできます。全 33 種の hook イベントを matcher の値つきで載せ、
     <code>statusLine</code> 設定にも対応しています。項目ごとの詳細は
@@ -107,6 +109,7 @@
     <form class="tool-form" onsubmit="return false;">
       <h2 class="tool-h">プリセットから始める</h2>
       <div class="presets" id="presets"></div>
+      <p class="preset-note">「セッション状態を追跡する」と「破壊的なシェルコマンドをブロックする」のスクリプトは自作が必要です。セッション状態を自分で書かずに済ませるなら、<a href="/ja.html" data-cta="tool_preset_lp">AgentManager</a> が同じ hook を自動で入れ、確認待ちのセッションを通知します。</p>
 
       <h2 class="tool-h">保存先</h2>
       <div class="targets" id="targets"></div>
@@ -145,8 +148,8 @@
       <div class="how-to">
         <ol>
           <li><code class="how-path">~/.claude/settings.json</code> を開く（無ければ作成する）。</li>
-          <li>既に <code>"hooks"</code> キーがある場合は、各イベントの配列をその中に貼る。無ければオブジェクト全体を貼る。</li>
-          <li>コマンドに実行権限を付ける（<code>chmod +x</code>）。hook はあなたのユーザー権限で実行される。</li>
+          <li>既に <code>"hooks"</code> キーがある場合は、その中に各イベントの配列だけを追加する（同じイベント名が既にあれば、その配列に要素として足す）。無ければオブジェクト全体を貼る。</li>
+          <li>コマンドがスクリプトファイルの場合は実行権限を付ける（<code>chmod +x</code>）。hook はあなたのユーザー権限で実行される。</li>
           <li>Claude Code 内で <code>/hooks</code> を実行し、変更が反映されたことを確認する。</li>
         </ol>
       </div>
@@ -180,10 +183,10 @@
   </div>
 
   <div class="guide-cta">
-    <h2>状態追跡のスクリプトを書きたくないなら</h2>
+    <h2>hook を自分で書かずに「確認待ち」を知りたいなら</h2>
     <p>
-      AgentManager は出来合いの hook をインストールしてこれらのイベントを自動登録し、
-      すべての Claude Code セッションをライブの状態ボードとして表示します。無料で使え、アカウント登録は不要です。
+      上の「確認が必要になったら通知する」「セッション状態を追跡する」プリセットと同じことを、AgentManager が自動で設定します。
+      すべての Claude Code セッションの状態を一覧し、確認待ちになった瞬間に通知します。無料で使え、アカウント登録は不要です。
     </p>
     <div class="cta-row">
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"

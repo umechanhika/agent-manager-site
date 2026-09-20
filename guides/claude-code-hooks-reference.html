@@ -99,12 +99,14 @@
   <h1>Claude Code Hooks Reference</h1>
   <span class="article-meta">Checked against the official docs on September 20, 2026</span>
   <p class="article-lede">
+    A hook is a command Claude Code runs automatically at moments like “waiting for your approval” or
+    “finished responding”. If you are new to hooks, start with the
+    <a href="/tools/claude-code-hooks-builder.html">hooks builder</a>, which writes the config for you.
     Everything you need on one page when writing a hook: the full event list with the values each
     <code>matcher</code> accepts, the fields every hook gets on stdin, the <code>settings.json</code> and
     <code>statusLine</code> shapes, and what exit codes mean. The last section documents the per-session
     state file that <a href="/">AgentManager</a> derives from these events, for anyone who wants to read it
-    from their own scripts. To generate a config instead of writing one, use the
-    <a href="/tools/claude-code-hooks-builder.html">hooks builder</a>.
+    from their own scripts.
   </p>
 
   <ul class="toc">
@@ -133,7 +135,7 @@
       <tr><td><code>UserPromptExpansion</code></td><td>A slash command expands into a prompt</td><td>—</td></tr>
       <tr><td><code>Stop</code></td><td>The main agent finishes its response</td><td>—</td></tr>
       <tr><td><code>StopFailure</code></td><td>The turn ends because of an API error</td><td>error type <span class="hint">rate_limit|overloaded|authentication_failed|billing_error|max_output_tokens|unknown</span></td></tr>
-      <tr><td><code>Notification</code></td><td>Claude Code needs your attention (permission prompt, idle…)</td><td>notification type <span class="hint">permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input</span></td></tr>
+      <tr><td><code>Notification</code></td><td>Waiting on you (permission prompt, idle prompt, or a question)</td><td>notification type <span class="hint">permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input</span></td></tr>
       <tr><td><code>SessionEnd</code></td><td>The session terminates</td><td>why it ended <span class="hint">clear|resume|logout|prompt_input_exit|other</span></td></tr>
       <tr class="grp"><th colspan="3">Tools and permissions</th></tr>
       <tr><td><code>PreToolUse</code></td><td>Before a tool call runs (can block it)</td><td>tool name <span class="hint">Bash|Edit|Write|mcp__.*</span></td></tr>
@@ -293,10 +295,10 @@
   </p>
 
   <div class="guide-cta">
-    <h2>Skip the script, keep the state</h2>
+    <h2>Get these states on screen and as notifications — without writing a hook</h2>
     <p>
-      AgentManager installs the hook and the status-line pass-through for you, registers the events it
-      needs, and shows every Claude Code session on a live board. Free to use, no account.
+      AgentManager writes the state file above for you. It notifies you when a session is waiting for you
+      and lists the status of every session. Free to use, no account required.
     </p>
     <div class="cta-row">
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"

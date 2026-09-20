@@ -99,11 +99,13 @@
   <h1>Claude Code hooks リファレンス</h1>
   <span class="article-meta">公式ドキュメントとの照合日: 2026年9月20日</span>
   <p class="article-lede">
+    hook は、Claude Code が「確認待ちになった」「応答が終わった」などの節目で自動実行するコマンドです。
+    hook を初めて触るなら、設定を手書きせず作れる
+    <a href="/tools/ja/claude-code-hooks-builder.html">hooks ビルダー</a>から始めてください。
     hook を書くときに必要な情報を 1 ページにまとめました。全イベントの一覧と各 <code>matcher</code> が受け付ける値、
     すべての hook が標準入力で受け取る項目、<code>settings.json</code> と <code>statusLine</code> の形、終了コードの意味です。
     最後の節では、<a href="/ja.html">AgentManager</a> がこれらのイベントから導出するセッションごとの状態ファイルを、
-    自分のスクリプトから読みたい人向けに説明します。設定を手書きせず生成したい場合は
-    <a href="/tools/ja/claude-code-hooks-builder.html">hooks ビルダー</a>を使ってください。
+    自分のスクリプトから読みたい人向けに説明します。
   </p>
 
   <ul class="toc">
@@ -131,7 +133,7 @@
       <tr><td><code>UserPromptExpansion</code></td><td>スラッシュコマンドがプロンプトに展開された</td><td>—</td></tr>
       <tr><td><code>Stop</code></td><td>メインエージェントの応答が終わった</td><td>—</td></tr>
       <tr><td><code>StopFailure</code></td><td>API エラーでターンが止まった</td><td>エラーの種類 <span class="hint">rate_limit|overloaded|authentication_failed|billing_error|max_output_tokens|unknown</span></td></tr>
-      <tr><td><code>Notification</code></td><td>確認が必要になった（許可待ち・放置…）</td><td>通知の種類 <span class="hint">permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input</span></td></tr>
+      <tr><td><code>Notification</code></td><td>あなたの操作待ち（許可の確認・一定時間入力なし・質問への回答）</td><td>通知の種類 <span class="hint">permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input</span></td></tr>
       <tr><td><code>SessionEnd</code></td><td>セッションが終了した</td><td>終了理由 <span class="hint">clear|resume|logout|prompt_input_exit|other</span></td></tr>
       <tr class="grp"><th colspan="3">ツールと許可</th></tr>
       <tr><td><code>PreToolUse</code></td><td>ツール実行の直前（ブロック可能）</td><td>ツール名 <span class="hint">Bash|Edit|Write|mcp__.*</span></td></tr>
@@ -288,10 +290,10 @@
   </p>
 
   <div class="guide-cta">
-    <h2>スクリプトは書かず、状態だけ手に入れる</h2>
+    <h2>この表の状態を、hook を書かずに画面と通知で受け取る</h2>
     <p>
-      AgentManager は hook とステータス行のパススルーをインストールし、必要なイベントを登録して、
-      すべての Claude Code セッションをライブのボードに表示します。無料で使え、アカウント登録は不要です。
+      上の状態ファイルは AgentManager が自動で書きます。確認待ちになったセッションを通知し、
+      すべてのセッションの状態を一覧できます。無料で使え、アカウント登録は不要です。
     </p>
     <div class="cta-row">
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"

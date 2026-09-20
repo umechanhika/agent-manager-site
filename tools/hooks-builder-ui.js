@@ -15,7 +15,13 @@
       copied: 'Copied to clipboard',
       copyFailed: 'Copy failed — select the text and copy it manually',
       selected: function (n) { return n + ' selected'; },
-      none: 'none'
+      none: 'none',
+      errors: {
+        no_events: 'select at least one event',
+        command_required: 'enter a command',
+        statusline_command_required: 'enter the status line command',
+        timeout_invalid: 'timeout must be a whole number of seconds, 1 or more'
+      }
     },
     ja: {
       matcher: 'matcher',
@@ -23,7 +29,13 @@
       copied: 'コピーしました',
       copyFailed: 'コピーできませんでした。テキストを選択して手動でコピーしてください',
       selected: function (n) { return n + ' 件選択'; },
-      none: '未選択'
+      none: '未選択',
+      errors: {
+        no_events: 'イベントを 1 つ以上選んでください',
+        command_required: 'コマンドを入力してください',
+        statusline_command_required: 'ステータス行のコマンドを入力してください',
+        timeout_invalid: 'タイムアウトは 1 以上の整数（秒）にしてください'
+      }
     }
   }[LANG];
 
@@ -203,7 +215,13 @@
       els.copy.disabled = false;
     } catch (err) {
       lastJSON = null;
-      els.out.textContent = '// ' + err.message;
+      var message = err.message;
+      if (err.code) {
+        message = T.errors[err.code];
+        // 翻訳漏れはプログラミングエラー。黙って隠さず、そのまま投げる。
+        if (message === undefined) throw err;
+      }
+      els.out.textContent = '// ' + message;
       els.outPre.classList.add('is-error');
       els.copy.disabled = true;
     }
