@@ -93,7 +93,10 @@ header {
 
 @media (max-width: 540px) {
   header { padding: 10px 16px; }
-  .logo-img { height: 14px; }
+  /* Let the wordmark shrink (keeping its aspect ratio) so header + toggle never exceed
+     the viewport on narrow phones. */
+  .logo { flex: 0 1 auto; min-width: 0; }
+  .logo-img { height: auto; width: 100%; max-width: 225px; }
   .hdr-cta { display: none; }
 }
 
@@ -161,6 +164,11 @@ header {
   border-radius: 5px;
   padding: 1px 6px;
   white-space: nowrap;
+}
+/* On phones a long path in inline code (e.g. a state-file location) must wrap instead of
+   forcing the whole page to scroll sideways. */
+@media (max-width: 540px) {
+  .article-wrap code { white-space: normal; overflow-wrap: anywhere; }
 }
 .article-wrap pre {
   background: var(--surf);

@@ -185,7 +185,10 @@
     }
     @media (max-width: 540px) {
       header { padding: 10px 16px; }
-      .logo-img { height: 14px; }
+      /* Let the wordmark shrink (keeping its aspect ratio) so logo + burger + language
+         toggle never exceed the viewport on narrow phones. */
+      .logo { flex: 0 1 auto; min-width: 0; }
+      .logo-img { height: auto; width: 100%; max-width: 225px; }
       .hdr-cta { display: none; }
     }
 
