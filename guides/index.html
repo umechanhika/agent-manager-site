@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Guides — AgentManager</title>
+  <meta name="description" content="Practical guides for running Claude Code in parallel and never missing the moment it needs you: git worktrees, tmux, hooks, and macOS notifications.">
+  <link rel="canonical" href="https://agentmgr.app/guides/">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://agentmgr.app/guides/">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code Guides">
+  <meta property="og:description" content="Practical guides for running Claude Code in parallel and never missing the moment it needs you.">
+  <meta property="og:image" content="https://agentmgr.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Claude Code Guides — AgentManager">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code Guides">
+  <meta name="twitter:description" content="Practical guides for running Claude Code in parallel and never missing the moment it needs you.">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4) -->
+  <script>
+    if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Claude Code Guides",
+    "description": "Practical guides for running Claude Code in parallel and never missing the moment it needs you.",
+    "url": "https://agentmgr.app/guides/",
+    "inLanguage": "en",
+    "isPartOf": { "@type": "WebSite", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "hasPart": [
+      { "@type": "TechArticle", "headline": "Running Claude Code in Parallel with Git Worktrees", "url": "https://agentmgr.app/guides/claude-code-git-worktrees.html" },
+      { "@type": "TechArticle", "headline": "A Practical tmux Workflow for Claude Code", "url": "https://agentmgr.app/guides/claude-code-tmux-workflow.html" },
+      { "@type": "TechArticle", "headline": "How to Manage Multiple Claude Code Sessions Without Losing Track", "url": "https://agentmgr.app/guides/manage-multiple-claude-code-sessions.html" },
+      { "@type": "TechArticle", "headline": "How to Get Claude Code Notifications on macOS", "url": "https://agentmgr.app/guides/claude-code-notifications-macos.html" },
+      { "@type": "TechArticle", "headline": "Tracking Claude Code Session Status with Hooks", "url": "https://agentmgr.app/guides/claude-code-hooks-session-status.html" }
+    ]
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn active" href="/guides/" aria-current="page">EN</a>
+      <a class="lang-btn" href="/guides/ja/" lang="ja" hreflang="ja">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="guide_header_download">Free download</a>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">AgentManager</a> / Guides</nav>
+
+  <h1>Claude Code Guides</h1>
+  <p class="article-lede">
+    Practical write-ups for two problems every Claude Code power user runs into: keeping several
+    sessions running at once without them stepping on each other, and knowing the moment one of
+    them actually needs you.
+  </p>
+
+  <h2>Running sessions in parallel</h2>
+  <ul class="related">
+    <li>
+      <a href="claude-code-git-worktrees.html">Running Claude Code in Parallel with Git Worktrees</a>
+      <p>One clone, one branch per session, zero collisions — the worktree setup we actually use.</p>
+    </li>
+    <li>
+      <a href="manage-multiple-claude-code-sessions.html">How to Manage Multiple Claude Code Sessions Without Losing Track</a>
+      <p>Worktrees, tmux, and terminal layouts compared — and how to know instantly which session needs you.</p>
+    </li>
+    <li>
+      <a href="claude-code-tmux-workflow.html">A Practical tmux Workflow for Claude Code</a>
+      <p>Named windows per session, panes vs. windows, and surviving SSH disconnects.</p>
+    </li>
+  </ul>
+
+  <h2>Staying aware of what needs you</h2>
+  <ul class="related">
+    <li>
+      <a href="claude-code-notifications-macos.html">How to Get Claude Code Notifications on macOS</a>
+      <p>Native terminal notifications, the terminal bell, and hook-based alerts — copy-paste setup included.</p>
+    </li>
+    <li>
+      <a href="claude-code-hooks-session-status.html">Tracking Claude Code Session Status with Hooks</a>
+      <p>How to turn hook events into a reliable waiting / running / done state, edge cases included.</p>
+    </li>
+  </ul>
+
+  <div class="guide-cta">
+    <h2>One status lamp per session</h2>
+    <p>
+      AgentManager shows every Claude Code session in one floating window and surfaces the one
+      that needs you. Free to use, no account required.
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="guide_cta_download">↓ Free Download</a>
+      <a href="/" class="btn btn-ghost" data-cta="guide_cta_lp">See how it works</a>
+    </div>
+    <div class="cta-note">macOS 13+ — free plan shows up to 2 sessions at once</div>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/">Home</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+<script>
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    var loc = cta.getAttribute('data-cta');
+    gtag('event', 'cta_click', { cta_location: loc });
+    var keyEvent = null;
+    if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
+    else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
+    else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
+  });
+
+  (function() {
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>
