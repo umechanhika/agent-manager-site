@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code hooks リファレンス — 全イベント・stdin 項目・設定キー</title>
+  <meta name="description" content="Claude Code hooks の 1 ページリファレンス。全 33 種の hook イベントと matcher に指定できる値、すべての hook が標準入力で受け取る JSON、settings.json と statusLine のスキーマ、終了コード、AgentManager がセッションごとに書き出す状態ファイルの項目。">
+  <link rel="canonical" href="https://agentmgr.app/guides/ja/claude-code-hooks-reference.html">
+  <link rel="alternate" hreflang="en" href="https://agentmgr.app/guides/claude-code-hooks-reference.html">
+  <link rel="alternate" hreflang="ja" href="https://agentmgr.app/guides/ja/claude-code-hooks-reference.html">
+  <link rel="alternate" hreflang="x-default" href="https://agentmgr.app/guides/claude-code-hooks-reference.html">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://agentmgr.app/guides/ja/claude-code-hooks-reference.html">
+  <meta property="og:site_name" content="AgentManager">
+  <meta property="og:title" content="Claude Code hooks リファレンス">
+  <meta property="og:description" content="全 33 種の hook イベントと matcher の値、stdin 項目、settings と statusLine のスキーマ、終了コード、セッション状態ファイルの構成。">
+  <meta property="og:image" content="https://agentmgr.app/og-image-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Claude Code hooks リファレンス">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code hooks リファレンス">
+  <meta name="twitter:description" content="全 33 種の hook イベントと matcher の値、stdin 項目、settings と statusLine のスキーマ、終了コード、セッション状態ファイルの構成。">
+  <meta name="twitter:image" content="https://agentmgr.app/og-image-ja.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0B0D10">
+  <link rel="stylesheet" href="/guides.css">
+  <style>
+    .article-wrap.ref-wrap { max-width: 900px; }
+    .article-wrap table tr.grp th { background: var(--surf2); color: var(--amber); font: 600 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .article-wrap td .hint { display: block; font: 12px var(--mono); color: var(--dim); margin-top: 3px; word-break: break-all; }
+    .article-wrap td:first-child { white-space: nowrap; }
+    .toc { font-size: 14px; margin: 0 0 8px; }
+    .toc li { margin-bottom: 4px; }
+  </style>
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xf42alibd6");
+  </script>
+  <!-- Google Analytics (GA4)
+       本番ホスト以外（localhost / 127.0.0.1 でのローカル確認）では送信しない。
+       gtag.js 公式のオプトアウトフラグ。gtag.js 本体が到着する前に立てる必要があるので
+       async の読み込みタグより前に置く。配信ホストは CNAME で agentmgr.app に固定。 -->
+  <script>
+    if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W72BR4X8Y6');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Claude Code hooks リファレンス",
+    "description": "Claude Code hooks の 1 ページリファレンス。全 33 種の hook イベントと matcher に指定できる値、すべての hook が標準入力で受け取る JSON、settings.json と statusLine のスキーマ、終了コード、AgentManager がセッションごとに書き出す状態ファイルの項目。",
+    "url": "https://agentmgr.app/guides/ja/claude-code-hooks-reference.html",
+    "inLanguage": "ja",
+    "datePublished": "2026-09-20",
+    "dateModified": "2026-09-20",
+    "author": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" },
+    "publisher": { "@type": "Organization", "name": "AgentManager", "url": "https://agentmgr.app/" }
+  }
+  </script>
+<script defer src="/utm.js"></script>
+</head>
+<body>
+
+<header>
+  <a href="/ja.html" class="logo">
+    <img class="logo-img" src="/logo-dark.svg" alt="AgentManager" width="322" height="20">
+  </a>
+  <div class="hdr-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <a class="lang-btn" href="../claude-code-hooks-reference.html" lang="en" hreflang="en">EN</a>
+      <a class="lang-btn active" href="claude-code-hooks-reference.html" aria-current="page">JA</a>
+    </div>
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="hdr-cta" data-cta="ref_header_download">無料ダウンロード</a>
+  </div>
+</header>
+
+<main class="article-wrap ref-wrap">
+  <nav class="crumbs" aria-label="パンくず"><a href="/ja.html">AgentManager</a> / <a href="/guides/ja/">ガイド</a> / hooks リファレンス</nav>
+
+  <h1>Claude Code hooks リファレンス</h1>
+  <span class="article-meta">公式ドキュメントとの照合日: 2026年9月20日</span>
+  <p class="article-lede">
+    hook を書くときに必要な情報を 1 ページにまとめました。全イベントの一覧と各 <code>matcher</code> が受け付ける値、
+    すべての hook が標準入力で受け取る項目、<code>settings.json</code> と <code>statusLine</code> の形、終了コードの意味です。
+    最後の節では、<a href="/ja.html">AgentManager</a> がこれらのイベントから導出するセッションごとの状態ファイルを、
+    自分のスクリプトから読みたい人向けに説明します。設定を手書きせず生成したい場合は
+    <a href="/tools/ja/claude-code-hooks-builder.html">hooks ビルダー</a>を使ってください。
+  </p>
+
+  <ul class="toc">
+    <li><a href="#events">hook イベント一覧</a></li>
+    <li><a href="#stdin">すべての hook が標準入力で受け取る項目</a></li>
+    <li><a href="#settings">settings.json のスキーマ</a></li>
+    <li><a href="#statusline">statusLine のスキーマと標準入力</a></li>
+    <li><a href="#exit-codes">終了コード</a></li>
+    <li><a href="#state-file">AgentManager のセッション状態ファイル</a></li>
+  </ul>
+
+  <h2 id="events">hook イベント一覧</h2>
+  <p>
+    Claude Code は現在 33 種の hook イベントを定義しています。3 列目は、そのイベントで <code>matcher</code> が何を対象に絞り込むかと、値の例です。
+    「—」のイベントは matcher を無視して常に発火します。<code>|</code> で区切った素の名前は完全一致、
+    正規表現の記号を含む場合は JavaScript の正規表現として扱われます。空の matcher は全件に一致します。
+  </p>
+  <div class="table-scroll"><table id="hook-events">
+    <thead><tr><th>イベント</th><th>発火するタイミング</th><th>matcher の対象</th></tr></thead>
+    <tbody>
+      <tr class="grp"><th colspan="3">セッションのライフサイクル</th></tr>
+      <tr><td><code>SessionStart</code></td><td>セッションが開始・再開した</td><td>開始の種類 <span class="hint">startup|resume|clear|compact|fork</span></td></tr>
+      <tr><td><code>Setup</code></td><td>--init / --maintenance のセットアップ時</td><td>セットアップの種類 <span class="hint">init|maintenance</span></td></tr>
+      <tr><td><code>UserPromptSubmit</code></td><td>プロンプトを送信した（Claude が読む前）</td><td>—</td></tr>
+      <tr><td><code>UserPromptExpansion</code></td><td>スラッシュコマンドがプロンプトに展開された</td><td>—</td></tr>
+      <tr><td><code>Stop</code></td><td>メインエージェントの応答が終わった</td><td>—</td></tr>
+      <tr><td><code>StopFailure</code></td><td>API エラーでターンが止まった</td><td>エラーの種類 <span class="hint">rate_limit|overloaded|authentication_failed|billing_error|max_output_tokens|unknown</span></td></tr>
+      <tr><td><code>Notification</code></td><td>確認が必要になった（許可待ち・放置…）</td><td>通知の種類 <span class="hint">permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input</span></td></tr>
+      <tr><td><code>SessionEnd</code></td><td>セッションが終了した</td><td>終了理由 <span class="hint">clear|resume|logout|prompt_input_exit|other</span></td></tr>
+      <tr class="grp"><th colspan="3">ツールと許可</th></tr>
+      <tr><td><code>PreToolUse</code></td><td>ツール実行の直前（ブロック可能）</td><td>ツール名 <span class="hint">Bash|Edit|Write|mcp__.*</span></td></tr>
+      <tr><td><code>PermissionRequest</code></td><td>ツール実行に許可の判断が必要になった</td><td>ツール名 <span class="hint">Bash|Edit|Write</span></td></tr>
+      <tr><td><code>PermissionDenied</code></td><td>自動モードがツール実行を拒否した</td><td>ツール名 <span class="hint">Bash|Edit|Write</span></td></tr>
+      <tr><td><code>PostToolUse</code></td><td>ツール実行が成功した後</td><td>ツール名 <span class="hint">Bash|Edit|Write|mcp__.*</span></td></tr>
+      <tr><td><code>PostToolUseFailure</code></td><td>ツール実行が失敗した後</td><td>ツール名 <span class="hint">Bash|Edit|Write</span></td></tr>
+      <tr><td><code>PostToolBatch</code></td><td>並列ツール呼び出しの一括分がすべて終わった</td><td>—</td></tr>
+      <tr><td><code>MessageDisplay</code></td><td>アシスタントのメッセージが表示された</td><td>—</td></tr>
+      <tr class="grp"><th colspan="3">サブエージェントとタスク</th></tr>
+      <tr><td><code>SubagentStart</code></td><td>サブエージェントが起動した</td><td>エージェント種別 <span class="hint">general-purpose|Explore|Plan</span></td></tr>
+      <tr><td><code>SubagentStop</code></td><td>サブエージェントが終了した</td><td>エージェント種別 <span class="hint">general-purpose|Explore|Plan</span></td></tr>
+      <tr><td><code>TaskCreated</code></td><td>タスクが作成された</td><td>—</td></tr>
+      <tr><td><code>TaskCompleted</code></td><td>タスクが完了になった</td><td>—</td></tr>
+      <tr><td><code>TeammateIdle</code></td><td>エージェントチームのメンバーが待機に入る直前</td><td>—</td></tr>
+      <tr class="grp"><th colspan="3">コンテキスト・設定・モデル</th></tr>
+      <tr><td><code>PreCompact</code></td><td>コンテキスト圧縮の直前</td><td>トリガー <span class="hint">manual|auto</span></td></tr>
+      <tr><td><code>PostCompact</code></td><td>コンテキスト圧縮の完了後</td><td>トリガー <span class="hint">manual|auto</span></td></tr>
+      <tr><td><code>InstructionsLoaded</code></td><td>CLAUDE.md やルールファイルが読み込まれた</td><td>読み込み理由 <span class="hint">session_start|nested_traversal|path_glob_match|include|compact</span></td></tr>
+      <tr><td><code>ConfigChange</code></td><td>セッション中に設定ファイルが変わった</td><td>設定の種類 <span class="hint">user_settings|project_settings|local_settings|policy_settings|skills</span></td></tr>
+      <tr><td><code>PreModelSwitch</code></td><td>モデル切り替えの直前（ブロック可能）</td><td>切り替え先モデル <span class="hint">.*opus.*</span></td></tr>
+      <tr><td><code>PostModelSwitch</code></td><td>モデルが切り替わった後</td><td>切り替え先モデル <span class="hint">.*opus.*</span></td></tr>
+      <tr><td><code>Elicitation</code></td><td>MCP サーバーが入力を求めた</td><td>MCP サーバー名 <span class="hint">my-server</span></td></tr>
+      <tr><td><code>ElicitationResult</code></td><td>MCP サーバーの入力要求に応答した</td><td>MCP サーバー名 <span class="hint">my-server</span></td></tr>
+      <tr class="grp"><th colspan="3">ワークスペース</th></tr>
+      <tr><td><code>CwdChanged</code></td><td>作業ディレクトリが変わった</td><td>—</td></tr>
+      <tr><td><code>DirectoryAdded</code></td><td>/add-dir でディレクトリが追加された</td><td>追加方法 <span class="hint">slash_command|register_repo_root</span></td></tr>
+      <tr><td><code>FileChanged</code></td><td>監視中のファイルが変更された</td><td>ファイル名（正規表現ではなく | 区切り） <span class="hint">.envrc|.env</span></td></tr>
+      <tr><td><code>WorktreeCreate</code></td><td>git worktree が作成される</td><td>—</td></tr>
+      <tr><td><code>WorktreeRemove</code></td><td>git worktree が削除される</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <strong>古い版はファイル全体を捨てます。</strong>Claude Code 2.1.101 より前の版は、未知のイベント名を含む設定ファイルを丸ごと無視します。
+    そのファイル内の hook と permissions がすべて黙って無効になります。<code>StopFailure</code> や <code>PostCompact</code> のような
+    新しいイベントを追加する前に <code>claude --version</code> を確認してください。
+  </div>
+
+  <h2 id="stdin">すべての hook が標準入力で受け取る項目</h2>
+  <p>
+    各 hook コマンドは標準入力から JSON オブジェクトを 1 つ受け取ります。次の項目は全イベント共通で、イベントごとに固有の項目が加わります
+    （例: ツール系イベントの <code>tool_name</code> と <code>tool_input</code>、<code>Notification</code> の <code>notification_type</code>、
+    <code>StopFailure</code> の <code>error_type</code>、<code>SessionEnd</code> の <code>reason</code>）。
+  </p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>項目</th><th>意味</th></tr></thead>
+    <tbody>
+      <tr><td><code>session_id</code></td><td>Claude Code セッションの固定 ID。永続化するものはこれをキーにします。</td></tr>
+      <tr><td><code>hook_event_name</code></td><td>上の表のイベント名。1 つのスクリプトで複数イベントを扱うときはこれで分岐します。</td></tr>
+      <tr><td><code>cwd</code></td><td>hook 発火時点のセッションの作業ディレクトリ。</td></tr>
+      <tr><td><code>transcript_path</code></td><td>セッションの JSONL トランスクリプトのパス。</td></tr>
+      <tr><td><code>prompt_id</code></td><td>現在のターンが属するユーザープロンプトの ID。</td></tr>
+      <tr><td><code>scratchpad_dir</code></td><td>セッション専用の一時ディレクトリ。</td></tr>
+      <tr><td><code>permission_mode</code></td><td>現在の許可モード（<code>default</code>・<code>plan</code>・<code>acceptEdits</code>・<code>bypassPermissions</code> など）。</td></tr>
+      <tr><td><code>effort</code></td><td>現在の推論の努力量の設定。</td></tr>
+      <tr><td><code>agent_id</code>・<code>agent_type</code></td><td>サブエージェント内で発火した場合に付きます。メインエージェントでは付きません。</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="settings">settings.json のスキーマ</h2>
+  <p>
+    hook はトップレベルの <code>hooks</code> キーの下に置きます。置き場所は <code>~/.claude/settings.json</code>（ユーザー）、
+    <code>.claude/settings.json</code>（プロジェクト・コミット対象）、<code>.claude/settings.local.json</code>（プロジェクト・git 管理外）のいずれかです。
+    ファイルはマージされ、複数ファイルに定義した hook はそれぞれから実行されます。
+  </p>
+  <pre><code>{
+  "hooks": {
+    "&lt;イベント名&gt;": [
+      {
+        "matcher": "&lt;任意の絞り込み&gt;",
+        "hooks": [
+          { "type": "command", "command": "&lt;シェルコマンド&gt;", "timeout": 600 }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  <div class="table-scroll"><table>
+    <thead><tr><th>キー</th><th>意味</th></tr></thead>
+    <tbody>
+      <tr><td><code>matcher</code></td><td>任意。イベント表の値で絞り込みます。省略または空なら全件に一致します。</td></tr>
+      <tr><td><code>hooks[].type</code></td><td><code>command</code> はシェルコマンドを実行します。他のハンドラ種別（<code>http</code>・<code>mcp_tool</code>・<code>prompt</code>・<code>agent</code>）もありますが、このページとビルダーは <code>command</code> を扱います。</td></tr>
+      <tr><td><code>hooks[].command</code></td><td>あなたのユーザー環境で実行されるシェルコマンド。<code>$HOME</code> などの変数は展開されます。</td></tr>
+      <tr><td><code>hooks[].timeout</code></td><td>hook を打ち切るまでの秒数。既定は 600。<code>UserPromptSubmit</code>・<code>PreModelSwitch</code>・<code>PostModelSwitch</code> は 30、<code>MessageDisplay</code> は 10。<code>SessionEnd</code> の hook は全体で 1.5 秒を共有します。</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="statusline">statusLine のスキーマと標準入力</h2>
+  <p>
+    ステータス行は別のトップレベルキーで、枠は 1 つだけです。そのコマンドはアシスタントの応答のたびに実行され、
+    hook には渡らないデータ（コンテキストウィンドウの使用量と利用上限の状態）を受け取ります。
+  </p>
+  <pre><code>{
+  "statusLine": {
+    "type": "command",
+    "command": "&lt;シェルコマンド&gt;",
+    "padding": 0,
+    "refreshInterval": 5,
+    "hideVimModeIndicator": false
+  }
+}</code></pre>
+  <div class="table-scroll"><table>
+    <thead><tr><th>標準入力の項目</th><th>意味</th></tr></thead>
+    <tbody>
+      <tr><td><code>session_id</code>・<code>version</code></td><td>セッション ID と Claude Code のバージョン。</td></tr>
+      <tr><td><code>model.id</code>・<code>model.display_name</code></td><td>現在使用中のモデル。</td></tr>
+      <tr><td><code>workspace.*</code></td><td>現在のディレクトリとプロジェクトディレクトリ。</td></tr>
+      <tr><td><code>cost.*</code></td><td>セッションの累積コストと経過時間のカウンタ。</td></tr>
+      <tr><td><code>context_window.used_percentage</code></td><td>コンテキストウィンドウの使用率。ほかに <code>remaining_percentage</code>・<code>total_input_tokens</code>・<code>context_window_size</code>・<code>current_usage</code>。</td></tr>
+      <tr><td><code>rate_limits.five_hour</code>・<code>rate_limits.seven_day</code></td><td>それぞれ <code>used_percentage</code> と <code>resets_at</code>（エポック秒）を持ちます。</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="exit-codes">終了コード</h2>
+  <div class="table-scroll"><table>
+    <thead><tr><th>終了コード</th><th>効果</th></tr></thead>
+    <tbody>
+      <tr><td><code>0</code></td><td>成功。標準出力は verbose モードで表示され、構造化出力を受け付けるイベントでは JSON として解釈されます。</td></tr>
+      <tr><td><code>2</code></td><td>ブロック対応イベント（<code>PreToolUse</code>・<code>UserPromptSubmit</code>・<code>PermissionRequest</code>・<code>PreModelSwitch</code>・<code>Stop</code>・<code>SubagentStop</code> など）で動作を止めます。標準エラー出力が理由として Claude に渡されます。</td></tr>
+      <tr><td>その他</td><td>非ブロックのエラー。標準エラー出力があなたに表示され、動作は続行されます。</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="state-file">AgentManager のセッション状態ファイル</h2>
+  <p>
+    AgentManager の hook は上のイベントをセッションごとに 1 つの JSON ファイルへ集約し、
+    <code>~/.claude/agent-manager/sessions/&lt;session_id&gt;.json</code> に書きます。イベントのたびにその場で上書きされるため、
+    読み取り側でパースに失敗したら壊れたと判断せず読み直してください。導出ルールは
+    <a href="claude-code-hooks-session-status.html">hook で Claude Code のセッション状態を追跡する</a>で説明しています。
+  </p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>項目</th><th>型</th><th>意味</th></tr></thead>
+    <tbody>
+      <tr><td><code>session_id</code></td><td>string</td><td>Claude Code のセッション ID。ファイル名と同じです。</td></tr>
+      <tr><td><code>state</code></td><td>string</td><td><code>waiting</code>・<code>done</code>・<code>processing</code>・<code>idle</code>・<code>error</code> のいずれか。</td></tr>
+      <tr><td><code>waiting_kind</code></td><td>string | null</td><td>待機の理由。<code>approval</code>（許可の確認）、<code>plan</code>（計画の承認）、<code>choice</code>（回答待ちの質問）。<code>state</code> が <code>waiting</code> 以外なら null。</td></tr>
+      <tr><td><code>error_reason</code></td><td>string | null</td><td><code>state</code> が <code>error</code> のときの <code>StopFailure</code> のエラー種別。<code>rate_limit</code>・<code>overloaded</code>・<code>authentication_failed</code>・<code>billing_error</code>・<code>max_output_tokens</code>・<code>unknown</code>。</td></tr>
+      <tr><td><code>cwd</code></td><td>string</td><td>直近のイベントが報告した作業ディレクトリ。</td></tr>
+      <tr><td><code>label</code></td><td>string</td><td>アプリに表示する名前。<code>cwd</code> の末尾のパス要素です。</td></tr>
+      <tr><td><code>host_bundle_id</code>・<code>host_bundle_chain</code></td><td>string | null, array</td><td>セッションを動かしているターミナルアプリのバンドル ID と、それを特定するのに使ったプロセスの親子関係。</td></tr>
+      <tr><td><code>iterm_session_id</code>・<code>tmux_pane_id</code></td><td>string | null</td><td>セッションをクリックしたときに該当ペインをフォーカスするための識別子。</td></tr>
+      <tr><td><code>owner_pid</code>・<code>owner_started_at</code></td><td>int, string</td><td><code>claude</code> プロセスの PID と起動時刻。両方を突き合わせて、PID が再利用された死んだセッションを検出します。</td></tr>
+      <tr><td><code>created_at</code>・<code>updated_at</code>・<code>state_since</code></td><td>ISO 8601 string</td><td>ファイルの初回書き込み時刻、最終書き込み時刻、<code>state</code> が最後に変わった時刻。</td></tr>
+      <tr><td><code>active_subagent_ids</code>・<code>subagent_seen_ids</code></td><td>array of string</td><td>現在実行中のサブエージェントと、このセッションで観測した全サブエージェント。</td></tr>
+      <tr><td><code>main_stopped</code>・<code>main_waiting</code></td><td>bool</td><td>内部フラグ。メインエージェントが <code>Stop</code> を出したか、メインエージェントが入力待ちで止まっているか。</td></tr>
+      <tr><td><code>agent_input_pending_ids</code></td><td>array of string</td><td><code>agent_needs_input</code> を出してまだ回答されていないサブエージェント。</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    もう 1 つのファイル <code>~/.claude/agent-manager/stats/&lt;session_id&gt;.json</code> は <code>statusLine</code> の
+    パススルーが書きます。ステータス行の標準入力にある <code>context_window</code>・<code>rate_limits</code>・<code>model</code> を
+    そのまま持ち、<code>PreCompact</code> が発火したときはその印も持ちます。インストール前に設定していたステータス行のコマンドは
+    <code>~/.claude/agent-manager/statusline-original.json</code> に保存され、引き続き実行されます。
+  </p>
+
+  <div class="guide-cta">
+    <h2>スクリプトは書かず、状態だけ手に入れる</h2>
+    <p>
+      AgentManager は hook とステータス行のパススルーをインストールし、必要なイベントを登録して、
+      すべての Claude Code セッションをライブのボードに表示します。無料で使え、アカウント登録は不要です。
+    </p>
+    <div class="cta-row">
+      <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+         class="btn btn-primary" data-cta="ref_cta_download">↓ 無料ダウンロード</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="ref_cta_lp">機能を見る</a>
+    </div>
+    <div class="cta-note">macOS 13 以降 — 無料プランは同時に 2 セッションまで表示</div>
+  </div>
+
+  <nav class="related" aria-label="関連ページ">
+    <h2>関連</h2>
+    <ul>
+      <li><a href="/tools/ja/claude-code-hooks-builder.html">Claude Code hooks ビルダー — チェックリストから settings.json を生成</a></li>
+      <li><a href="claude-code-hooks-session-status.html">hook で Claude Code のセッション状態を追跡する</a></li>
+      <li><a href="claude-code-notifications-macos.html">macOS で Claude Code の通知を受け取る方法</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer>
+  <p>&copy; 2026 AgentManager</p>
+  <p style="margin-top:10px;">
+    <a href="/ja.html">ホーム</a>
+    &nbsp;·&nbsp;
+    <a href="/guides/ja/">ガイド</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy-ja.html">プライバシーポリシー</a>
+    &nbsp;·&nbsp;
+    <a href="/terms-ja.html">利用規約</a>
+    &nbsp;·&nbsp;
+    <a href="/legal.html">特定商取引法に基づく表記</a>
+  </p>
+</footer>
+
+<script>
+  // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
+  document.addEventListener('click', function(e) {
+    var cta = e.target.closest('[data-cta]');
+    if (!cta || typeof gtag !== 'function') return;
+    var loc = cta.getAttribute('data-cta');
+    gtag('event', 'cta_click', { cta_location: loc });
+    // キーイベント用の派生イベントを LP 側で判定して直接送る。
+    // 判定ルールは agent-manager/docs/spec/08-telemetry-sentry-ga4.md の登録一覧と対応。
+    var keyEvent = null;
+    if (/_download$/.test(loc)) keyEvent = 'lp_download_click';
+    else if (loc === 'hero_brew_copy') keyEvent = 'lp_brew_copy';
+    else if (/^pricing_/.test(loc) && loc.indexOf('free') === -1) keyEvent = 'lp_purchase_click';
+    if (keyEvent) gtag('event', keyEvent, { cta_location: loc });
+  });
+
+  (function() {
+    // LP (index.html) と同じ非Mac判定。iPhone の UA は「like Mac OS X」だが「Macintosh」を含まない。
+    // iPad はデスクトップモードで「Macintosh」を名乗るため maxTouchPoints で除外。
+    // 判定できない環境ではダウンロード可能のままにする（正規のMacユーザーを誤って弾かないため）。
+    var ua = navigator.userAgent || '';
+    var isMac = ua.indexOf('Macintosh') !== -1 && navigator.maxTouchPoints <= 1;
+    // どちらの CTA を出したかを 1 ページビューにつき 1 回送る（cta_click の分母。
+    // Tests/test_cta_variant_denominator.py が検査する）。
+    gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
+    if (isMac) return;
+    document.querySelectorAll('.hdr-cta, [data-cta="ref_cta_download"]').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }());
+</script>
+</body>
+</html>
