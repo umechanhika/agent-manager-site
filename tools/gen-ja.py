@@ -118,6 +118,9 @@ def main() -> None:
     logo = find_one(soup, "a", class_="logo")
     logo["href"] = "/ja.html"
 
+    nav_guides = find_one(soup, "a", id="nav-guides")
+    nav_guides["href"] = "/guides/ja/"
+
     # 日本語のみの要素（特商法リンク等）を表示状態に
     ja_only = soup.select(".ja-only")
     if not ja_only:
