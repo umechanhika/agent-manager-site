@@ -97,6 +97,9 @@
   <h1>Claude Code Hooks Builder</h1>
   <span class="article-meta">Free · no sign-up · runs in your browser, nothing is uploaded</span>
   <p class="article-lede">
+    A hook is a command Claude Code runs automatically at moments like “waiting for your approval” or
+    “finished responding”. Build the config here, copy it, and paste it into
+    <code>~/.claude/settings.json</code> — that is all it takes.
     Pick the events you care about, write one command, and copy a
     <code>settings.json</code> snippet that Claude Code accepts as-is. Every one of the
     33 hook events is here with its matcher values, plus the <code>statusLine</code> setting.
@@ -108,6 +111,7 @@
     <form class="tool-form" onsubmit="return false;">
       <h2 class="tool-h">Start from a preset</h2>
       <div class="presets" id="presets"></div>
+      <p class="preset-note">The “Track session status” and “Block destructive shell commands” presets point at scripts you write yourself. If you would rather not write the status script, <a href="/" data-cta="tool_preset_lp">AgentManager</a> installs the same hook for you and notifies you when a session is waiting.</p>
 
       <h2 class="tool-h">Save to</h2>
       <div class="targets" id="targets"></div>
@@ -146,8 +150,8 @@
       <div class="how-to">
         <ol>
           <li>Open <code class="how-path">~/.claude/settings.json</code> (create it if it doesn't exist).</li>
-          <li>If the file already has a <code>"hooks"</code> key, paste each event array inside it; otherwise paste the whole object.</li>
-          <li>Make the command executable: <code>chmod +x</code> your script. Hooks run with your user's permissions.</li>
+          <li>If the file already has a <code>"hooks"</code> key, add only the per-event arrays inside it (if an event name is already there, append to its array). Otherwise paste the whole object.</li>
+          <li>If the command is a script file, make it executable with <code>chmod +x</code>. Hooks run with your user's permissions.</li>
           <li>Run <code>/hooks</code> inside Claude Code to confirm it picked up the change.</li>
         </ol>
       </div>
@@ -181,10 +185,11 @@
   </div>
 
   <div class="guide-cta">
-    <h2>Don't want to write the status script?</h2>
+    <h2>Want to know when Claude is waiting — without writing the hook?</h2>
     <p>
-      AgentManager installs a ready-made hook, registers these events for you, and turns them into a
-      live status board for every Claude Code session — free to use, no account required.
+      AgentManager sets up the same thing as the “Notify me” and “Track session status” presets above,
+      automatically. It lists the status of every Claude Code session and notifies you the moment one is
+      waiting for you. Free to use, no account required.
     </p>
     <div class="cta-row">
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"

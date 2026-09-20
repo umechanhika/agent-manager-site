@@ -100,28 +100,28 @@
   <h2>セッションを並行実行する</h2>
   <ul class="related">
     <li>
-      <a href="claude-code-git-worktrees.html">git worktree で Claude Code を並行実行する</a>
-      <p>1 クローン・1 ブランチ 1 worktree で衝突ゼロ。実際に使っている構成をそのまま紹介。</p>
+      <a href="claude-code-git-worktrees.html">git worktree で Claude Code を並列で走らせる方法</a>
+      <p>2 つのセッションが同じファイルを触って壊す事故を、git の標準機能だけで防ぐ手順。実際に使っている構成をそのまま紹介。</p>
     </li>
     <li>
-      <a href="manage-multiple-claude-code-sessions.html">複数の Claude Code セッションを見失わずに管理する方法</a>
+      <a href="manage-multiple-claude-code-sessions.html">Claude Code の複数セッションを見失わずに管理する方法</a>
       <p>worktree・tmux・ターミナルレイアウトを比較し、対応が必要なセッションを即座に見分ける方法。</p>
     </li>
     <li>
-      <a href="claude-code-tmux-workflow.html">Claude Code の実践的な tmux ワークフロー</a>
-      <p>セッションごとに名前付きウィンドウを分け、SSH 切断を乗り越える運用。</p>
+      <a href="claude-code-tmux-workflow.html">Claude Code のための実践 tmux ワークフロー</a>
+      <p>セッションごとに名前付きウィンドウを分け、SSH が切れても作業を失わない運用。</p>
     </li>
   </ul>
 
   <h2>対応が必要な瞬間を見逃さない</h2>
   <ul class="related">
     <li>
-      <a href="claude-code-notifications-macos.html">macOS で Claude Code の通知を受け取る方法</a>
+      <a href="claude-code-notifications-macos.html">Claude Code の完了・確認待ちに気づく — macOS 通知設定ガイド</a>
       <p>ターミナル通知・ベル音・hook 経由の通知まで、コピペで使える設定をまとめて紹介。</p>
     </li>
     <li>
-      <a href="claude-code-hooks-session-status.html">hook で Claude Code のセッション状態を追跡する</a>
-      <p>hook イベントから waiting / running / done の状態を組み立てる方法とその落とし穴。</p>
+      <a href="claude-code-hooks-session-status.html">Claude Code hooks でセッション状態を追跡する</a>
+      <p>どのセッションが止まっているかをスクリプトで判定する方法と、素朴な実装が誤表示する 4 つの落とし穴。</p>
     </li>
   </ul>
 
@@ -138,7 +138,7 @@
   </ul>
 
   <div class="guide-cta">
-    <h2>セッションごとに 1 つのランプ</h2>
+    <h2>確認待ちをもう見逃さない</h2>
     <p>
       AgentManager は実行中の Claude Code セッションを 1 つのフローティングウィンドウにまとめ、
       対応が必要なセッションを一目で示します。無料・アカウント登録不要。
@@ -146,7 +146,7 @@
     <div class="cta-row">
       <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
          class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
-      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">機能を見る</a>
+      <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る</a>
     </div>
     <div class="cta-note">macOS 13+ — 無料プランは同時に最大 2 セッションまで表示</div>
   </div>

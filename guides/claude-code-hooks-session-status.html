@@ -94,6 +94,7 @@
   <h1>Tracking Claude Code Session Status with Hooks</h1>
   <span class="article-meta">Updated August 26, 2026</span>
   <p class="article-lede">
+    By the end of this guide you will be able to tell, automatically, which of your Claude Code sessions is waiting for your reply right now.
     Claude Code's hooks are usually pitched for policy — block this tool, lint that edit.
     But they're also the only public API that tells you <em>what a session is doing</em>:
     running, finished, or blocked on a question. This guide shows how to turn hook events
@@ -155,25 +156,9 @@
   <p>
     One script, registered for a handful of events, writing one small JSON file per
     <code>session_id</code> — then anything (a status bar widget, a tmux segment, a dashboard)
-    can render the directory. In <code>~/.claude/settings.json</code>:
+    can render the directory.
   </p>
-  <pre><code>{
-  "hooks": {
-    "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh running" } ] }
-    ],
-    "Notification": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh waiting" } ] }
-    ],
-    "Stop": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh done" } ] }
-    ],
-    "SessionEnd": [
-      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh ended" } ] }
-    ]
-  }
-}</code></pre>
-  <p>And <code>~/.claude/track-status.sh</code> (needs <a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a>; make it executable with <code>chmod +x</code>):</p>
+  <p>First, <code>~/.claude/track-status.sh</code> (needs <a href="https://jqlang.org/" target="_blank" rel="noopener">jq</a> — install it with <code>brew install jq</code> if you don't have it; make it executable with <code>chmod +x</code>):</p>
   <pre><code>#!/bin/bash
 # Reads the hook payload on stdin, keeps one status file per session.
 STATE="$1"
@@ -192,6 +177,34 @@ else
     '{state: $state, cwd: $cwd, updated: now | todate}' \
     &gt; "$DIR/$SESSION_ID.json.tmp" &amp;&amp; mv "$DIR/$SESSION_ID.json.tmp" "$DIR/$SESSION_ID.json"
 fi</code></pre>
+  <p>Then register it in <code>~/.claude/settings.json</code>:</p>
+  <pre><code>{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh running" } ] }
+    ],
+    "Notification": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh waiting" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh done" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "$HOME/.claude/track-status.sh ended" } ] }
+    ]
+  }
+}</code></pre>
+  <p>
+    If <code>settings.json</code> already has entries such as <code>permissions</code>, add a comma after
+    the closing brace of the last entry and put <code>hooks</code> at the same level. For example:
+  </p>
+  <pre><code>{
+  "permissions": { "allow": ["Bash(npm test)"] },
+  "hooks": {
+    "UserPromptSubmit": [ /* the block above goes here */ ]
+  }
+}</code></pre>
+  <p>If you are unsure about the shape, the <a href="/tools/claude-code-hooks-builder.html">hooks builder</a> generates exactly this from a list of ticked events.</p>
   <p>
     Now <code>cat ~/.claude/session-status/*.json</code> shows the live state of every session.
     Two design notes baked in above: files are keyed by <code>session_id</code>, not working

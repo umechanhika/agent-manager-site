@@ -188,6 +188,17 @@ chmod +x ~/.claude/scripts/notify-waiting.sh ~/.claude/scripts/notify-done.sh</c
   }
 }</code></pre>
   <p>
+    If <code>settings.json</code> already has entries such as <code>permissions</code>, add a comma after
+    the closing brace of the last entry and put <code>hooks</code> at the same level. For example:
+  </p>
+  <pre><code>{
+  "permissions": { "allow": ["Bash(npm test)"] },
+  "hooks": {
+    "Notification": [ /* the block above goes here */ ]
+  }
+}</code></pre>
+  <p>If you are unsure about the shape, the <a href="/tools/claude-code-hooks-builder.html">hooks builder</a> generates exactly this from a list of ticked events.</p>
+  <p>
     Start a new Claude Code session (hooks are read at startup), ask for something that runs a
     tool you haven't allowlisted, and leave the permission dialog unanswered for a few seconds —
     a notification should appear.

@@ -36,7 +36,7 @@ const cases = JSON.parse(process.argv[2]);
 const out = {};
 for (const [key, spec] of Object.entries(cases)) {
   try { out[key] = { ok: HB.buildSettings(spec) }; }
-  catch (e) { out[key] = { error: e.message }; }
+  catch (e) { out[key] = { error: e.message, code: e.code }; }
 }
 out.__catalog = HB.HOOK_EVENTS.map(e => ({ name: e.name, matcher: !!e.matcher, group: e.group }));
 out.__presets = HB.PRESETS.map(p => p.id);
@@ -148,6 +148,22 @@ class TestBuildSettings(unittest.TestCase):
         self.assertIn("timeout", self.error("timeout_zero"))
         self.assertIn("timeout", self.error("timeout_float"))
         self.assertIn("statusLine command", self.error("statusline_empty"))
+
+    def test_user_reachable_errors_carry_localisable_codes(self):
+        # UI 側（hooks-builder-ui.js）が err.code で翻訳を引くため、利用者が到達しうる 4 種にだけコードを付ける。
+        self.error("no_events")
+        self.assertEqual(self.result["no_events"]["code"], "no_events")
+        self.error("empty_command")
+        self.assertEqual(self.result["empty_command"]["code"], "command_required")
+        self.error("statusline_empty")
+        self.assertEqual(self.result["statusline_empty"]["code"], "statusline_command_required")
+        self.error("timeout_zero")
+        self.assertEqual(self.result["timeout_zero"]["code"], "timeout_invalid")
+        self.error("timeout_float")
+        self.assertEqual(self.result["timeout_float"]["code"], "timeout_invalid")
+        # プログラミングエラー（不正なイベント名）にはコードを付けない（JSON.stringify で undefined は落ちる）。
+        self.error("unknown_event")
+        self.assertNotIn("code", self.result["unknown_event"])
 
 
 @unittest.skipIf(NODE is None, "node が無い環境では実行できない")

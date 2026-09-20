@@ -188,6 +188,17 @@ chmod +x ~/.claude/scripts/notify-waiting.sh ~/.claude/scripts/notify-done.sh</c
   }
 }</code></pre>
   <p>
+    既に <code>settings.json</code> に <code>permissions</code> などの項目がある場合は、その閉じ波括弧の後にカンマを足し、
+    同じ階層に <code>hooks</code> を並べます。例:
+  </p>
+  <pre><code>{
+  "permissions": { "allow": ["Bash(npm test)"] },
+  "hooks": {
+    "Notification": [ /* ここに上の内容 */ ]
+  }
+}</code></pre>
+  <p>貼る形に迷うなら、<a href="/tools/ja/claude-code-hooks-builder.html">hooks ビルダー</a>でイベントを選ぶだけで同じ形を生成できます。</p>
+  <p>
     新しい Claude Code セッションを起動し（hooks は起動時に読み込まれます）、許可リストに
     入れていないツールを使うタスクを頼んで、許可ダイアログを数秒放置してみてください。
     通知が出れば成功です。
@@ -260,7 +271,7 @@ osascript -e "display notification \"${msg//\"/\\\"}\" with title \"Claude Code\
          class="btn btn-primary" data-cta="guide_cta_download">↓ 無料ダウンロード</a>
       <a href="/ja.html" class="btn btn-ghost" data-cta="guide_cta_lp">詳しく見る</a>
     </div>
-    <div class="cta-note">macOS 13+ — フリープランは同時表示 2 セッションまで</div>
+    <div class="cta-note">macOS 13+ — 無料プランは同時表示 2 セッションまで</div>
   </div>
 
   <nav class="related" aria-label="関連ガイド">

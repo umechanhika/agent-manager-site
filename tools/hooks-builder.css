@@ -20,6 +20,7 @@
 
 /* Presets */
 .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.preset-note { font-size: 13px; line-height: 1.55; color: var(--muted); margin: 6px 0 4px; }
 .preset {
   font: 600 13px var(--sans); color: var(--text);
   background: var(--surf); border: 1px solid var(--border-2); border-radius: 8px;
