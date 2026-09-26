@@ -870,10 +870,19 @@
 <code class="brew-cmd" id="brew-cmd">brew install --cask umechanhika/tap/agent-manager</code>
 <button class="brew-copy" data-cta="hero_brew_copy" data-en="⧉ Copy" data-ja="⧉ コピー" id="brew-copy" type="button">⧉ コピー</button>
 </div>
+<!-- 非 Mac 訪問者向けの代替導線。ダウンロードボタンは出さない（macOS 専用アプリのため）。
+             「自分にメール」を btn-primary にしているのは、非 Mac 訪問者が LP 訪問の多数派
+             （2026-08-27〜09-25 の cta_variant_shown は nonmac 46 / mac 29）なのに、この 2 つの
+             代替導線のクリックが同期間で 0 件だったため。Mac 訪問者は同期間に hero_download 2 件 +
+             hero_brew_copy 4 件（29 インプレッションに対し約 21%）クリックしている。
+             同じ強さのボタンを 2 つ並べると主要な行動が決まらないので、リンクを実際に Mac へ
+             渡せる「メール」を 1 つだけ primary にし、「コピー」は副導線のまま残す。
+             data-cta の値は変えない（GA4 のキーイベント判定ルールと cta_location の登録一覧を
+             壊さないため。agent-manager/docs/spec/08-telemetry-sentry-ga4.md）。 -->
 <div class="nonmac-cta hidden" id="nonmac-cta">
 <span class="macos-note" data-en="Available on macOS — save the link and open it on your Mac" data-ja="macOS専用アプリです — リンクを保存して、あとでMacから開いてください">macOS専用アプリです — リンクを保存して、あとでMacから開いてください</span>
 <div class="nonmac-actions">
-<button class="btn btn-ghost" data-cta="nonmac_email" data-en="✉ Email me the link" data-ja="✉ リンクを自分にメール" id="nonmac-email" type="button">✉ リンクを自分にメール</button>
+<button class="btn btn-primary" data-cta="nonmac_email" data-en="✉ Email me the link" data-ja="✉ リンクを自分にメール" id="nonmac-email" type="button">✉ リンクを自分にメール</button>
 <button class="btn btn-ghost" data-cta="nonmac_copy" data-en="⧉ Copy the link" data-ja="⧉ リンクをコピー" id="nonmac-copy" type="button">⧉ リンクをコピー</button>
 </div>
 </div>

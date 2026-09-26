@@ -892,12 +892,21 @@
           <button type="button" id="brew-copy" class="brew-copy" data-cta="hero_brew_copy"
                   data-en="⧉ Copy" data-ja="⧉ コピー">⧉ Copy</button>
         </div>
+        <!-- 非 Mac 訪問者向けの代替導線。ダウンロードボタンは出さない（macOS 専用アプリのため）。
+             「自分にメール」を btn-primary にしているのは、非 Mac 訪問者が LP 訪問の多数派
+             （2026-08-27〜09-25 の cta_variant_shown は nonmac 46 / mac 29）なのに、この 2 つの
+             代替導線のクリックが同期間で 0 件だったため。Mac 訪問者は同期間に hero_download 2 件 +
+             hero_brew_copy 4 件（29 インプレッションに対し約 21%）クリックしている。
+             同じ強さのボタンを 2 つ並べると主要な行動が決まらないので、リンクを実際に Mac へ
+             渡せる「メール」を 1 つだけ primary にし、「コピー」は副導線のまま残す。
+             data-cta の値は変えない（GA4 のキーイベント判定ルールと cta_location の登録一覧を
+             壊さないため。agent-manager/docs/spec/08-telemetry-sentry-ga4.md）。 -->
         <div id="nonmac-cta" class="nonmac-cta hidden">
           <span class="macos-note"
                 data-en="Available on macOS — save the link and open it on your Mac"
                 data-ja="macOS専用アプリです — リンクを保存して、あとでMacから開いてください">Available on macOS — save the link and open it on your Mac</span>
           <div class="nonmac-actions">
-            <button type="button" id="nonmac-email" class="btn btn-ghost" data-cta="nonmac_email"
+            <button type="button" id="nonmac-email" class="btn btn-primary" data-cta="nonmac_email"
                     data-en="✉ Email me the link" data-ja="✉ リンクを自分にメール">✉ Email me the link</button>
             <button type="button" id="nonmac-copy" class="btn btn-ghost" data-cta="nonmac_copy"
                     data-en="⧉ Copy the link" data-ja="⧉ リンクをコピー">⧉ Copy the link</button>
