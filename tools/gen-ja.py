@@ -100,13 +100,33 @@ def main() -> None:
     }.items():
         find_one(soup, "meta", attrs={"name": name})["content"] = value
 
-    # JSON-LD の説明文を日本語化
+    # JSON-LD の説明文を日本語化。
+    # @graph の Organization はブランドの実体そのもので言語に依存しないため、@id も url も
+    # 英語版と同一のまま残す（両ページが同じ @id を指すことで検索エンジン側で 1 つの実体に
+    # まとまる）。ページに紐づく WebSite / SoftwareApplication だけを日本語版に差し替え、
+    # @id もページ単位にずらす（同じ @id で url だけ違うノードが 2 つあると矛盾するため）。
     ld = find_one(soup, "script", type="application/ld+json")
     data = json.loads(ld.string)
-    data["description"] = DESCRIPTION
-    data["url"] = JA_URL
-    data["image"] = OG_IMAGE
-    data["inLanguage"] = "ja"
+    graph = data.get("@graph")
+    if not isinstance(graph, list):
+        die("JSON-LD に @graph 配列が無い — index.html の構造化データが変わった?")
+    nodes = {node.get("@type"): node for node in graph}
+    for required in ("Organization", "WebSite", "SoftwareApplication"):
+        if required not in nodes:
+            die(f"JSON-LD の @graph に {required} ノードが無い")
+
+    website = nodes["WebSite"]
+    website["@id"] = f"{JA_URL}#website"
+    website["url"] = JA_URL
+    website["inLanguage"] = "ja"
+
+    app = nodes["SoftwareApplication"]
+    app["@id"] = f"{JA_URL}#software"
+    app["description"] = DESCRIPTION
+    app["url"] = JA_URL
+    app["image"] = OG_IMAGE
+    app["inLanguage"] = "ja"
+
     ld.string = json.dumps(data, ensure_ascii=False, indent=2)
 
     # 言語トグルの active 状態を JA 側へ
