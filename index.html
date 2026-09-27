@@ -1582,8 +1582,8 @@
   //
   // GA4 (video engagement — the built-in video measurement only covers YouTube embeds):
   //   video_start     first time playback actually runs (once per page view)
-  //   video_progress  playback crosses 25 / 50 / 75 / 100 % (each once per page view; only when reached by
-  //                   playing, not by seeking past it, so a jump to 80 % does not fire 25/50/75)
+  //   video_progress  playback crosses 5 / 10 / 25 / 50 / 75 / 100 % (each once per page view; only when
+  //                   reached by playing, not by seeking past it, so a jump to 80 % does not fire 25/50/75)
   //   video_pause     the viewer paused it (click / Space), with video_percent at that moment
   //   video_seek      one seek operation (drag end or arrow key), with the video_percent landed on
   // All carry video_id = hero_intro. The production-host gate above (ga-disable) applies as usual.
@@ -1609,7 +1609,13 @@
       }
       if (t - lastT < 1) {                            // continuous playback, not a seek jump
         var from = lastT / v.duration * 100, to = t / v.duration * 100;
-        [25, 50, 75, 100].forEach(function(m) {
+        // 5 / 10 は冒頭の離脱を測るための観測点（50 秒の動画で 2.5 秒 / 5 秒）。25% = 12.5 秒が
+        // 最初の観測点だった間、過去 30 日で video_start 39 セッションのうち 25% 到達が 18 しかなく、
+        // 離脱の 54% が計測の死角である 0〜12.5 秒で起きていた。値は
+        // agent-manager/scripts/ga4-daily-report.py の VIDEO_MILESTONES と一対一で対応する。
+        // **ここに値を足すときは、先にあちらを更新してマージすること**（未知の値が届くと
+        // summarize_hero_video が例外を投げ、日次レポートがスクリプトごと落ちる）。
+        [5, 10, 25, 50, 75, 100].forEach(function(m) {
           var line = m === 100 ? 99 : m;              // the loop restarts before hitting exactly 100 %
           if (!sent['p' + m] && from < line && to >= line) { sent['p' + m] = true; track('video_progress', { video_percent: m }); }
         });
