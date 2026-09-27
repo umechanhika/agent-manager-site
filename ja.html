@@ -798,38 +798,72 @@
     gtag('config', 'G-W72BR4X8Y6');
   </script>
 <!-- Structured data for search engines -->
+<!-- 検索エンジンにブランド「AgentManager」と agentmgr.app を同じ実体として結び付けるため、
+       SoftwareApplication だけでなく Organization / WebSite も宣言し、publisher で相互に参照する。
+       sameAs に並べるのは、このサイト上に実在する公式プロフィールだけ（Product Hunt の
+       製品ページ・リリースを配布している GitHub リポジトリ）。存在しないアカウントを
+       書き足すと誤った実体に結び付くため増やさない。 -->
 <script type="application/ld+json">{
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "AgentManager",
-  "url": "https://agentmgr.app/ja.html",
-  "description": "全 Claude Code セッションを監視する macOS 用フローティングウィンドウ。確認が必要な瞬間に自動で現れ、見逃しを防ぎます。無料で使えます。",
-  "image": "https://agentmgr.app/og-image-ja.png",
-  "screenshot": "https://agentmgr.app/screenshot-simple.png",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "macOS 13.0 or later",
-  "downloadUrl": "https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg",
-  "offers": [
+  "@graph": [
     {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD",
-      "description": "Free plan — every feature, up to 2 sessions shown at once"
+      "@type": "Organization",
+      "@id": "https://agentmgr.app/#organization",
+      "name": "AgentManager",
+      "url": "https://agentmgr.app/",
+      "logo": "https://agentmgr.app/icon-512.png",
+      "sameAs": [
+        "https://github.com/umechanhika/agent-manager-site",
+        "https://www.producthunt.com/products/agentmanager"
+      ]
     },
     {
-      "@type": "Offer",
-      "price": "4.99",
-      "priceCurrency": "USD",
-      "description": "Pro plan (monthly) — unlimited sessions shown"
+      "@type": "WebSite",
+      "@id": "https://agentmgr.app/ja.html#website",
+      "name": "AgentManager",
+      "url": "https://agentmgr.app/ja.html",
+      "inLanguage": "ja",
+      "publisher": {
+        "@id": "https://agentmgr.app/#organization"
+      }
     },
     {
-      "@type": "Offer",
-      "price": "48",
-      "priceCurrency": "USD",
-      "description": "Pro plan (annual) — unlimited sessions shown"
+      "@type": "SoftwareApplication",
+      "@id": "https://agentmgr.app/ja.html#software",
+      "name": "AgentManager",
+      "url": "https://agentmgr.app/ja.html",
+      "description": "全 Claude Code セッションを監視する macOS 用フローティングウィンドウ。確認が必要な瞬間に自動で現れ、見逃しを防ぎます。無料で使えます。",
+      "image": "https://agentmgr.app/og-image-ja.png",
+      "screenshot": "https://agentmgr.app/screenshot-simple.png",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS 13.0 or later",
+      "inLanguage": "ja",
+      "publisher": {
+        "@id": "https://agentmgr.app/#organization"
+      },
+      "downloadUrl": "https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg",
+      "offers": [
+        {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Free plan — every feature, up to 2 sessions shown at once"
+        },
+        {
+          "@type": "Offer",
+          "price": "4.99",
+          "priceCurrency": "USD",
+          "description": "Pro plan (monthly) — unlimited sessions shown"
+        },
+        {
+          "@type": "Offer",
+          "price": "48",
+          "priceCurrency": "USD",
+          "description": "Pro plan (annual) — unlimited sessions shown"
+        }
+      ]
     }
-  ],
-  "inLanguage": "ja"
+  ]
 }</script>
 <script defer="" src="/utm.js"></script>
 </head>
