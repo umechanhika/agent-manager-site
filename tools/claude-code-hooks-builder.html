@@ -47,6 +47,8 @@
   <script>
     if (location.hostname !== 'agentmgr.app') window['ga-disable-G-W72BR4X8Y6'] = true;
   </script>
+  <!-- 自己参照 utm の除去。gtag.js より前に async / defer 無しで実行する（utm-strip.js 冒頭参照） -->
+  <script src="/utm-strip.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-W72BR4X8Y6"></script>
   <script>
     window.dataLayer = window.dataLayer || [];

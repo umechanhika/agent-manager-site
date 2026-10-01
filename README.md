@@ -32,9 +32,9 @@ python3 -m unittest discover -s Tests -p 'test_*.py'
 CI（`.github/workflows/ci.yml`）が main への push と pull request で、上記の ja.html 検査と
 あわせて実行する。
 
-`Tests/test_utm_self_referral_strip.py` は `utm.js` 本体を Node で実行して検査するため Node が
+`Tests/test_utm_self_referral_strip.py` は `utm-strip.js` / `utm.js` 本体を Node で実行して検査するため Node が
 必要（CI の ubuntu-latest にはプリインストール済み）。ロジックを Python 側へ写して検査すると
-写したコピーを検査するだけになり、`utm.js` の退行を捕まえられないため実物を動かしている。
+写したコピーを検査するだけになり、本体の退行を捕まえられないため実物を動かしている。
 
 ## 計測（GA4）の適用範囲
 
@@ -55,7 +55,7 @@ GA4 タグを持つ全ページは、`location.hostname` が本番ホスト `age
 ガードを持たないページをローカル配信すると、その page_view や CTA クリックがそのまま本番
 プロパティに入る。
 
-## 流入元の UTM（utm.js）
+## 流入元の UTM（utm.js / utm-strip.js）
 
 `utm.js` は全ページに読み込まれ、LP → アプリのチャネルアトリビューションを運ぶ。
 
@@ -65,10 +65,14 @@ GA4 タグを持つ全ページは、`location.hostname` が本番ホスト `age
 - **ページ URL 自体には合成デフォルトを書き足さない。** 書き込むと、リモート取得の gtag.js
   （async）が到着して `page_view` を組み立てる時点では既に URL が書き換わっており、直接流入・
   オーガニック検索・SNS 参照がすべて「`agentmgr.app` / `website`」という偽の流入元として
-  記録される（同一オリジンの defer スクリプトである `utm.js` の方が先に走るため、この順序が常態）。
+  記録される（同一オリジンの defer スクリプトである `utm.js` の方が先に走ることが多い。
+  gtag.js が先に走った場合も、拡張計測が書き換えを履歴変更として拾い page_view を二重に送る）。
 - 逆向きに、**合成デフォルトの署名で着弾した URL からはその utm を除去する。** 判定は
   `utm_source` が自ホスト **かつ** `utm_medium` が `website` の AND で、除去するのは
   合成デフォルトが書いていた 3 キーだけ。`ref=` 等の非 utm パラメータ・ハッシュ・パス名は残す。
+- この除去は `utm.js` ではなく **`utm-strip.js`** が行う。`utm.js` を読む全ページは
+  `<script src="/utm-strip.js"></script>` を **async / defer 無しで、gtag.js の読み込みタグより前**
+  に置く。`utm.js`（defer）はページ URL を一切書き換えない。
 
 最後の除去が必要な理由: 2026-08-28〜08-30 の不具合期間はページ URL への書き込みを行っていた。
 書き込みは廃止したが、その期間に検索エンジンが索引した URL・ブックマーク・共有リンクは外部に
@@ -78,6 +82,17 @@ GA4 タグを持つ全ページは、`location.hostname` が本番ホスト `age
 リスト」は referrer ベースの判定で utm 由来の誤分類には効かないため、着弾時に URL 側を
 直すのが唯一の対処になる。
 
-このルールは `Tests/test_utm_self_referral_strip.py` が検査する。アプリ側の対応する仕様は
+除去を同期スクリプトに分けた理由: 当初は除去を `utm.js`（defer）の中で行い、「defer は async の
+gtag.js より先に走る」前提に頼っていた。しかし async スクリプトは取得が終わった時点で HTML の
+解析途中でも実行されるため、この順序は保証されない。GA4 実測では修正の 9 日後の 2026-09-30 に、
+referrer = google.com の新規セッションが再び `agentmgr.app` / `website`（campaign `/`）に
+計上され、同じ分のうちに汚染 URL を referrer とする 2 本目の `page_view` が記録された
+（gtag.js が汚染 URL のまま `page_view` を送った後に除去の `replaceState` が走り、拡張計測が
+それを履歴変更として拾った）。同期スクリプトならパーサーは実行が終わるまで後続の gtag.js
+読み込みタグに到達しないため、除去が常に先に終わる。
+
+このルールは `Tests/test_utm_self_referral_strip.py` が検査する（除去の挙動に加え、`utm.js` を
+読む全ページで `utm-strip.js` が同期・gtag.js より前に置かれていること、`utm.js` 単体が
+ページ URL を書き換えないこと）。アプリ側の対応する仕様は
 agent-manager の `docs/spec/08-telemetry-sentry-ga4.md`「新規ユーザー計測とチャネル
 アトリビューション（app_first_open / UTM）」にある。
