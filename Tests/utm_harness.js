@@ -1,18 +1,20 @@
-// Tests/test_utm_self_referral_strip.py から呼ばれる utm.js の実行ハーネス。
+// Tests/test_utm_self_referral_strip.py から呼ばれる utm-strip.js / utm.js の実行ハーネス。
 //
-// utm.js をそのまま（コピーせず）読み込み、location / history / document を差し替えた
+// スクリプトをそのまま（コピーせず）読み込み、location / history / document を差し替えた
 // コンテキストで実行して、結果を JSON で標準出力に出す。ロジックを Python 側へ写して
-// 検査すると「写したコピー」を検査するだけになり、utm.js 本体の退行を捕まえられない。
+// 検査すると「写したコピー」を検査するだけになり、本体の退行を捕まえられない。
 //
-// 引数: <utm.js のパス> <入力 JSON>
+// 引数: <スクリプトのパス>... <入力 JSON>
+//   スクリプトは渡した順に同じコンテキストで実行する（実ページの読み込み順を再現する。
+//   utm-strip.js → utm.js の順で渡せば、除去後の URL を utm.js が読む）。
 //   入力 JSON: { hostname, path（?query#hash を含む）, links（a.href の配列） }
 //   出力 JSON: { replaced（history.replaceState に渡された URL の配列）,
 //                finalSearch, finalPath, links（書き換え後の href）, selectors }
 const fs = require('fs');
 const vm = require('vm');
 
-const src = fs.readFileSync(process.argv[2], 'utf8');
-const input = JSON.parse(process.argv[3]);
+const scriptPaths = process.argv.slice(2, -1);
+const input = JSON.parse(process.argv[process.argv.length - 1]);
 
 const origin = 'https://' + input.hostname;
 const current = new URL(origin + input.path);
@@ -49,7 +51,8 @@ const document = {
   },
 };
 
-vm.runInNewContext(src, { location, history, document, URL, URLSearchParams, console });
+const context = vm.createContext({ location, history, document, URL, URLSearchParams, console });
+scriptPaths.forEach(function (p) { vm.runInContext(fs.readFileSync(p, 'utf8'), context); });
 
 process.stdout.write(JSON.stringify({
   replaced: replaced,

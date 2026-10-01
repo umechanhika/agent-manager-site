@@ -10,45 +10,23 @@
 // - 流入 URL に utm_* があればそのまま維持・引き継ぐ（キャンペーンリンク → アプリまで貫通）。
 //   この場合ページ URL には最初から utm_* が載っているため、書き換えは不要。
 // - 無ければサイト自身を示すデフォルトを「ダウンロードリンクにのみ」付与する。
-// - 過去に出回った自己参照 utm 付き URL で着弾した場合は、その utm をページ URL から除去する。
+// - 過去に出回った自己参照 utm 付き URL の除去は utm-strip.js が担う（gtag.js より前に
+//   同期実行する必要があるため、defer の本ファイルとは分けている）。
 //
 // ページ URL に合成デフォルトを書き足してはいけない。合成した値を history.replaceState で
 // 現在の URL に書き込むと、リモート取得の gtag.js（async）が到着して page_view を組み立てる
 // 時点では既に書き換え後の URL になっており、GA4 が直接流入・オーガニック検索・SNS 参照を
 // すべて「agentmgr.app / website」という偽の流入元として記録してしまう（同一オリジンの
-// defer スクリプトである本ファイルの方が先に走るため、この順序が常態になる）。
+// defer スクリプトである本ファイルの方が先に走ることが多い。async の gtag.js が先に走った
+// 場合も、拡張計測が replaceState を履歴変更として拾い page_view を二重に送る）。
 // 流入 utm の無いダウンロードは、アプリ側が kMDItemWhereFroms のページ URL のホストを
 // source、"referral" を medium とするフォールバックで LP 経由と判別する。
 (function () {
   var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 
-  // 過去に出回った「自己参照 utm 付き URL」からの流入を正しい流入元に戻す。
-  //
-  // 2026-08-28〜08-30 の不具合期間、上記の合成デフォルト（source = ホスト名 /
-  // medium = website / campaign = パス名）をページ URL 自体へ書き込んでいた。書き込みは
-  // c9cbd08 で廃止したが、その期間に検索エンジンが索引した URL・ブックマーク・共有リンクは
-  // 外部に残り続けるため、そこからの流入は今も自己参照として誤分類される。実測: 2026-09-14 に
-  // 2 セッション・09-21 に 1 セッションが referrer = google.com（オーガニック検索）なのに
-  // GA4 では agentmgr.app / website に計上された（修正の 15 日後・22 日後）。
-  // GA4 の「除外する参照のリスト」は referrer ベースの判定で utm 由来の誤分類には効かないため、
-  // 着弾時に URL 側を直すのが唯一の対処になる。除去は gtag.js 本体が到着して page_view を
-  // 組み立てる前に完了する（汚染が成立したのと同じ「defer が async より先」の順序を使う）。
-  //
-  // 除去するのは合成デフォルトが書いていた 3 キーだけ、かつ「utm_source が自ホスト」と
-  // 「utm_medium が website」が**両方**成立した場合に限る。本物のキャンペーンが自サイトの
-  // ホスト名を utm_source に使うことは無いため、正規の utm を取り違えて壊さない。
-  // ref= のような utm 以外のパラメータはそのまま残す。
-  var SYNTHESIZED_KEYS = ['utm_source', 'utm_medium', 'utm_campaign'];
-  var arriving = new URLSearchParams(location.search);
-  if (arriving.get('utm_source') === location.hostname
-      && arriving.get('utm_medium') === 'website') {
-    SYNTHESIZED_KEYS.forEach(function (key) { arriving.delete(key); });
-    var rest = arriving.toString();
-    history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
-  }
-
-  // 除去後の URL を読む。自己参照 utm だけが載っていた URL はここで「utm 無し」になり、
-  // 通常の直接訪問と同じ扱い（ダウンロードリンクにのみ合成デフォルトを付与）に合流する。
+  // 自己参照 utm 付き URL の除去は utm-strip.js が gtag.js より前に済ませている。
+  // そこで「utm 無し」になった URL は、通常の直接訪問と同じ扱い（ダウンロードリンクにのみ
+  // 合成デフォルトを付与）に合流する。
   var incoming = new URLSearchParams(location.search);
   var utm = {};
   var hasIncoming = false;

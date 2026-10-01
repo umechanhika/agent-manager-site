@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""utm.js が「自己参照 utm 付き URL」からの流入を正しい流入元に戻すことを検査する。
+"""utm-strip.js / utm.js が「自己参照 utm 付き URL」からの流入を正しい流入元に戻すことを検査する。
 
     python3 Tests/test_utm_self_referral_strip.py
 
@@ -14,6 +14,14 @@ GA4 実測では 2026-09-14 に 2 セッション・09-21 に 1 セッション�
 GA4 の「除外する参照のリスト」は referrer ベースの判定のため utm 由来の誤分類には効かず、
 着弾時に URL 側を直すのが唯一の対処になる。
 
+追記（2026-10-01 の日次分析で検出）: 当初は除去を utm.js（defer）の中で行い、「defer は
+async の gtag.js より先に走る」前提に頼っていた。しかし async は取得が終わった時点で HTML の
+解析途中でも実行されるため、この順序は保証されない。修正の 9 日後の 2026-09-30 に、
+referrer = google.com の新規セッションが再び agentmgr.app / website / campaign "/" に
+計上され、同じ分のうちに汚染 URL を referrer とする 2 本目の page_view（遅れて走った
+replaceState を拡張計測が履歴変更として拾ったもの）が記録された。そこで除去を
+utm-strip.js に分け、gtag.js の読み込みタグより前に同期実行する。
+
 検査する不変条件:
 
 1. 合成デフォルトの署名（utm_source = 自ホスト **かつ** utm_medium = website）で着弾したら、
@@ -22,18 +30,24 @@ GA4 の「除外する参照のリスト」は referrer ベースの判定のた
 3. 本物のキャンペーン utm は書き換えない（署名が片方しか一致しない場合も書き換えない）
 4. 合成デフォルトのダウンロードリンクへの付与は従来どおり維持される（除去後の URL は
    「utm 無しの直接訪問」と同じ扱いに合流する）
+5. utm.js を読む全ページが utm-strip.js を async / defer 無しで、gtag.js の読み込みタグ
+   **より前** に読み込む（後ろや非同期だと gtag.js が汚染 URL のまま page_view を組み立てる）
+6. 除去は utm-strip.js だけが行い、defer の utm.js はページ URL を書き換えない
+   （遅れて replaceState すると、拡張計測がそれを拾い page_view を二重に送る）
 
-ロジックは Python に写さず、Node で utm.js 本体を実行して検査する（写すと「コピー」を
+ロジックは Python に写さず、Node で utm-strip.js / utm.js 本体を実ページと同じ順に実行して検査する（写すと「コピー」を
 検査するだけになり、utm.js の退行を捕まえられない）。Node は CI の ubuntu-latest に
 プリインストールされている。見つからない場合は黙って飛ばさずエラーにする。
 """
 import json
+import re
 import shutil
 import subprocess
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+UTM_STRIP_JS = ROOT / "utm-strip.js"
 UTM_JS = ROOT / "utm.js"
 HARNESS = Path(__file__).resolve().parent / "utm_harness.js"
 
@@ -53,11 +67,12 @@ def node():
     return exe
 
 
-def run_utm(path, links=(DMG,), hostname=HOST):
-    """utm.js を差し替えコンテキストで実行し、結果の dict を返す。"""
+def run_utm(path, links=(DMG,), hostname=HOST, scripts=(UTM_STRIP_JS, UTM_JS)):
+    """スクリプトを実ページと同じ順（utm-strip.js → utm.js）に差し替えコンテキストで実行し、
+    結果の dict を返す。"""
     payload = json.dumps({"hostname": hostname, "path": path, "links": list(links)})
     out = subprocess.run(
-        [node(), str(HARNESS), str(UTM_JS), payload],
+        [node(), str(HARNESS), *[str(s) for s in scripts], payload],
         capture_output=True, text=True, check=True,
     )
     return json.loads(out.stdout)
@@ -148,6 +163,62 @@ class TestPageUrlIsNeverDecorated(unittest.TestCase):
         internal = [h for h in r["links"] if "agentmgr.app/ja.html" in h]
         self.assertEqual(len(internal), 1)
         self.assertNotIn("utm_", internal[0])
+
+
+UTM_JS_TAG_RE = re.compile(r'<script\b[^>]*\bsrc="/utm\.js"[^>]*>')
+STRIP_TAG_RE = re.compile(r'<script\b[^>]*\bsrc="/utm-strip\.js"[^>]*>')
+GTAG_LOADER_RE = re.compile(r'<script\b[^>]*googletagmanager\.com/gtag/js[^>]*>')
+
+
+def audit_strip_order(text):
+    """1 ページ分の HTML を検査し、問題の一覧を返す。utm.js を読まないページは対象外。"""
+    if not UTM_JS_TAG_RE.search(text):
+        return []
+    strip = STRIP_TAG_RE.search(text)
+    if not strip:
+        return ["utm.js を読み込んでいるが utm-strip.js が無い"]
+    problems = []
+    if re.search(r"\b(async|defer)\b", strip.group(0)):
+        problems.append(f"utm-strip.js が非同期読み込みになっている: {strip.group(0)}")
+    loader = GTAG_LOADER_RE.search(text)
+    if loader and strip.start() > loader.start():
+        problems.append("utm-strip.js が gtag.js の読み込みタグより後ろにある")
+    return problems
+
+
+class TestStripRunsBeforeGtag(unittest.TestCase):
+    """除去が gtag.js の page_view 組み立てより前に必ず終わること。"""
+
+    def test_every_page_loads_strip_synchronously_before_gtag(self):
+        pages = [p for p in sorted(ROOT.rglob("*.html"))
+                 if UTM_JS_TAG_RE.search(p.read_text(encoding="utf-8"))]
+        self.assertTrue(pages, "utm.js を読み込むページが 1 つも見つからない")
+        for page in pages:
+            with self.subTest(page=str(page.relative_to(ROOT))):
+                self.assertEqual(audit_strip_order(page.read_text(encoding="utf-8")), [])
+
+    def test_audit_rejects_strip_after_gtag(self):
+        html = ('<script async src="https://www.googletagmanager.com/gtag/js?id=G-X"></script>'
+                '<script src="/utm-strip.js"></script><script defer src="/utm.js"></script>')
+        self.assertEqual(audit_strip_order(html),
+                         ["utm-strip.js が gtag.js の読み込みタグより後ろにある"])
+
+    def test_audit_rejects_deferred_strip(self):
+        html = ('<script defer src="/utm-strip.js"></script>'
+                '<script async src="https://www.googletagmanager.com/gtag/js?id=G-X"></script>'
+                '<script defer src="/utm.js"></script>')
+        self.assertEqual(len(audit_strip_order(html)), 1)
+
+    def test_audit_rejects_missing_strip(self):
+        html = ('<script async src="https://www.googletagmanager.com/gtag/js?id=G-X"></script>'
+                '<script defer src="/utm.js"></script>')
+        self.assertEqual(audit_strip_order(html),
+                         ["utm.js を読み込んでいるが utm-strip.js が無い"])
+
+    def test_deferred_utm_js_never_rewrites_page_url(self):
+        """defer の utm.js 単体は汚染 URL でも replaceState しない（遅い書き換えは二重 page_view になる）。"""
+        r = run_utm("/" + POLLUTED_ROOT, scripts=(UTM_JS,))
+        self.assertEqual(r["replaced"], [])
 
 
 if __name__ == "__main__":
