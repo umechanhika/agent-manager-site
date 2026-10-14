@@ -684,6 +684,9 @@
     .step-body a      { color: var(--link); text-decoration: none; }
     .step-body a:hover { text-decoration: underline; }
     .step-body code   { font-family: var(--mono); font-size: 13px; color: var(--text); }
+    /* 始め方の手順 1 に置くダウンロードボタン。.step-body a のリンク色・下線を打ち消す */
+    .step-body .step-cta { color: #1A1207; margin-top: 8px; }
+    .step-body .step-cta:hover { text-decoration: none; }
 
     /* ── FAQ ──────────────────────────────────────────────── */
     .faq-sec {
@@ -1328,6 +1331,12 @@
       <span class="step-n">1</span>
       <div class="step-body">
         <strong data-en="Download the app" data-ja="アプリをダウンロード">Download the app</strong>
+        <!-- ページ末尾まで読んだ訪問者の行き止まりを無くすための導線。data-cta は _download で
+             終わらせ、ヒーロー等と同じく lp_download_click に写す。非 Mac では下の出し分けで隠す -->
+        <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+           id="setup-download-btn"
+           class="btn btn-primary step-cta" data-cta="setup_download"
+           data-en="Free Download" data-ja="無料ダウンロード">Free Download</a>
       </div>
     </li>
     <li class="step">
@@ -1764,6 +1773,7 @@
     document.getElementById('brew-line').classList.add('hidden');
     document.getElementById('hdr-cta').classList.add('hidden');
     document.getElementById('price-download-btn').classList.add('hidden');
+    document.getElementById('setup-download-btn').classList.add('hidden');
     document.getElementById('nonmac-cta').classList.remove('hidden');
 
     // 非Macでは行き止まりにせず、後で Mac から戻れる導線（メール送信 / リンクコピー）を出す。
