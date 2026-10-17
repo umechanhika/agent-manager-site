@@ -38,6 +38,9 @@
      *
      * Matches the app's simple mode: an always-dark, quiet utility panel.
      *   Near-black bg (#0B0D10), elevated cards, 1px hairline borders.
+     *   Surfaces step bg -> surf -> surf2 and sections alternate bg / surf,
+     *   so card and section edges still read on a dimmed phone screen.
+     *   Borders: --border ~2:1, --border-2 ~3.3:1 against bg (WCAG non-text 3:1).
      *   Amber (#F5A623) = the "waiting" lamp = the single brand accent.
      *   Sky / Grass / Gray / Red = the remaining status lamps, used sparingly.
      *
@@ -56,13 +59,13 @@
     :root {
       /* Palette */
       --bg:       #0B0D10;
-      --surf:     #12151B;
-      --surf2:    #191E26;
-      --border:   rgba(255,255,255,.08);
-      --border-2: rgba(255,255,255,.16);
+      --surf:     #1C222D;
+      --surf2:    #262E3B;
+      --border:   rgba(255,255,255,.22);
+      --border-2: rgba(255,255,255,.36);
       --text:     #E8EBF0;
       --muted:    #9BA3B0;
-      --dim:      #646C7A;
+      --dim:      #8591A1;
 
       /* Session-status lamp colors (same hues as the app) */
       --amber:  #F5A623;
@@ -249,7 +252,7 @@
       background: var(--surf); color: var(--text);
       border-color: var(--border-2);
     }
-    .btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); }
+    .btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.5); }
 
     .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
     .macos-note {
@@ -287,7 +290,7 @@
       cursor: pointer; white-space: nowrap;
       transition: color .12s, border-color .12s, background .12s;
     }
-    .brew-copy:hover { color: var(--text); background: var(--surf2); border-color: rgba(255,255,255,.26); }
+    .brew-copy:hover { color: var(--text); background: var(--surf2); border-color: rgba(255,255,255,.5); }
 
     .nonmac-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
     .nonmac-actions { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -384,7 +387,7 @@
     .px-divider::before {
       content: '';
       width: min(520px, 70vw); height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
     }
 
     /* ── SECTION HEADING ───────────────────────────────────── */
@@ -569,9 +572,12 @@
     .fn-ref { font-size: 12px; font-weight: 500; vertical-align: super; line-height: 0; margin-left: 2px; }
     .fn-ref a { color: var(--dim); text-decoration: none; }
     .fn-ref a:hover { color: var(--text); }
-    .footnotes { border-top: 1px solid var(--border); background: var(--bg); padding: 20px 32px 4px; }
+    /* Footnotes open the footer block: one rule above, none between them, so the
+       note does not become a thin strip pinched between two lines. */
+    .footnotes { border-top: 1px solid var(--border); background: var(--bg); padding: 32px 32px 0; }
+    .footnotes + footer { border-top: none; padding-top: 20px; }
     .footnotes ol {
-      max-width: 1040px; margin: 0 auto; padding-left: 18px;
+      width: fit-content; max-width: 1040px; margin: 0 auto; padding-left: 18px;
       font-family: var(--mono); font-size: 11px; line-height: 1.7; color: var(--dim); letter-spacing: .02em;
     }
     .footnotes li:target { color: var(--muted); }
@@ -580,7 +586,7 @@
     .reviews-note a:hover { color: var(--text); }
 
     .pricing-sec {
-      background: #0E1116;
+      background: var(--bg);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       padding: 80px 32px;
@@ -672,8 +678,12 @@
 
     /* ── SETUP ─────────────────────────────────────────────── */
     .setup-sec {
-      max-width: 580px; margin: 0 auto; padding: 80px 32px;
+      background: var(--surf);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 32px;
     }
+    .setup-sec > * { max-width: 516px; margin-left: auto; margin-right: auto; }
     .steps { list-style: none; }
     .step {
       display: grid; grid-template-columns: 42px 1fr;
@@ -1229,9 +1239,6 @@
 <p class="price-note price-note--tight" data-en="* Cancel anytime." data-ja="※ いつでもキャンセルできます。">※ いつでもキャンセルできます。</p>
 </div>
 </section>
-<!-- PIXEL DIVIDER -->
-<div aria-hidden="true" class="px-divider">
-</div>
 <!-- SETUP — 3 steps (compressed from 4) -->
 <section class="setup-sec" data-section="setup" id="setup">
 <div class="sec-head">
