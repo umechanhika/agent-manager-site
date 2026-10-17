@@ -550,6 +550,8 @@
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
     }
     @media (max-width: 900px) { .review-grid { grid-template-columns: 1fr; } }
+    /* A lone card sits in the middle instead of the left column; the grid stays 3-up once more reviews are added. */
+    .review-grid:has(> .review-card:only-child) { grid-template-columns: minmax(0, 1fr); max-width: 360px; margin: 0 auto; }
     .review-card {
       background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
       padding: 22px 22px 18px; display: flex; flex-direction: column; gap: 14px;
@@ -1136,8 +1138,8 @@
 </div>
 </section>
 <!-- PRICING -->
-<!-- REVIEWS: hidden until the first accepted campaign review is added (remove the hidden attribute then). -->
-<section class="reviews-sec" data-section="reviews" hidden="" id="reviews">
+<!-- REVIEWS: one card per displayed review; avatar file goes in reviews/<handle>.jpg (see reviews/README.md). -->
+<section class="reviews-sec" data-section="reviews" id="reviews">
 <div class="reviews-inner">
 <div class="sec-head">
 <span class="section-label" data-en="From our Founding Users" data-ja="利用者の声">利用者の声</span>
@@ -1150,6 +1152,10 @@
         <cite><img class="review-avatar" src="reviews/USERNAME.jpg" alt="" width="28" height="28"><span class="review-name">DISPLAY NAME</span><span class="review-handle">@USERNAME</span></cite>
       </article>
       -->
+<article class="review-card">
+<blockquote data-en="You can jump to each window, so it's clear where to go. Each agent's status is visible, so I can focus on other work. When a session is waiting for me, the AgentManager window comes to the front and forces me to stop what I'm doing, so it's easy to notice." data-ja="各ウィンドウに飛べる、どこに行けばいいか分かりやすい。各 Agent の状態が可視化されているので他の作業に集中できる。確認待ちになると AgentManager のウィンドウが前面に出て作業が強制的に止まるので、確認待ちに気づきやすい。">各ウィンドウに飛べる、どこに行けばいいか分かりやすい。各 Agent の状態が可視化されているので他の作業に集中できる。確認待ちになると AgentManager のウィンドウが前面に出て作業が強制的に止まるので、確認待ちに気づきやすい。</blockquote>
+<cite><img alt="" class="review-avatar" height="28" src="reviews/417_72ki.jpg" width="28"/><span class="review-name">椎名夏希</span><span class="review-handle">@417_72ki</span></cite>
+</article>
 </div>
 <p class="reviews-note">
 <a data-cta="reviews_campaign_link" data-en="Become a Founding User and get the Pro plan for life →" data-ja="モニターに応募して Pro プランを永久無料に →" href="review-campaign-ja.html">モニターに応募して Pro プランを永久無料に →</a>
