@@ -566,6 +566,15 @@
     .review-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--surf2); }
     .review-name { color: var(--text); font-family: inherit; font-size: 13px; }
     .review-handle { color: var(--dim); }
+    .fn-ref { font-size: 12px; font-weight: 500; vertical-align: super; line-height: 0; margin-left: 2px; }
+    .fn-ref a { color: var(--dim); text-decoration: none; }
+    .fn-ref a:hover { color: var(--text); }
+    .footnotes { border-top: 1px solid var(--border); background: var(--bg); padding: 20px 32px 4px; }
+    .footnotes ol {
+      max-width: 1040px; margin: 0 auto; padding-left: 18px;
+      font-family: var(--mono); font-size: 11px; line-height: 1.7; color: var(--dim); letter-spacing: .02em;
+    }
+    .footnotes li:target { color: var(--muted); }
     .reviews-note { margin-top: 24px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--dim); }
     .reviews-note a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--border-2); }
     .reviews-note a:hover { color: var(--text); }
@@ -1142,8 +1151,7 @@
 <section class="reviews-sec" data-section="reviews" id="reviews">
 <div class="reviews-inner">
 <div class="sec-head">
-<span class="section-label" data-en="From our Founding Users" data-ja="利用者の声">利用者の声</span>
-<p class="sec-sub" data-en="Reviews from users who received a lifetime Pro plan license through the Founding Users program. Selected and lightly edited for length." data-ja="モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。">モニター募集で Pro プランの永久ライセンスの提供を受けた利用者のレビューです。掲載は主催者が選び、長さの調整をしています。</p>
+<span class="section-label" data-en='From our Founding Users&lt;sup class="fn-ref"&gt;&lt;a href="#fn-1"&gt;1&lt;/a&gt;&lt;/sup&gt;' data-ja='利用者の声&lt;sup class="fn-ref"&gt;&lt;a href="#fn-1"&gt;1&lt;/a&gt;&lt;/sup&gt;'>利用者の声<sup class="fn-ref"><a href="#fn-1">1</a></sup></span>
 </div>
 <div class="review-grid">
 <!-- Template for one review (copy per displayed review; excerpt/shorten allowed, meaning must be preserved; no link):
@@ -1353,6 +1361,12 @@
 </ul>
 </section>
 <!-- FOOTER -->
+<!-- FOOTNOTES: fine print referenced by superscript markers in the page body (keep the body copy free of disclaimers). -->
+<section aria-label="注記" class="footnotes">
+<ol>
+<li data-en="Reviews under “From our Founding Users” are from people who received a lifetime Pro plan license through the Founding Users program. AgentManager selects which reviews to show and lightly edits them for length." data-ja="「利用者の声」は、モニター募集で Pro プランの永久ライセンスを受け取った利用者によるレビューです。掲載するレビューは主催者が選び、長さを調整しています。" id="fn-1">「利用者の声」は、モニター募集で Pro プランの永久ライセンスを受け取った利用者によるレビューです。掲載するレビューは主催者が選び、長さを調整しています。</li>
+</ol>
+</section>
 <footer>
 <p>
     © 2026 AgentManager
