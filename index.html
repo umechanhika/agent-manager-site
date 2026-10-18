@@ -796,6 +796,9 @@
       * { transition: none !important; animation: none !important; }
     }
   </style>
+  <!-- 日本語ブラウザの ja.html への転送。Clarity・gtag.js より前に async / defer 無しで実行し、
+       英語版 "/" 側の page_view / cta_variant_shown / section_view を送らせない（lang-redirect.js 冒頭参照） -->
+  <script src="/lang-redirect.js"></script>
   <!-- Microsoft Clarity -->
   <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -820,7 +823,10 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-W72BR4X8Y6');
+    // lang-redirect.js で "/" から転送されてきた場合だけ、転送前の参照元を page_referrer に戻す。
+    // 戻さないと転送元の "/" が参照元になり、検索などからの新規セッションが (direct) に落ちる。
+    gtag('config', 'G-W72BR4X8Y6',
+      window.amLangRedirectReferrer === undefined ? {} : { page_referrer: window.amLangRedirectReferrer });
   </script>
   <!-- Structured data for search engines -->
   <!-- 検索エンジンにブランド「AgentManager」と agentmgr.app を同じ実体として結び付けるため、
@@ -1717,17 +1723,7 @@
     return lang !== (IS_JA ? 'ja' : 'en');
   }
 
-  (function() {
-    if (IS_JA) return;
-    var saved = '';
-    try { saved = localStorage.getItem('am-lang') || ''; } catch(e) {}
-    if (saved === 'en') return;
-    var nav = (navigator.language || '').toLowerCase();
-    // クエリとハッシュを引き継ぐ。引き継がないと日本語ブラウザで開いたキャンペーンリンクの
-    // utm_* がこの遷移で消え、しかも参照元が自サイト（自己参照）になるため、GA4 では
-    // 流入元が失われて直接流入として計上されてしまう。
-    if (saved === 'ja' || (!saved && nav.startsWith('ja'))) location.replace('ja.html' + location.search + location.hash);
-  }());
+  // 日本語ブラウザの ja.html への転送は <head> の lang-redirect.js が gtag.js より前に行う。
 
   // CTA クリックを GA4 に送る（cta_location で設置場所を区別）。
   // 外部遷移前でも取りこぼさないよう gtag のデフォルト beacon 送信に任せる。

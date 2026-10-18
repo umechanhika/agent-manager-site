@@ -55,6 +55,27 @@ GA4 タグを持つ全ページは、`location.hostname` が本番ホスト `age
 ガードを持たないページをローカル配信すると、その page_view や CTA クリックがそのまま本番
 プロパティに入る。
 
+## 日本語ブラウザの転送（lang-redirect.js）
+
+英語版トップ（`index.html`）を日本語ブラウザ（または言語切替で `am-lang` = `ja` を保存済み）で
+開くと `ja.html` へ転送する。転送は `lang-redirect.js` が行う。
+
+- `index.html` / `ja.html` は `<script src="/lang-redirect.js"></script>` を **async / defer 無しで、
+  Clarity と gtag.js の読み込みタグより前** に置く。`<body>` 側に転送処理を書かない。
+  `<body>` で転送すると、英語版 "/" 側でも `page_view`・`cta_variant_shown`・`section_view`（hero）が
+  送られてから移るため、訪問 1 回が "/" と `ja.html` の 2 ページビューに数えられる。実測
+  （2026-09-18〜10-17）では "/" の `cta_variant_shown` 66 件のうち 16 件（24%）がこの誰も見ていない分母だった。
+- 転送するときは "/" 側の GA4 送信をオプトアウトフラグ（`ga-disable-<測定ID>`）で止める。
+  `location.replace` は呼んだ時点でページを止めないため、gtag.js がキャッシュから先に届くと送られてしまう。
+- 転送先の `document.referrer` は転送元の "/" になり、そのままでは検索などからの新規セッションが
+  自己参照として (direct) に落ちる。転送前の参照元を sessionStorage に預け、`ja.html` 側で
+  `gtag('config')` の `page_referrer` に渡す。転送直後の読み込みかどうかは `document.referrer` と
+  預けた転送元 URL（ハッシュ無し）の一致で判定する。`utm_*` はクエリとして URL に残るので別途運ばない。
+- sessionStorage が使えない環境では転送しない（英語版のまま表示し、計測は "/" の 1 回）。
+  参照元を失ったまま転送して流入元を誤分類させない。
+
+このルールは `Tests/test_lang_redirect.py` が `lang-redirect.js` 本体を Node で実行して検査する。
+
 ## 流入元の UTM（utm.js / utm-strip.js）
 
 `utm.js` は全ページに読み込まれ、LP → アプリのチャネルアトリビューションを運ぶ。
