@@ -259,6 +259,8 @@ header {
 }
 .btn-ghost:hover { background: var(--surf2); border-color: rgba(255,255,255,.26); }
 .guide-cta .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+/* 本文中で製品を紹介した直後のダウンロード導線（ページ末尾の .guide-cta とは別の設置場所） */
+.inline-cta { margin: 20px 0 8px; }
 .guide-cta .cta-note {
   font-family: var(--mono); font-size: 11px;
   color: var(--dim); letter-spacing: .04em;
