@@ -221,6 +221,10 @@ tmux split-window -h</code></pre>
     きれいに解除可能）。自作の hook スクリプトとも共存できます。セッションが worktree・タブ・
     tmux のどこで動いていても、同じボードに載ります。
   </p>
+  <div class="inline-cta">
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="btn btn-primary" data-cta="guide_inline_download">↓ 無料ダウンロード</a>
+  </div>
 
   <h2>並列セッションを破綻させないための実践 Tips</h2>
   <ul>
@@ -302,7 +306,7 @@ tmux split-window -h</code></pre>
     // ここでは非 Mac 扱いになるため、実際に出し分けた結果と一致しない。
     gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
     if (isMac) return;
-    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"], [data-cta="guide_inline_download"]').forEach(function(el) {
       el.classList.add('hidden');
     });
   }());

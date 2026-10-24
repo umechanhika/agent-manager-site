@@ -217,6 +217,10 @@ tmux split-window -h</code></pre>
     are cleanly removable), so it composes fine with your own hook scripts. Sessions run in
     worktrees, tabs, tmux — anywhere — and still land on the same board.
   </p>
+  <div class="inline-cta">
+    <a href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg"
+       class="btn btn-primary" data-cta="guide_inline_download">↓ Free Download</a>
+  </div>
 
   <h2>Practical tips that keep parallel sessions sane</h2>
   <ul>
@@ -296,7 +300,7 @@ tmux split-window -h</code></pre>
     // ここでは非 Mac 扱いになるため、実際に出し分けた結果と一致しない。
     gtag('event', 'cta_variant_shown', { cta_variant: isMac ? 'mac' : 'nonmac' });
     if (isMac) return;
-    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"]').forEach(function(el) {
+    document.querySelectorAll('.hdr-cta, [data-cta="guide_cta_download"], [data-cta="guide_inline_download"]').forEach(function(el) {
       el.classList.add('hidden');
     });
   }());
