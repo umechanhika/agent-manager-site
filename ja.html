@@ -458,6 +458,8 @@
     .cat-sec  { max-width: 640px; margin: 0 auto; padding: 0 32px 80px; }
     .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
     @media (max-width: 480px) { .cat-grid { grid-template-columns: 1fr; } }
+    /* 猫モード節の末尾に置くダウンロードボタン。Mac 訪問者の離脱が最も大きいのがこの節の直後のため */
+    .cat-cta { display: flex; justify-content: center; margin-top: 32px; }
 
     /* ── PRICING ───────────────────────────────────────────── */
     /* ── CAMPAIGN ANNOUNCEMENT ──────────────────────────────
@@ -1161,6 +1163,14 @@
 <p data-en="A cat meows the moment a session needs your input." data-ja="セッションに確認が必要になると猫の鳴き声でお知らせ。">セッションに確認が必要になると猫の鳴き声でお知らせ。</p>
 </div>
 </div>
+<!-- Mac 訪問者の離脱が最も大きい「猫モード → 次の節」の手前に置くダウンロード導線。
+       2026-10-15〜11-13 の LP "/" で Mac の section_view は cat_mode 10 → reviews 5 → pricing 5 と
+       半減し、ダウンロードクリック 3 件のうち 2 件は pricing まで読んだ 5 セッションから出ていた
+       （ヒーローの hero_download は 19 セッションで 0 件）。読み進めて納得した時点で押せる位置に置く。
+       data-cta は _download で終わらせ lp_download_click に写す。非 Mac では下の出し分けで隠す -->
+<div class="cat-cta">
+<a class="btn btn-primary" data-cta="cat_mode_download" data-en="Free Download" data-ja="無料ダウンロード" href="https://github.com/umechanhika/agent-manager-site/releases/latest/download/AgentManager.dmg" id="cat-download-btn">無料ダウンロード</a>
+</div>
 </section>
 <!-- PRICING -->
 <!-- REVIEWS: one card per displayed review; avatar file goes in reviews/<handle>.jpg (see reviews/README.md). -->
@@ -1611,6 +1621,7 @@
     document.getElementById('hdr-cta').classList.add('hidden');
     document.getElementById('price-download-btn').classList.add('hidden');
     document.getElementById('setup-download-btn').classList.add('hidden');
+    document.getElementById('cat-download-btn').classList.add('hidden');
     document.getElementById('nonmac-cta').classList.remove('hidden');
 
     // 非Macでは行き止まりにせず、後で Mac から戻れる導線（メール送信 / リンクコピー）を出す。
