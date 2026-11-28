@@ -261,6 +261,8 @@ header {
 .guide-cta .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
 /* 本文中で製品を紹介した直後のダウンロード導線（ページ末尾の .guide-cta とは別の設置場所） */
 .inline-cta { margin: 20px 0 8px; }
+/* 本文中の LP 遷移ボタンは文言が長いため、狭い画面で横にはみ出さないよう折り返す */
+.inline-cta .btn-ghost { white-space: normal; }
 .guide-cta .cta-note {
   font-family: var(--mono); font-size: 11px;
   color: var(--dim); letter-spacing: .04em;
